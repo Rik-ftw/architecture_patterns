@@ -1,0 +1,56 @@
+{
+  "id": 2,
+  "patternId": "SC-001",
+  "name": "Zero Trust Network Access",
+  "domain": "Security & Controls",
+  "tier": "Tier 3 — Conceptual",
+  "status": "Under Review",
+  "version": "1.0",
+  "owner": "Sarah Chen",
+  "approvers": "Mike Davis",
+  "lastReviewed": "2025-12-01",
+  "ccoeCertified": "No",
+  "ccoeCertRef": null,
+  "leanixRef": null,
+  "strategicIntent": "Enforce Zero Trust principles across all network boundaries.",
+  "problemStatement": "Traditional perimeter-based security is insufficient for hybrid cloud environments.",
+  "useCases": [
+    {
+      "use": "Any production workload accessing corporate resources",
+      "dontUse": "Isolated dev sandbox environments with no corporate data"
+    }
+  ],
+  "components": [
+    "Azure AD Conditional Access",
+    "Microsoft Defender for Cloud"
+  ],
+  "interactionSteps": [
+    "User authenticates via Azure AD with MFA",
+    "Conditional Access evaluates device compliance"
+  ],
+  "securityConsiderations": [
+    "All access requests must be authenticated and authorized",
+    "Network micro-segmentation must be enforced"
+  ],
+  "guardrails": [
+    {
+      "area": "Identity",
+      "rule": "MFA required for all privileged access",
+      "severity": "Required"
+    }
+  ],
+  "composition": [],
+  "implementationAssets": {},
+  "exceptionProcess": "Submit security exception via ServiceNow with CISO approval.",
+  "revisionHistory": [
+    {
+      "date": "2025-12-01",
+      "author": "Sarah Chen",
+      "summary": "Initial draft",
+      "version": "1.0"
+    }
+  ],
+  "diagramSvg": null,
+  "createdAt": "2026-03-13T17:19:17.612Z",
+  "updatedAt": "2026-03-13T17:19:17.612Z"
+}
