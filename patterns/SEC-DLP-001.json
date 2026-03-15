@@ -1,0 +1,168 @@
+{
+  "id": 17,
+  "patternId": "SEC-DLP-001",
+  "name": "Device Compliance-Gated DLP — Blocking Downloads to Non-Compliant Endpoints via Intune, MDCA, and Microsoft Purview",
+  "domain": "Security & Controls",
+  "tier": "Tier 2 — Logical",
+  "status": "In Development",
+  "version": "1.0",
+  "owner": "",
+  "approvers": "",
+  "lastReviewed": "2026-03-15",
+  "ccoeCertified": "No",
+  "ccoeCertRef": "",
+  "leanixRef": "",
+  "strategicIntent": "This pattern establishes a Zero Trust–aligned, defense-in-depth data loss prevention architecture for McCain Foods that prevents sensitive corporate data from being downloaded to endpoints that fail Intune compliance policy — including unmanaged personal devices, contractor laptops missing required security controls, and devices with outdated OS or missing EDR agents. By combining Microsoft Intune device compliance signals, Microsoft Defender for Cloud Apps (MDCA) session controls, and Microsoft Purview DLP sensitivity label enforcement, the pattern creates a layered and correlated control chain that ensures data exfiltration risk is minimized across all 35 manufacturing sites and remote workforce segments. The architecture aligns to McCain's broader cloud-first security strategy on Azure and supports audit-readiness against food industry regulatory requirements and internal data governance mandates.",
+  "problemStatement": "McCain Foods employees and contractors regularly access cloud-hosted business applications — including SharePoint Online, OneDrive for Business, Teams, and third-party SaaS platforms — from a diverse and heterogeneous device fleet that spans corporate-managed Windows/macOS endpoints, BYOD mobile devices, kiosk terminals at manufacturing sites, and vendor-supplied contractor devices. Without device compliance enforcement at the point of data access, sensitive content such as manufacturing formulations, supplier contracts, financial forecasts, and HR records can be freely downloaded to unmanaged or non-compliant devices where McCain has no visibility or control over subsequent data handling. Existing network-layer controls are insufficient to address this risk because modern SaaS access occurs over HTTPS and bypasses traditional perimeter inspection. A coordinated signal-sharing architecture using Intune compliance state, MDCA reverse proxy session controls, and Purview DLP sensitivity labels is required to enforce contextual, risk-based download blocking that does not impede productivity for compliant users while preventing data leakage from non-compliant endpoints.",
+  "useCases": [
+    {
+      "use": "A McCain corporate user accesses SharePoint Online from a personal laptop (BYOD) that is not enrolled in Intune. MDCA intercepts the session via Conditional Access App Control, Intune signals confirm the device is unmanaged/non-compliant, and Purview DLP labels on the requested files trigger a block-download policy — the user can view content in the browser but cannot download files labeled Confidential or above.",
+      "dontUse": "Do not apply this pattern to kiosk or shared-terminal use cases at manufacturing OT sites where devices are domain-joined but cannot enroll in Intune due to legacy OS constraints. Use network-layer access controls and OT-specific segmentation patterns instead."
+    },
+    {
+      "use": "A third-party supplier or contractor accesses McCain's Power BI reports or SharePoint procurement portal from a device that is not managed by McCain's Intune tenant. MDCA session policy enforces read-only access with download blocking for any file or report export containing sensitivity labels marking financial or supplier data.",
+      "dontUse": "Do not use this pattern as the sole control for data exfiltration prevention on fully managed, Intune-compliant McCain corporate devices where endpoint DLP via Purview Client agent provides deeper file-system level controls and should be the primary enforcement mechanism."
+    },
+    {
+      "use": "A McCain employee's managed corporate laptop falls out of Intune compliance because the device encryption policy reports non-compliant (e.g., BitLocker disabled after a recovery event) or the Microsoft Defender for Endpoint health signal shows the device is at elevated risk. MDCA dynamically detects the changed compliance state via real-time Intune signal and downgrades the session to read-only, blocking all downloads until the device remediates compliance.",
+      "dontUse": "Do not use this pattern to replace MFA or identity-based Conditional Access policies. Device compliance gating is a contextual signal that supplements but does not substitute for strong identity authentication enforced through Entra ID Conditional Access."
+    },
+    {
+      "use": "McCain's Security Operations Centre (SOC) needs to demonstrate to external auditors that sensitive manufacturing IP, HR records, and financial data labeled via Microsoft Purview cannot leave the organization's control boundary through unmanaged devices. This pattern provides audit logs from MDCA, Intune compliance reports, and Purview DLP incident reports that together document the enforcement chain.",
+      "dontUse": "Do not deploy this pattern without first completing a Purview sensitivity label taxonomy and ensuring labels are consistently applied to content. If data is unlabeled, MDCA session policies cannot reliably classify content for download decisions and the pattern will produce inconsistent enforcement results."
+    },
+    {
+      "use": "Seasonal or temporary workers at McCain manufacturing sites are issued non-domain-joined Windows devices provisioned via Intune Autopilot. This pattern ensures that even during the Autopilot enrollment window — before compliance is confirmed — those devices receive a restricted session profile via MDCA that blocks sensitive downloads until Intune marks the device compliant.",
+      "dontUse": "Do not apply this pattern to OT/SCADA engineering workstations or historian servers that require direct file-transfer access to manufacturing execution systems (MES). Those environments require OT-specific data flow controls documented in the OT Network Segmentation pattern."
+    }
+  ],
+  "components": [
+    "Microsoft Entra ID (Azure AD) Conditional Access — The policy engine that evaluates device compliance state, user identity risk, and application context to determine whether a session should be routed through MDCA reverse proxy (Conditional Access App Control). Policies are configured to require 'Use Conditional Access App Control' for target cloud apps when device compliance cannot be confirmed, creating the entry point for MDCA session enforcement.",
+    "Microsoft Intune — Device Management and Compliance Signal Provider — Manages McCain's corporate endpoint fleet across Windows, macOS, iOS, and Android. Intune compliance policies define the minimum security bar (BitLocker enabled, OS patch level, Defender for Endpoint health status, screen lock, approved OS version). The real-time compliance state for each enrolled device is shared with Entra ID as a device compliance claim, which Conditional Access and MDCA consume to make enforcement decisions. Non-enrolled BYOD devices are treated as non-compliant by default.",
+    "Microsoft Defender for Cloud Apps (MDCA) — Session Control and Reverse Proxy Enforcement Engine — Acts as a cloud-access security broker (CASB) that intercepts sessions routed through Conditional Access App Control. MDCA session policies evaluate the device compliance tag (compliant, non-compliant, or unmanaged) passed from Entra ID and apply granular controls: block download, block upload, require step-up authentication, or allow with monitoring. MDCA also provides Shadow IT discovery, OAuth app governance, and anomaly detection alerts that feed into McCain's SOC.",
+    "Microsoft Purview Information Protection — Sensitivity Label Classification Engine — Provides the data classification layer that MDCA session policies use to make content-aware enforcement decisions. Sensitivity labels (e.g., Public, Internal, Confidential — Manufacturing IP, Restricted — HR, Restricted — Financial) are applied to documents, emails, and SharePoint sites either manually by users or automatically via Purview auto-labeling policies based on sensitive information types (SITs). MDCA reads label metadata at the point of download request and applies the most restrictive policy matching the label tier and device compliance state.",
+    "Microsoft Purview Data Loss Prevention (DLP) Policies — Policy Enforcement and Incident Reporting Layer — DLP policies defined in the Microsoft Purview compliance portal apply across Exchange, SharePoint, OneDrive, Teams, and endpoint. For the download-blocking use case, Purview DLP works in concert with MDCA by defining the sensitive information types and label conditions that trigger blocking actions. Purview DLP also provides the incident management workflow, generating alerts routed to McCain's SOC via Microsoft Sentinel, and producing the audit evidence required for compliance reporting.",
+    "Microsoft Defender for Endpoint (MDE) — Device Health Signal Provider — Provides real-time device risk scores and threat intelligence to Intune and Entra ID. MDE's Machine Risk Score (Low, Medium, High, Critical) is surfaced as a device compliance condition in Intune, meaning a device that has active malware detections, suspicious behavior, or unresolved vulnerabilities will automatically fail compliance and trigger the MDCA download-blocking session policy without manual intervention.",
+    "Microsoft Sentinel — SIEM and SOC Integration — Aggregates DLP incident alerts from Microsoft Purview, MDCA anomaly detection alerts, and Intune non-compliance events into a unified security operations view for McCain's SOC team. Analytic rules correlate repeated download-block events with identity risk signals to identify insider threat scenarios or compromised credentials being used from non-compliant devices. Sentinel workbooks provide dashboards for compliance posture across McCain's 35 manufacturing sites.",
+    "Azure Active Directory — Device Registration and Hybrid Join — Ensures McCain's domain-joined on-premises workstations at manufacturing sites are registered in Entra ID as Hybrid Azure AD Joined devices, making them eligible for Intune compliance evaluation. This is critical for sites where devices are managed through on-premises Group Policy and Intune co-management, ensuring the Conditional Access device compliance signal is available even for legacy-managed endpoints.",
+    "Microsoft Purview Audit Log — Forensic Evidence and Compliance Reporting — Captures all MDCA session control events, DLP policy matches, and sensitivity label activity into the unified audit log. For McCain's compliance and legal teams, this provides the evidentiary chain showing that specific download attempts were blocked on specific non-compliant devices, supporting regulatory audit responses and internal investigations."
+  ],
+  "interactionSteps": [
+    "Step 1 — Device Enrollment and Compliance Policy Assignment: McCain IT provisions Windows and macOS corporate devices through Intune (via Autopilot or manual enrollment). Intune compliance policies are assigned to all device groups, defining minimum requirements: BitLocker/FileVault encryption enabled, Microsoft Defender for Endpoint onboarded and reporting healthy risk score (Low or None), minimum OS version enforced (e.g., Windows 11 22H2+, macOS 13+), screen lock with PIN/password enforced, and device registered in Entra ID. Non-enrolled devices (BYOD, contractor-owned) receive no compliance claim and are treated as non-compliant by default in all downstream policy decisions.",
+    "Step 2 — Conditional Access Policy Routing to MDCA: A Conditional Access policy in Entra ID is configured targeting cloud applications where McCain hosts sensitive data (SharePoint Online, OneDrive, Exchange Online, Power BI, and approved third-party SaaS). The policy conditions evaluate device compliance state: if the device is marked compliant by Intune (and MDE risk score is acceptable), normal access is permitted. If the device is non-compliant, unmanaged, or the compliance state is unknown, the session is granted access but redirected through MDCA's reverse proxy using the 'Use Conditional Access App Control — Monitor only' or 'Block' session control, depending on the sensitivity of the application. The Conditional Access policy passes a device compliance tag (compliant/non-compliant/unmanaged) to MDCA as part of the session token.",
+    "Step 3 — MDCA Session Interception and Policy Evaluation: Once the user's browser or application session is proxied through MDCA, the MDCA session control engine evaluates the incoming request against configured session policies. For non-compliant or unmanaged devices, the applicable session policy is: 'When device tag = non-compliant OR unmanaged AND action = Download AND content matches sensitivity label (Confidential, Restricted) OR file type (Office documents, PDF, CSV) — BLOCK download and generate alert.' MDCA presents the user with a branded McCain block page explaining the action and providing a link to the IT self-service device enrollment portal. For low-sensitivity content (Public label), MDCA may permit download with a watermark or audit-only action depending on the data owner's policy decision.",
+    "Step 4 — Purview Sensitivity Label Inspection by MDCA: During step 3, when a download request is evaluated, MDCA queries the Purview Information Protection SDK to read the sensitivity label metadata embedded in the file or inherited from the SharePoint/OneDrive site label. The label tier is matched against the MDCA session policy matrix: Public (allow), Internal (allow with audit on non-compliant), Confidential — Manufacturing IP (block download on non-compliant, allow on compliant), Restricted — HR (block on all non-compliant, require MFA step-up on compliant), Restricted — Financial (block on all non-compliant). This ensures the enforcement decision is data-driven and consistently aligned with McCain's Purview classification taxonomy rather than relying solely on file type or location heuristics.",
+    "Step 5 — Purview DLP Policy Enforcement as Secondary Control: Independently of MDCA session controls, Microsoft Purview DLP policies configured in the compliance portal provide a secondary enforcement layer. DLP policies scan content in SharePoint, OneDrive, and Exchange for sensitive information types (SITs) such as manufacturing process codes, employee PII, financial account numbers, and supplier contract terms. When a DLP policy matches, it can independently block sharing or restrict access regardless of device state. In the download-blocking scenario, the DLP policy acts as a backstop — if MDCA session policy is bypassed (e.g., via a mobile app using native sync rather than browser session), the Purview DLP endpoint policy on enrolled devices or SharePoint-level policy will enforce the control. DLP incidents are raised and routed to the McCain compliance team and SOC.",
+    "Step 6 — MDE Risk Score Feedback Loop to Intune Compliance: Microsoft Defender for Endpoint continuously evaluates the managed device's security posture and updates its Machine Risk Score. Intune is configured with a Device Compliance policy that sets the maximum allowed MDE risk level to 'Low.' When MDE detects active threats, vulnerability exploitation, or anomalous behavior on a corporate device and elevates the risk score to Medium, High, or Critical, Intune automatically marks the device as non-compliant. This triggers Entra ID Conditional Access to re-evaluate the device's access and route subsequent sessions through MDCA with the non-compliant tag, applying download-blocking session policies — even on a device that was previously compliant. This creates a real-time, automated feedback loop that does not require manual SOC intervention to restrict a compromised device.",
+    "Step 7 — SOC Alerting and Incident Management via Microsoft Sentinel: MDCA, Purview DLP, and Intune all emit alerts and diagnostic logs to Microsoft Sentinel via the native Microsoft Sentinel data connectors (MDCA connector, Microsoft 365 Defender connector, Microsoft Purview audit log connector). In Sentinel, analytic rules are configured to: correlate MDCA download-block events with Intune non-compliance events for the same device/user pair; alert on bulk download attempts from non-compliant devices (potential data staging behavior); flag DLP false positive patterns requiring policy tuning. Incidents are assigned to McCain's SOC L1 analysts for triage, with automated playbooks (Logic Apps) that can notify the device owner's manager, trigger an Intune compliance remediation push, or escalate to L2 for investigation. Monthly Sentinel workbooks are distributed to site IT managers showing device compliance posture and DLP policy match trends per manufacturing site.",
+    "Step 8 — User Remediation and Exception Handling: When a user is blocked by a download policy, MDCA presents a custom McCain-branded block page with a 'Request Access' link that routes to a ServiceNow ticket pre-populated with session context (user, device, file requested, policy triggered). IT administrators review the ticket and can either: (a) guide the user to enroll their device in Intune through a self-service portal, resolving non-compliance and lifting the block automatically once Intune marks the device compliant; (b) approve a time-limited exception using MDCA's IP address-based exception or a temporary Conditional Access named location exclusion, with documented business justification recorded in ServiceNow; or (c) escalate to the Data Governance team if the content requested is labeled Restricted and requires a formal data access approval workflow in Purview's data catalog."
+  ],
+  "securityConsiderations": [
+    "Zero Trust Device Trust Model: The pattern assumes that device compliance state is the authoritative trust signal for download decisions. McCain must ensure Intune compliance policies are not overly permissive — every policy exception or grace period (e.g., 'mark device compliant for X days after enrollment') creates a window where non-compliant devices can download sensitive data. Compliance policy grace periods should be set to zero for Restricted-labeled data environments. Additionally, Hybrid Azure AD Join synchronization latency (up to 30 minutes) must be accounted for in the Conditional Access policy design to prevent false non-compliance blocks on legitimate corporate devices during the join process.",
+    "MDCA Session Control Coverage Gaps — Native App Bypass: MDCA session controls operate via browser-based reverse proxy and do not natively intercept native sync clients (OneDrive sync client, Teams desktop client) using non-browser protocols. For enrolled Intune devices, Purview Endpoint DLP provides coverage for native app file operations. For non-enrolled devices, the OneDrive sync client should be blocked via Conditional Access policies that enforce browser-only access (requiring compliant device for non-browser client access). McCain's MDCA deployment must include policies to block native client access from non-compliant or unmanaged devices at the Conditional Access layer, routing all access to browser-based sessions that MDCA can inspect.",
+    "Sensitivity Label Coverage and Consistency: The effectiveness of this pattern is directly proportional to the percentage of McCain's sensitive data that carries a Purview sensitivity label. If documents lack labels — either because auto-labeling policies have not been tuned, legacy documents have not been scanned, or users are not trained to apply labels — MDCA session policies that rely on label inspection will not trigger for unlabeled content. A pre-deployment audit of content labeling coverage across SharePoint, OneDrive, and Exchange is required. McCain should target >90% labeling coverage for content in Confidential and Restricted sites before relying on label-based MDCA session policy as the primary control, with file-type-based policies as an interim backstop.",
+    "Privileged and Break-Glass Account Exclusions: Global Administrator and break-glass emergency accounts should be carefully scoped in Conditional Access policies. If break-glass accounts are excluded from the Conditional Access policy that routes sessions to MDCA (a common practice to prevent lockout), those accounts effectively bypass the download-blocking control. McCain should maintain a short list of documented break-glass account exclusions, monitor their usage via Microsoft Sentinel alerts with near-real-time notification to the CISO, and ensure break-glass account usage automatically triggers an Intune compliance and MDCA session audit. Under no circumstances should routine administrative work be performed using excluded accounts.",
+    "Data Residency and MDCA Proxy Routing: When sessions are proxied through MDCA, traffic is routed through Microsoft's MDCA infrastructure. McCain must confirm that MDCA data processing aligns with applicable data residency requirements for manufacturing sites in jurisdictions with strict data sovereignty rules (e.g., EU sites subject to GDPR, Canadian sites subject to PIPEDA). Microsoft's MDCA service processes session metadata but does not permanently store document content. McCain's legal and privacy team should review the MDCA data processing addendum and confirm alignment with the company's Data Protection Impact Assessment (DPIA) framework.",
+    "Intune Compliance Policy Drift and Lifecycle Management: Compliance policies must be reviewed quarterly to ensure minimum OS version requirements, patch levels, and security baseline expectations remain current. As Microsoft releases new Windows and macOS versions, outdated compliance policy minimum OS requirements will incorrectly mark up-to-date devices as non-compliant (or conversely, allow devices on deprecated OS versions to pass compliance). McCain's Intune administration team should integrate compliance policy review into the quarterly security patch cycle and maintain a documented policy change log in the APL governance system."
+  ],
+  "guardrails": [
+    {
+      "area": "Conditional Access — MDCA Routing Policy",
+      "rule": "All Conditional Access policies that route sessions to MDCA must be configured in 'Block' or 'Session: Use Conditional Access App Control' mode — never 'Report-only' — in production environments. Report-only mode must only be used during a time-boxed pilot period (maximum 30 days) with documented approval from the CISO. The Conditional Access policy must explicitly target all cloud applications where McCain's sensitive data resides (SharePoint Online, OneDrive for Business, Exchange Online, Power BI, and approved third-party SaaS) and must not contain broad 'All Apps' exclusions that could allow sensitive applications to bypass MDCA routing.",
+      "severity": "Required"
+    },
+    {
+      "area": "Intune Compliance Policy — Minimum Security Baseline",
+      "rule": "All Intune compliance policies deployed under this pattern must include at minimum: (1) Device encryption required (BitLocker for Windows, FileVault for macOS), (2) Microsoft Defender for Endpoint risk score must be 'Low' or better, (3) Minimum OS version must be within 12 months of the current latest release, (4) Screen lock with PIN/password required, (5) No jailbreak/root detection for mobile devices. Grace periods for compliance enforcement must not exceed 24 hours for corporate-owned devices. Devices without an assigned compliance policy must be treated as non-compliant by default in Intune tenant settings.",
+      "severity": "Required"
+    },
+    {
+      "area": "Purview Sensitivity Label Taxonomy Alignment",
+      "rule": "MDCA session policies must be mapped to McCain's approved Purview sensitivity label taxonomy as defined by the Data Governance team. Ad-hoc or site-specific sensitivity labels that are not part of the approved enterprise taxonomy must not be used as enforcement conditions in MDCA session policies, as inconsistent label naming will cause policy gaps. Any changes to the McCain sensitivity label taxonomy must trigger a mandatory review of all MDCA session policies within 10 business days to ensure policy-label alignment is maintained.",
+      "severity": "Required"
+    },
+    {
+      "area": "MDCA Session Policy — Default Deny for Unmanaged Devices",
+      "rule": "MDCA session policies must be configured so that unmanaged devices (devices with no Intune enrollment and no compliant device claim) are blocked by default from downloading any content classified as Confidential or above. Download-allow policies for unmanaged devices may only be created for content explicitly labeled 'Public' and must be reviewed annually by the Data Governance team. Any exception permitting download of Internal or higher classified content to unmanaged devices requires a signed exception from the VP of IT Security with a documented business case and compensating control.",
+      "severity": "Required"
+    },
+    {
+      "area": "Microsoft Sentinel — DLP Alert Response SLA",
+      "rule": "All Purview DLP High and Critical severity incidents and MDCA anomaly detection alerts (bulk download from non-compliant device, suspicious session behaviors) forwarded to Microsoft Sentinel must be acknowledged by McCain's SOC within 4 hours of alert generation during business hours and 8 hours outside business hours. Analytic rules in Sentinel for this pattern must not be disabled without CISO approval, and any Sentinel workspace changes affecting DLP or MDCA data connectors must go through the McCain change management process.",
+      "severity": "Required"
+    },
+    {
+      "area": "Exception Management and Temporary Exclusions",
+      "rule": "Temporary exclusions from MDCA session control policies (e.g., IP-based exceptions for specific office networks, named location exclusions) must be time-limited to a maximum of 90 days and require documented approval from the IT Security team. All active exceptions must be inventoried in the McCain exception register, reviewed quarterly, and renewed or revoked based on current business need. Temporary exceptions must not be granted for content classified as Restricted — HR or Restricted — Financial without explicit CISO sign-off.",
+      "severity": "Required"
+    },
+    {
+      "area": "Monitoring and Reporting — Monthly Compliance Posture Review",
+      "rule": "The McCain Intune and Security teams must produce a monthly device compliance posture report covering: percentage of enrolled devices meeting compliance policy, number of MDCA download-block events by site and label tier, top non-compliant device categories, and open DLP incidents. This report must be distributed to site IT managers and the CISO. Sites with device compliance rates below 85% must be escalated to the regional IT Director for remediation planning within 30 days.",
+      "severity": "Recommended"
+    },
+    {
+      "area": "MDCA App Connector Coverage — SaaS Application Governance",
+      "rule": "Before enabling MDCA session controls for a new SaaS application used by McCain, a formal application onboarding assessment must be completed to verify: (a) the application supports Conditional Access App Control (SAML/OIDC federation with Entra ID), (b) the application does not use certificate pinning or custom authentication flows that bypass MDCA proxy, (c) MDCA app connector (if available) is enabled to provide API-mode visibility in addition to session control proxy mode. Applications that cannot support MDCA session controls must be managed through Conditional Access block policies on non-compliant devices rather than being left uncontrolled.",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "IAM-CA-001",
+      "patternName": "Conditional Access ",
+      "relationship": "Depends on — A Conditional Access pattern defining the Entra ID policy framework is a prerequisite. The device compliance signal and MDCA routing decision described in this pattern are downstream outputs of Conditional Access policy evaluation. The CA pattern must be deployed and validated before MDCA session policies can be enforced."
+    },
+    {
+      "patternId": "",
+      "patternName": "",
+      "relationship": ""
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": "",
+    "ccoeRunbook": "",
+    "configExample": "",
+    "githubTemplate": "",
+    "terraformModule": ""
+  },
+  "exceptionProcess": "Exception requests for this pattern must be submitted through McCain's IT Service Management platform (ServiceNow) using the Security Exception Request form, referencing pattern ID SEC-DLP-001. The requestor must provide: the specific guardrail being excepted, the business justification, the impacted user group or device category, proposed compensating controls, and the requested exception duration (maximum 90 days for temporary exceptions, 12 months for permanent exceptions subject to annual review). All exception requests are reviewed by the IT Security team within 5 business days; exceptions affecting Restricted-labeled data or breaking the default-deny posture for unmanaged devices require CISO approval. Approved exceptions are logged in the McCain Security Exception Register, linked to the relevant ServiceNow ticket, and included in the quarterly security governance review presented to the IT Steering Committee. Exceptions that expire without renewal are automatically revoked through a Sentinel playbook that re-enables the relevant MDCA or Conditional Access policy enforcement.",
+  "revisionHistory": [
+    {
+      "date": "2026-03-15",
+      "author": "AI Assistant",
+      "summary": "Initial draft built from concept research using GitHub reference repositories (RickKotlarz/SC-900, SelvageLabs/M365-Assess) and Microsoft vendor documentation for Intune, MDCA, and Microsoft Purview. Pattern adapted to McCain Foods enterprise context including 35 manufacturing sites, Azure-primary cloud, OT environment boundaries, and Microsoft 365 E5 security stack.",
+      "version": "1.0"
+    }
+  ],
+  "thirdPartyRisks": [
+    {
+      "notes": "AI enrichment failed — showing only web-scraped data",
+      "sources": [
+        "AI Analysis (Claude)"
+      ],
+      "riskLevel": "medium",
+      "vendorName": "Microsoft Entra ID (Azure Active Directory) — Identity platform and Conditional Access policy engine",
+      "websiteUrl": "",
+      "retrievedAt": "2026-03-15T01:54:48.116Z",
+      "breachHistory": [],
+      "certifications": []
+    },
+    {
+      "notes": "AI enrichment failed — showing only web-scraped data",
+      "sources": [
+        "AI Analysis (Claude)"
+      ],
+      "riskLevel": "high",
+      "vendorName": "Microsoft Defender for Cloud Apps (MDCA) — CASB and session control reverse proxy",
+      "websiteUrl": "",
+      "retrievedAt": "2026-03-15T01:54:48.116Z",
+      "breachHistory": [],
+      "certifications": []
+    }
+  ],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:57:59.096Z",
+  "updatedAt": "2026-03-15T01:57:59.096Z"
+}
