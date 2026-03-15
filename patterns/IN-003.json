@@ -1,0 +1,113 @@
+{
+  "id": 16,
+  "patternId": "IN-003",
+  "name": "API Productization",
+  "domain": "Application & Integration",
+  "tier": "Tier 3 — Conceptual",
+  "status": "In Development",
+  "version": "0.8",
+  "owner": "Emma Larsson",
+  "approvers": "Digital Platform Team, Integration Architecture Board",
+  "lastReviewed": "2026-03-01",
+  "ccoeCertified": "No",
+  "ccoeCertRef": null,
+  "leanixRef": null,
+  "strategicIntent": "Package internal APIs as managed products with defined SLAs, comprehensive documentation, tiered access plans, and self-service developer onboarding to accelerate partner integration and internal API reuse across McCain's digital ecosystem.",
+  "problemStatement": "Internal APIs are built as point solutions without documentation, SLAs, or onboarding processes. Partners and internal teams spend weeks discovering, understanding, and gaining access to APIs, slowing time-to-market for new integrations.",
+  "useCases": [
+    {
+      "use": "Packaging order management APIs for retailer partner self-service integration",
+      "dontUse": "Internal-only utilities or helper APIs not intended for broad consumption"
+    },
+    {
+      "use": "Creating tiered API products (Bronze/Silver/Gold) with different rate limits and SLAs",
+      "dontUse": "Experimental or prototype APIs that are not yet stable for external consumption"
+    },
+    {
+      "use": "Developer portal onboarding for McCain's digital supply chain partner ecosystem",
+      "dontUse": "Machine-to-machine integrations already governed by specific partner contracts"
+    }
+  ],
+  "components": [
+    "Azure API Management Developer Portal — self-service API discovery and onboarding",
+    "Azure API Management Products — API grouping, access tiers, and subscription management",
+    "OpenAPI Specification (3.0+) — standardized API contract documentation",
+    "Azure AD B2C — partner identity management and API subscription authentication",
+    "Azure Monitor & API Analytics — usage tracking, SLA monitoring, and billing metrics",
+    "Azure DevOps Pipelines — automated API documentation generation and portal publishing"
+  ],
+  "interactionSteps": [
+    "API team publishes OpenAPI spec and creates API Product in API Management",
+    "Product is configured with access tiers (Bronze: 100 req/min, Silver: 1000, Gold: 10000)",
+    "SLA targets are defined per tier and configured in Azure Monitor",
+    "API documentation is auto-generated from OpenAPI spec and published to Developer Portal",
+    "Partner registers on Developer Portal and subscribes to appropriate product tier",
+    "Subscription keys are issued and partner completes sandbox testing",
+    "API usage metrics track consumption against SLA and trigger alerts on threshold breach"
+  ],
+  "securityConsiderations": [
+    "Developer Portal must require Azure AD B2C authentication for all access",
+    "API subscription keys must have configurable expiry and rotation policies",
+    "Sandbox and production environments must be completely isolated",
+    "API documentation must not expose internal implementation details or infrastructure information",
+    "Partner access must be revocable immediately in case of security incident"
+  ],
+  "guardrails": [
+    {
+      "area": "Governance",
+      "rule": "All externally-consumed APIs must be published as managed API Products",
+      "severity": "Required"
+    },
+    {
+      "area": "Documentation",
+      "rule": "API Products must have OpenAPI 3.0+ specification published to Developer Portal",
+      "severity": "Required"
+    },
+    {
+      "area": "SLA",
+      "rule": "Each API Product tier must have defined and monitored SLA targets",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "API subscription keys must have maximum 180-day expiry",
+      "severity": "Required"
+    },
+    {
+      "area": "Onboarding",
+      "rule": "API Products must provide sandbox environment for partner testing",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "AP-001",
+      "patternName": "API Gateway Pattern",
+      "relationship": "Built on"
+    },
+    {
+      "patternId": "AP-003",
+      "patternName": "Backend-for-Frontend (BFF)",
+      "relationship": "May expose"
+    }
+  ],
+  "implementationAssets": {
+    "ccoeRunbook": "api-productization-onboarding-guide-v0.8",
+    "configExample": "api-product-order-mgmt-v0.8.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-api-products"
+  },
+  "exceptionProcess": "Submit Digital Platform Team request for APIs consumed externally without API Product packaging. Must include documentation plan, SLA commitment, and partner onboarding process.",
+  "revisionHistory": [
+    {
+      "date": "2026-03-01",
+      "author": "Emma Larsson",
+      "summary": "Initial draft with tiered product model, Developer Portal integration, and SLA framework",
+      "version": "0.8"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.500Z",
+  "updatedAt": "2026-03-15T01:01:58.500Z"
+}
