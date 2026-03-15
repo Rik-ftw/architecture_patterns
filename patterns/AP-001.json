@@ -92,7 +92,7 @@
     "configExample": "apim-gateway-config-v2.1.yaml",
     "terraformModule": "github.com/mccain/terraform-azure-apim-gateway"
   },
-  "exceptionProcess": "Submit API Architecture Review request with justification for direct backend exposure. Requires Integration Architecture Board and CISO approval.",
+  "exceptionProcess": "Submit API Architecture Review request with justification for direct backend exposure. Requires Integration Architecture Board and CISO approval. Compensating controls must include WAF, IP whitelisting, and enhanced logging.",
   "revisionHistory": [
     {
       "date": "2025-03-15",
@@ -116,6 +116,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T00:58:45.164Z",
-  "updatedAt": "2026-03-15T00:58:45.164Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

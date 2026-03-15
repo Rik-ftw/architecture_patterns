@@ -13,7 +13,7 @@
   "ccoeCertRef": null,
   "leanixRef": null,
   "strategicIntent": "Package internal APIs as managed products with defined SLAs, comprehensive documentation, tiered access plans, and self-service developer onboarding to accelerate partner integration and internal API reuse across McCain's digital ecosystem.",
-  "problemStatement": "Internal APIs are built as point solutions without documentation, SLAs, or onboarding processes. Partners and internal teams spend weeks discovering, understanding, and gaining access to APIs, slowing time-to-market for new integrations.",
+  "problemStatement": "Internal APIs are built as point solutions without documentation, SLAs, or onboarding processes. Partners and internal teams spend weeks discovering, understanding, and gaining access to APIs, slowing time-to-market for new integrations and digital products.",
   "useCases": [
     {
       "use": "Packaging order management APIs for retailer partner self-service integration",
@@ -108,6 +108,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.500Z",
-  "updatedAt": "2026-03-15T01:01:58.500Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

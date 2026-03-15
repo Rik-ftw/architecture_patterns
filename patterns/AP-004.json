@@ -37,7 +37,7 @@
   ],
   "interactionSteps": [
     "Producer publishes domain event with unique correlation ID to Event Hubs or Service Bus topic",
-    "Event Hubs partitions events by key for ordered processing",
+    "Event Hubs partitions events by key (e.g., plant code or order ID) for ordered processing",
     "Consumer groups process events independently at their own rate",
     "Subscriber checks idempotency store in Cosmos DB before processing to prevent duplicates",
     "Failed events are routed to Dead Letter Queue after configurable retry attempts",
@@ -120,6 +120,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.442Z",
-  "updatedAt": "2026-03-15T01:01:58.442Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

@@ -20,7 +20,7 @@
       "dontUse": "Low-volume internal API calls between co-located microservices"
     },
     {
-      "use": "Retailer EDI connectors processing seasonal order surges",
+      "use": "Retailer EDI connectors processing seasonal order surges (e.g., holiday peak)",
       "dontUse": "Asynchronous event consumers with built-in consumer group scaling"
     },
     {
@@ -114,6 +114,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.489Z",
-  "updatedAt": "2026-03-15T01:01:58.489Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

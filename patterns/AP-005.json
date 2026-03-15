@@ -36,7 +36,7 @@
     "Azure Logic Apps — low-code orchestration option for simpler sagas"
   ],
   "interactionSteps": [
-    "Saga orchestrator receives initiating command",
+    "Saga orchestrator receives initiating command (e.g., 'Place Order')",
     "Orchestrator sends command to first participant (inventory reservation)",
     "Participant executes local transaction and publishes completion event",
     "Orchestrator advances to next step (payment processing) on success",
@@ -49,7 +49,7 @@
     "Compensation actions must be idempotent to handle retry scenarios safely",
     "External partner steps must use timeout-based compensation, not indefinite waits",
     "Saga correlation IDs must be propagated across all participants for end-to-end tracing",
-    "Sensitive data must not be stored in saga state — use references only"
+    "Sensitive data (payment details, PII) must not be stored in saga state — use references only"
   ],
   "guardrails": [
     {
@@ -107,6 +107,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.453Z",
-  "updatedAt": "2026-03-15T01:01:58.453Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

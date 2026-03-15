@@ -13,7 +13,7 @@
   "ccoeCertRef": "CCOE-IN-2025-001",
   "leanixRef": "LX-5708",
   "strategicIntent": "Define a logical enterprise service bus layer for complex multi-system orchestrations, canonical data model enforcement, and protocol mediation across McCain's ERP, CRM, supply chain, and manufacturing ecosystems.",
-  "problemStatement": "McCain's enterprise landscape includes 200+ applications across SAP, Salesforce, factory MES systems, and logistics platforms. Without a logical integration backbone, each point-to-point integration creates exponential complexity.",
+  "problemStatement": "McCain's enterprise landscape includes 200+ applications across SAP, Salesforce, factory MES systems, and logistics platforms. Without a logical integration backbone, each point-to-point integration creates exponential complexity, inconsistent data formats, and ungoverned data flows.",
   "useCases": [
     {
       "use": "Multi-step order-to-cash orchestrations spanning SAP, Salesforce, and logistics",
@@ -120,6 +120,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.481Z",
-  "updatedAt": "2026-03-15T01:01:58.481Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }

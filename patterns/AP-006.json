@@ -98,7 +98,7 @@
     "configExample": "integration-zone-dmz-v1.2.yaml",
     "terraformModule": "github.com/mccain/terraform-azure-integration-zone"
   },
-  "exceptionProcess": "Submit Security Architecture Board request with threat model for any direct connectivity bypassing the integration zone. CISO and Network Team approval required.",
+  "exceptionProcess": "Submit Security Architecture Board request with threat model for any direct connectivity bypassing the integration zone. CISO and Network Team approval required. Must include compensating network controls and 30-day review.",
   "revisionHistory": [
     {
       "date": "2025-05-01",
@@ -116,6 +116,6 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
-  "createdAt": "2026-03-15T01:01:58.462Z",
-  "updatedAt": "2026-03-15T01:01:58.462Z"
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "updatedAt": "2026-03-15T01:08:22.427Z"
 }
