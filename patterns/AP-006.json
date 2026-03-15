@@ -1,0 +1,121 @@
+{
+  "id": 12,
+  "patternId": "AP-006",
+  "name": "Secure Integration Zones",
+  "domain": "Application & Integration",
+  "tier": "Tier 2 — Logical",
+  "status": "Endorsed",
+  "version": "1.2",
+  "owner": "Raj Patel",
+  "approvers": "Security Architecture Board, Network Team",
+  "lastReviewed": "2025-12-20",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-006",
+  "leanixRef": "LX-5607",
+  "strategicIntent": "Establish isolated network and compute zones for hosting third-party integration connectors, ensuring that external partner traffic never reaches internal systems directly and all egress is controlled and auditable.",
+  "problemStatement": "Third-party connectors (EDI partners, logistics providers, payment gateways) require network connectivity that, if hosted within internal zones, exposes core systems to external attack vectors and complicates compliance with data residency requirements.",
+  "useCases": [
+    {
+      "use": "EDI connectors for retailer order ingestion (Walmart, Costco, Tesco)",
+      "dontUse": "Internal service-to-service integration within the same trust boundary"
+    },
+    {
+      "use": "Payment gateway connectors requiring PCI DSS isolation",
+      "dontUse": "Azure-native PaaS integrations using private endpoints within the corporate network"
+    },
+    {
+      "use": "Logistics partner APIs for shipment tracking and carrier booking",
+      "dontUse": "Internal BI reporting connections to Azure Synapse or Data Lake"
+    }
+  ],
+  "components": [
+    "Azure Virtual Network (DMZ spoke) — isolated network zone for integration workloads",
+    "Azure Firewall — egress filtering and threat inspection for outbound partner traffic",
+    "Azure API Management (isolated tier) — API proxy within the integration zone",
+    "Azure Private Link — secure inbound connectivity from integration zone to internal services",
+    "Azure NSG & ASG — micro-segmentation within the integration zone",
+    "Azure Monitor — network flow logging and anomaly detection"
+  ],
+  "interactionSteps": [
+    "Third-party connector is deployed into the isolated DMZ spoke VNet",
+    "Inbound partner traffic is routed through Azure Firewall with allow-listed IPs and FQDNs",
+    "Connector processes partner data and transforms to internal canonical format",
+    "Outbound calls to internal services routed via Private Link endpoints only",
+    "Azure Firewall enforces egress allow-list — blocks all non-approved outbound destinations",
+    "Network flow logs capture all traffic for security monitoring and compliance auditing",
+    "Anomaly detection alerts on unexpected traffic patterns or volume spikes"
+  ],
+  "securityConsiderations": [
+    "Integration zone must be a separate VNet with no direct peering to internal application VNets",
+    "All egress from the integration zone must pass through Azure Firewall with explicit allow-lists",
+    "Third-party connector images must be scanned for vulnerabilities before deployment",
+    "Data leaving the integration zone to partners must be encrypted in transit (TLS 1.2+)",
+    "PCI DSS-scoped connectors must run in a dedicated sub-zone with additional audit controls",
+    "No corporate credentials may be stored within the integration zone — use Key Vault references"
+  ],
+  "guardrails": [
+    {
+      "area": "Network",
+      "rule": "Integration zone VNet must not have direct peering to internal VNets",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "All egress must be filtered through Azure Firewall with FQDN allow-lists",
+      "severity": "Required"
+    },
+    {
+      "area": "Compliance",
+      "rule": "PCI-scoped connectors must be deployed in dedicated PCI sub-zone",
+      "severity": "Required"
+    },
+    {
+      "area": "Operations",
+      "rule": "Network flow logs must be retained for 90 days minimum",
+      "severity": "Required"
+    },
+    {
+      "area": "Supply Chain",
+      "rule": "Third-party container images must pass vulnerability scan before deployment",
+      "severity": "Required"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "NW-001",
+      "patternName": "Hub-Spoke Network Topology",
+      "relationship": "Extends"
+    },
+    {
+      "patternId": "SC-001",
+      "patternName": "Zero Trust Network Access",
+      "relationship": "Implements"
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": "Deny-Direct-Peering-IntegrationZone",
+    "ccoeRunbook": "integration-zone-onboarding-guide-v1.2",
+    "configExample": "integration-zone-dmz-v1.2.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-integration-zone"
+  },
+  "exceptionProcess": "Submit Security Architecture Board request with threat model for any direct connectivity bypassing the integration zone. CISO and Network Team approval required.",
+  "revisionHistory": [
+    {
+      "date": "2025-05-01",
+      "author": "Raj Patel",
+      "summary": "Initial secure integration zone pattern with DMZ spoke design",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-12-20",
+      "author": "Raj Patel",
+      "summary": "Added PCI sub-zone guidance, egress FQDN filtering, and container image scanning",
+      "version": "1.2"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.462Z",
+  "updatedAt": "2026-03-15T01:01:58.462Z"
+}
