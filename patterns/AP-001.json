@@ -1,0 +1,121 @@
+{
+  "id": 7,
+  "patternId": "AP-001",
+  "name": "API Gateway Pattern",
+  "domain": "Application & Integration",
+  "tier": "Tier 2 — Logical",
+  "status": "Endorsed",
+  "version": "2.1",
+  "owner": "Priya Sharma",
+  "approvers": "Integration Architecture Board, Mike Davis",
+  "lastReviewed": "2026-01-10",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-001",
+  "leanixRef": "LX-5102",
+  "strategicIntent": "Provide a centralized, secure API gateway for all consumer-facing and partner APIs, enforcing consistent authentication, rate-limiting, routing, and API lifecycle management across McCain's digital ecosystem.",
+  "problemStatement": "Without a centralized gateway, API consumers connect directly to backend services, leading to inconsistent authentication enforcement, no rate-limiting, difficulty in API versioning, and inability to monitor API usage patterns across the enterprise.",
+  "useCases": [
+    {
+      "use": "External partner APIs for order management and supply chain integration",
+      "dontUse": "Internal service-to-service calls within a single Kubernetes cluster"
+    },
+    {
+      "use": "Mobile and web BFF endpoints requiring OAuth2 token validation",
+      "dontUse": "Batch file transfers or SFTP-based integrations"
+    },
+    {
+      "use": "Public developer portal APIs with tiered rate-limiting",
+      "dontUse": "Low-latency event streaming where gateway hop adds unacceptable latency"
+    }
+  ],
+  "components": [
+    "Azure API Management — gateway runtime, policy engine, and developer portal",
+    "Azure AD B2C — consumer and partner identity federation",
+    "Azure Key Vault — API signing keys and certificate storage",
+    "Azure Monitor & Application Insights — API analytics, latency tracking, and alerting",
+    "Azure Front Door — global load balancing and WAF for API endpoints"
+  ],
+  "interactionSteps": [
+    "API consumer authenticates via OAuth2 / Azure AD B2C and obtains JWT token",
+    "Request hits Azure Front Door for global routing and WAF inspection",
+    "API Management validates JWT, applies rate-limit and quota policies",
+    "Gateway routes request to backend service based on URL path and version",
+    "Response transformation policies normalize backend responses to API contract",
+    "Application Insights captures request telemetry and latency metrics",
+    "API Management publishes usage analytics to Azure Monitor dashboards"
+  ],
+  "securityConsiderations": [
+    "All API endpoints must require OAuth2 bearer token validation",
+    "Rate-limiting policies must be applied per subscription tier",
+    "Backend services must not be directly accessible — gateway is the sole ingress",
+    "API keys must be rotated every 90 days via Key Vault",
+    "WAF rules must be enabled on Azure Front Door for OWASP Top 10 protection",
+    "Mutual TLS required for partner-grade API integrations"
+  ],
+  "guardrails": [
+    {
+      "area": "Security",
+      "rule": "All APIs must enforce OAuth2 authentication at the gateway",
+      "severity": "Required"
+    },
+    {
+      "area": "Performance",
+      "rule": "Rate-limiting must be configured per API product tier",
+      "severity": "Required"
+    },
+    {
+      "area": "Governance",
+      "rule": "All APIs must be registered in the API catalog before production deployment",
+      "severity": "Required"
+    },
+    {
+      "area": "Versioning",
+      "rule": "APIs must support at least one prior version during deprecation window",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "AP-003",
+      "patternName": "Backend-for-Frontend (BFF)",
+      "relationship": "Routes to"
+    },
+    {
+      "patternId": "IN-003",
+      "patternName": "API Productization",
+      "relationship": "Enables"
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": "Require-APIM-For-External-APIs",
+    "ccoeRunbook": "api-gateway-operations-runbook-v2.1",
+    "configExample": "apim-gateway-config-v2.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-apim-gateway"
+  },
+  "exceptionProcess": "Submit API Architecture Review request with justification for direct backend exposure. Requires Integration Architecture Board and CISO approval.",
+  "revisionHistory": [
+    {
+      "date": "2025-03-15",
+      "author": "Priya Sharma",
+      "summary": "Initial API gateway pattern with basic routing and auth",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-07-20",
+      "author": "Priya Sharma",
+      "summary": "Added rate-limiting tiers and developer portal integration",
+      "version": "1.5"
+    },
+    {
+      "date": "2026-01-10",
+      "author": "Priya Sharma",
+      "summary": "Added Azure Front Door WAF, mutual TLS for partners, and API versioning policy",
+      "version": "2.1"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T00:58:45.164Z",
+  "updatedAt": "2026-03-15T00:58:45.164Z"
+}
