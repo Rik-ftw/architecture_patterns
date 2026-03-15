@@ -1,6 +1,6 @@
 # Architecture Pattern Library
 
-> Auto-generated index — last synced 2026-03-15T01:50:00.805Z
+> Auto-generated index — last synced 2026-03-15T01:59:29.528Z
 
 ## Patterns
 
@@ -21,6 +21,7 @@
 | IN-003 | API Productization | Application & Integration | In Development | [JSON](patterns/IN-003.json) |
 | NW-001 | Hub-Spoke Network Topology | Network & Connectivity | Endorsed | [JSON](patterns/NW-001.json) · [SVG](patterns/NW-001.svg) |
 | SC-001 | Zero Trust Network Access | Security & Controls | Under Review | [JSON](patterns/SC-001.json) · [SVG](patterns/SC-001.svg) |
+| SEC-DLP-001 | Device Compliance-Gated DLP — Blocking Downloads to Non-Compliant Endpoints via Intune, MDCA, and Microsoft Purview | Security & Controls | In Development | [JSON](patterns/SEC-DLP-001.json) · [SVG](patterns/SEC-DLP-001.svg) |
 
 ## Vendors
 
