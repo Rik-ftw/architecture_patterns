@@ -1,0 +1,112 @@
+{
+  "id": 11,
+  "patternId": "AP-005",
+  "name": "Saga & Distributed Transaction",
+  "domain": "Application & Integration",
+  "tier": "Tier 3 — Conceptual",
+  "status": "Endorsed",
+  "version": "1.0",
+  "owner": "David Okonkwo",
+  "approvers": "Integration Architecture Board, Carlos Mendes",
+  "lastReviewed": "2025-10-15",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-005",
+  "leanixRef": "LX-5506",
+  "strategicIntent": "Define orchestration and compensation patterns for managing distributed transactions across multiple microservices, ensuring eventual consistency and graceful failure handling without two-phase commit.",
+  "problemStatement": "Multi-step business processes spanning order management, inventory reservation, payment processing, and logistics require transactional guarantees, but distributed two-phase commit is impractical across independent microservices and external partner systems.",
+  "useCases": [
+    {
+      "use": "Order fulfilment spanning inventory, payment, and shipping services",
+      "dontUse": "Single-service CRUD operations with local database transactions"
+    },
+    {
+      "use": "Cross-plant inventory transfer requiring multi-system coordination",
+      "dontUse": "Read-only reporting queries across multiple data sources"
+    },
+    {
+      "use": "Customer onboarding workflow spanning CRM, billing, and access provisioning",
+      "dontUse": "Fire-and-forget notifications where compensation is unnecessary"
+    }
+  ],
+  "components": [
+    "Azure Durable Functions — saga orchestrator with state management",
+    "Azure Service Bus — reliable messaging between saga participants",
+    "Azure Cosmos DB — saga state store and compensation log",
+    "Application Insights — saga execution tracing and failure analytics",
+    "Azure Logic Apps — low-code orchestration option for simpler sagas"
+  ],
+  "interactionSteps": [
+    "Saga orchestrator receives initiating command",
+    "Orchestrator sends command to first participant (inventory reservation)",
+    "Participant executes local transaction and publishes completion event",
+    "Orchestrator advances to next step (payment processing) on success",
+    "On participant failure, orchestrator initiates compensation chain in reverse order",
+    "Each compensating action is logged in Cosmos DB for audit and replay",
+    "Saga completes with final status event published for downstream consumers"
+  ],
+  "securityConsiderations": [
+    "Saga state store must be encrypted at rest and access-restricted to orchestrator identity",
+    "Compensation actions must be idempotent to handle retry scenarios safely",
+    "External partner steps must use timeout-based compensation, not indefinite waits",
+    "Saga correlation IDs must be propagated across all participants for end-to-end tracing",
+    "Sensitive data must not be stored in saga state — use references only"
+  ],
+  "guardrails": [
+    {
+      "area": "Reliability",
+      "rule": "Every saga step must have a defined compensating action",
+      "severity": "Required"
+    },
+    {
+      "area": "Reliability",
+      "rule": "Saga orchestrator must implement timeout for each participant step",
+      "severity": "Required"
+    },
+    {
+      "area": "Data",
+      "rule": "Saga state must not contain PII or payment card data",
+      "severity": "Required"
+    },
+    {
+      "area": "Observability",
+      "rule": "Saga execution must be fully traceable via correlation IDs",
+      "severity": "Required"
+    },
+    {
+      "area": "Design",
+      "rule": "Prefer choreography for simple 2-step flows; use orchestration for 3+ steps",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "AP-004",
+      "patternName": "Event-Driven Integration",
+      "relationship": "Built on"
+    },
+    {
+      "patternId": "AP-002",
+      "patternName": "Service Mesh for Microservices",
+      "relationship": "Runs within"
+    }
+  ],
+  "implementationAssets": {
+    "ccoeRunbook": "saga-pattern-implementation-guide-v1.0",
+    "configExample": "saga-order-fulfilment-v1.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-saga-orchestrator"
+  },
+  "exceptionProcess": "Submit Integration Architecture Board request for distributed transaction approaches outside the saga pattern. Must include consistency analysis, failure mode documentation, and data loss risk assessment.",
+  "revisionHistory": [
+    {
+      "date": "2025-10-15",
+      "author": "David Okonkwo",
+      "summary": "Initial saga pattern with Durable Functions orchestration and compensation guidance",
+      "version": "1.0"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.453Z",
+  "updatedAt": "2026-03-15T01:01:58.453Z"
+}
