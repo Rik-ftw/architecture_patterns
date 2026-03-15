@@ -1,0 +1,125 @@
+{
+  "id": 10,
+  "patternId": "AP-004",
+  "name": "Event-Driven Integration",
+  "domain": "Application & Integration",
+  "tier": "Tier 2 — Logical",
+  "status": "Endorsed",
+  "version": "2.0",
+  "owner": "David Okonkwo",
+  "approvers": "Integration Architecture Board, Sarah Chen",
+  "lastReviewed": "2026-02-01",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-004",
+  "leanixRef": "LX-5405",
+  "strategicIntent": "Establish a publish/subscribe event-driven architecture with durable messaging, dead-letter queues, and idempotency guarantees to decouple services and enable real-time data flows across McCain's supply chain and manufacturing systems.",
+  "problemStatement": "Point-to-point synchronous integrations between supply chain, ERP, and manufacturing systems create tight coupling, cascading failures during peak order periods, and inability to process events at different rates across global regions.",
+  "useCases": [
+    {
+      "use": "Real-time inventory updates from factory MES systems to central ERP",
+      "dontUse": "Nightly batch file extracts where latency is acceptable and volume is low"
+    },
+    {
+      "use": "Order lifecycle events published for multi-system consumption (logistics, billing, CRM)",
+      "dontUse": "Simple request-response queries where synchronous REST is sufficient"
+    },
+    {
+      "use": "IoT sensor events from production lines feeding quality analytics",
+      "dontUse": "Human-initiated CRUD operations on master data with immediate consistency needs"
+    }
+  ],
+  "components": [
+    "Azure Event Hubs — high-throughput event ingestion with partitioned consumers",
+    "Azure Service Bus — enterprise messaging with topics, sessions, and DLQ",
+    "Azure Functions — event processors and subscriber handlers",
+    "Azure Event Grid — system event routing and webhook delivery",
+    "Azure Cosmos DB — event store for idempotency tracking and replay"
+  ],
+  "interactionSteps": [
+    "Producer publishes domain event with unique correlation ID to Event Hubs or Service Bus topic",
+    "Event Hubs partitions events by key for ordered processing",
+    "Consumer groups process events independently at their own rate",
+    "Subscriber checks idempotency store in Cosmos DB before processing to prevent duplicates",
+    "Failed events are routed to Dead Letter Queue after configurable retry attempts",
+    "DLQ monitor Azure Function alerts operations team and enables manual replay",
+    "Event Grid publishes system lifecycle events for infrastructure automation"
+  ],
+  "securityConsiderations": [
+    "All event payloads containing PII must be encrypted at the field level before publishing",
+    "Event Hub and Service Bus connections must use managed identity, not connection strings",
+    "Dead Letter Queues must have restricted access — only operations team can read/replay",
+    "Event schemas must be registered in a schema registry to prevent breaking changes",
+    "Consumer applications must validate event schema version before processing"
+  ],
+  "guardrails": [
+    {
+      "area": "Reliability",
+      "rule": "All event consumers must implement idempotent processing",
+      "severity": "Required"
+    },
+    {
+      "area": "Reliability",
+      "rule": "Dead Letter Queues must be configured with alerting for all subscriptions",
+      "severity": "Required"
+    },
+    {
+      "area": "Data",
+      "rule": "PII fields in event payloads must be encrypted or tokenized",
+      "severity": "Required"
+    },
+    {
+      "area": "Governance",
+      "rule": "All event schemas must be registered in the central schema registry",
+      "severity": "Required"
+    },
+    {
+      "area": "Performance",
+      "rule": "Event processing latency SLO must be defined per consumer",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "AP-005",
+      "patternName": "Saga & Distributed Transaction",
+      "relationship": "Enables"
+    },
+    {
+      "patternId": "IN-002",
+      "patternName": "Connector Isolation & Throttling",
+      "relationship": "Uses"
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": "Require-Managed-Identity-EventHub",
+    "ccoeRunbook": "event-driven-operations-runbook-v2.0",
+    "configExample": "event-driven-config-v2.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-event-driven"
+  },
+  "exceptionProcess": "Submit Integration Architecture Board request for synchronous integration exceptions. Must include failure mode analysis, SLA impact assessment, and compensating retry strategy.",
+  "revisionHistory": [
+    {
+      "date": "2025-02-20",
+      "author": "David Okonkwo",
+      "summary": "Initial event-driven pattern with Event Hubs",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-08-10",
+      "author": "David Okonkwo",
+      "summary": "Added Service Bus DLQ handling and idempotency guidance",
+      "version": "1.5"
+    },
+    {
+      "date": "2026-02-01",
+      "author": "David Okonkwo",
+      "summary": "Added schema registry, field-level encryption, and Cosmos DB idempotency store",
+      "version": "2.0"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.442Z",
+  "updatedAt": "2026-03-15T01:01:58.442Z"
+}
