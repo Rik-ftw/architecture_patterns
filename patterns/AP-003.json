@@ -1,0 +1,112 @@
+{
+  "id": 9,
+  "patternId": "AP-003",
+  "name": "Backend-for-Frontend (BFF)",
+  "domain": "Application & Integration",
+  "tier": "Tier 2 — Logical",
+  "status": "Endorsed",
+  "version": "1.1",
+  "owner": "Emma Larsson",
+  "approvers": "Digital Platform Team, Integration Architecture Board",
+  "lastReviewed": "2025-11-20",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-003",
+  "leanixRef": "LX-5304",
+  "strategicIntent": "Provide tailored API backends for each client type (web, mobile, partner portal) to reduce client-side complexity, minimize over-fetching, and limit the API surface area exposed to each consumer.",
+  "problemStatement": "A single generic API serving web, mobile, and partner consumers forces each client to implement complex data aggregation, filtering, and transformation logic, increasing frontend bundle sizes and exposing unnecessary backend capabilities.",
+  "useCases": [
+    {
+      "use": "Mobile apps needing optimized payloads to reduce bandwidth on factory floor devices",
+      "dontUse": "Internal admin tools with a single web client"
+    },
+    {
+      "use": "Partner portal requiring curated API views with restricted data scope",
+      "dontUse": "Service-to-service backend integrations with no end-user client"
+    },
+    {
+      "use": "Progressive web apps needing aggregated responses from multiple microservices",
+      "dontUse": "Simple CRUD applications backed by a single database"
+    }
+  ],
+  "components": [
+    "Azure App Service — BFF runtime hosting per client type",
+    "Azure API Management — routing layer directing clients to correct BFF",
+    "GraphQL or REST aggregation layer — response composition and filtering",
+    "Azure AD B2C — client-specific authentication flows",
+    "Application Insights — per-BFF performance and error monitoring"
+  ],
+  "interactionSteps": [
+    "Client (web/mobile/partner) authenticates via Azure AD B2C with client-specific flow",
+    "API Management routes request to the appropriate BFF based on client type header",
+    "BFF aggregates data from downstream microservices via internal REST/gRPC calls",
+    "BFF applies client-specific transformations, filtering, and pagination",
+    "Optimized response payload returned to client with cache headers",
+    "Application Insights tracks per-BFF latency, error rates, and payload sizes"
+  ],
+  "securityConsiderations": [
+    "Each BFF must enforce its own OAuth2 scope validation matching client permissions",
+    "BFFs must not expose internal microservice schemas to clients",
+    "Response filtering must strip fields that the client type is not authorized to receive",
+    "Client type identification must use validated JWT claims, not user-agent sniffing",
+    "BFF-to-backend calls must use service-to-service credentials, not forwarded user tokens"
+  ],
+  "guardrails": [
+    {
+      "area": "Architecture",
+      "rule": "Each distinct client type must have its own BFF instance",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "BFFs must validate OAuth2 scopes specific to the client type",
+      "severity": "Required"
+    },
+    {
+      "area": "Performance",
+      "rule": "BFF response payloads must not exceed 500KB for mobile clients",
+      "severity": "Recommended"
+    },
+    {
+      "area": "Governance",
+      "rule": "BFF API contracts must be versioned independently of backend services",
+      "severity": "Required"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "AP-001",
+      "patternName": "API Gateway Pattern",
+      "relationship": "Sits behind"
+    },
+    {
+      "patternId": "AP-002",
+      "patternName": "Service Mesh for Microservices",
+      "relationship": "Calls via"
+    }
+  ],
+  "implementationAssets": {
+    "ccoeRunbook": "bff-deployment-guide-v1.1",
+    "configExample": "bff-config-mobile-v1.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-bff-appservice"
+  },
+  "exceptionProcess": "Submit Digital Platform variance request for shared BFF usage across client types. Must document payload analysis showing no over-fetching and security review confirming no scope leakage.",
+  "revisionHistory": [
+    {
+      "date": "2025-06-15",
+      "author": "Emma Larsson",
+      "summary": "Initial BFF pattern for mobile and web separation",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-11-20",
+      "author": "Emma Larsson",
+      "summary": "Added partner portal BFF guidance, payload size guardrails, and GraphQL option",
+      "version": "1.1"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.431Z",
+  "updatedAt": "2026-03-15T01:01:58.431Z"
+}
