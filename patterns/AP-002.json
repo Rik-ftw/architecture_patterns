@@ -1,0 +1,113 @@
+{
+  "id": 8,
+  "patternId": "AP-002",
+  "name": "Service Mesh for Microservices",
+  "domain": "Application & Integration",
+  "tier": "Tier 2 — Logical",
+  "status": "Endorsed",
+  "version": "1.3",
+  "owner": "Carlos Mendes",
+  "approvers": "Platform Engineering, Mike Davis",
+  "lastReviewed": "2025-12-05",
+  "ccoeCertified": "Yes",
+  "ccoeCertRef": "CCOE-AP-2025-002",
+  "leanixRef": "LX-5203",
+  "strategicIntent": "Implement a service mesh using the sidecar proxy model to provide consistent observability, traffic management, and mutual TLS between microservices across McCain's containerized workloads.",
+  "problemStatement": "As McCain's microservices estate grows, teams implement inconsistent approaches to service discovery, retries, circuit-breaking, and inter-service encryption, leading to reliability gaps and difficulty diagnosing cross-service failures in production.",
+  "useCases": [
+    {
+      "use": "AKS-hosted microservices requiring mutual TLS and traffic shaping",
+      "dontUse": "Monolithic applications running on VMs with no containerization plan"
+    },
+    {
+      "use": "Cross-namespace service communication needing fine-grained access policies",
+      "dontUse": "Simple two-tier web applications with a single backend service"
+    },
+    {
+      "use": "Canary and blue-green deployments requiring traffic splitting",
+      "dontUse": "Batch processing jobs with no real-time inter-service communication"
+    }
+  ],
+  "components": [
+    "Istio Service Mesh — control plane for traffic management and policy",
+    "Envoy Sidecar Proxy — data plane for request routing and telemetry",
+    "Kiali — service mesh observability dashboard",
+    "Jaeger — distributed tracing for cross-service request flows",
+    "Prometheus & Grafana — metrics collection and visualization"
+  ],
+  "interactionSteps": [
+    "Envoy sidecar is automatically injected into each pod via Istio admission webhook",
+    "Service-to-service calls are intercepted by Envoy and encrypted with mutual TLS",
+    "Istio VirtualService rules manage traffic splitting for canary deployments",
+    "DestinationRules configure circuit-breaking thresholds and retry policies",
+    "Jaeger captures distributed traces across the full request chain",
+    "Kiali dashboard visualizes service topology, traffic flow, and error rates",
+    "Prometheus scrapes Envoy metrics and Grafana renders operational dashboards"
+  ],
+  "securityConsiderations": [
+    "Mutual TLS must be enforced in STRICT mode for all mesh-enrolled namespaces",
+    "Istio AuthorizationPolicies must restrict cross-namespace access to explicit allow-lists",
+    "Sidecar resource limits must be configured to prevent proxy resource exhaustion",
+    "Control plane components must run in a dedicated, hardened namespace",
+    "Mesh telemetry data must not contain PII or sensitive payload content"
+  ],
+  "guardrails": [
+    {
+      "area": "Security",
+      "rule": "mTLS STRICT mode required for all production namespaces",
+      "severity": "Required"
+    },
+    {
+      "area": "Reliability",
+      "rule": "Circuit-breaker thresholds must be configured for all inter-service calls",
+      "severity": "Required"
+    },
+    {
+      "area": "Observability",
+      "rule": "Distributed tracing must be enabled for all mesh services",
+      "severity": "Required"
+    },
+    {
+      "area": "Performance",
+      "rule": "Sidecar CPU/memory limits must be set per workload tier",
+      "severity": "Recommended"
+    }
+  ],
+  "composition": [
+    {
+      "patternId": "NW-001",
+      "patternName": "Hub-Spoke Network Topology",
+      "relationship": "Runs within"
+    },
+    {
+      "patternId": "CP-001",
+      "patternName": "Azure Landing Zone Foundation",
+      "relationship": "Deployed on"
+    }
+  ],
+  "implementationAssets": {
+    "ccoeRunbook": "service-mesh-operations-runbook-v1.3",
+    "configExample": "istio-mesh-config-v1.3.yaml",
+    "terraformModule": "github.com/mccain/terraform-aks-istio-mesh"
+  },
+  "exceptionProcess": "Submit Platform Engineering variance request for non-mesh service communication. Must include network-level compensating controls (NSG rules, private endpoints) and security team sign-off.",
+  "revisionHistory": [
+    {
+      "date": "2025-04-10",
+      "author": "Carlos Mendes",
+      "summary": "Initial service mesh pattern with Istio on AKS",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-12-05",
+      "author": "Carlos Mendes",
+      "summary": "Added canary deployment support, circuit-breaker guardrails, and Kiali integration",
+      "version": "1.3"
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "diagramSvg": null,
+  "createdAt": "2026-03-15T01:01:58.376Z",
+  "updatedAt": "2026-03-15T01:01:58.376Z"
+}
