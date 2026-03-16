@@ -3,7 +3,7 @@
   "patternId": "IN-002",
   "name": "Connector Isolation & Throttling",
   "domain": "Application & Integration",
-  "tier": "Tier 2 — Logical",
+  "tier": "Layer 2 — Logical",
   "status": "Endorsed",
   "version": "1.1",
   "owner": "Raj Patel",
@@ -114,6 +114,7 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
+  "azureDesign": null,
   "createdAt": "2026-03-15T01:08:22.427Z",
   "updatedAt": "2026-03-15T01:08:22.427Z"
 }

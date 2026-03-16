@@ -3,7 +3,7 @@
   "patternId": "AP-007",
   "name": "Adapter/Facade for Legacy Systems",
   "domain": "Application & Integration",
-  "tier": "Tier 2 — Logical",
+  "tier": "Layer 2 — Logical",
   "status": "In Development",
   "version": "0.9",
   "owner": "Karen Mitchell",
@@ -108,6 +108,7 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
+  "azureDesign": null,
   "createdAt": "2026-03-15T01:08:22.427Z",
   "updatedAt": "2026-03-15T01:08:22.427Z"
 }

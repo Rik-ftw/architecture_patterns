@@ -3,7 +3,7 @@
   "patternId": "IN-001",
   "name": "Enterprise Service Bus (Logical)",
   "domain": "Application & Integration",
-  "tier": "Tier 3 — Conceptual",
+  "tier": "Layer 3 — Conceptual",
   "status": "Endorsed",
   "version": "1.4",
   "owner": "Priya Sharma",
@@ -120,6 +120,7 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
+  "azureDesign": null,
   "createdAt": "2026-03-15T01:08:22.427Z",
   "updatedAt": "2026-03-15T01:08:22.427Z"
 }

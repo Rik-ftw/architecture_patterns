@@ -3,7 +3,7 @@
   "patternId": "AP-005",
   "name": "Saga & Distributed Transaction",
   "domain": "Application & Integration",
-  "tier": "Tier 3 — Conceptual",
+  "tier": "Layer 3 — Conceptual",
   "status": "Endorsed",
   "version": "1.0",
   "owner": "David Okonkwo",
@@ -107,6 +107,7 @@
   "thirdPartyRisks": [],
   "submissionSource": null,
   "diagramSvg": null,
+  "azureDesign": null,
   "createdAt": "2026-03-15T01:08:22.427Z",
   "updatedAt": "2026-03-15T01:08:22.427Z"
 }

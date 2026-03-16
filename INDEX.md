@@ -1,12 +1,12 @@
 # Architecture Pattern Library
 
-> Auto-generated index — last synced 2026-03-15T01:59:29.528Z
+> Auto-generated index — last synced 2026-03-16T15:27:55.698Z
 
 ## Patterns
 
 | ID | Name | Domain | Status | Files |
 |---|---|---|---|---|
-| AP-001 | API Gateway Pattern | Application & Integration | Endorsed | [JSON](patterns/AP-001.json) |
+| AP-001 | API Gateway Pattern | Application & Integration | Endorsed | [JSON](patterns/AP-001.json) · [SVG](patterns/AP-001.svg) |
 | AP-002 | Service Mesh for Microservices | Application & Integration | Endorsed | [JSON](patterns/AP-002.json) · [SVG](patterns/AP-002.svg) |
 | AP-003 | Backend-for-Frontend (BFF) | Application & Integration | Endorsed | [JSON](patterns/AP-003.json) |
 | AP-004 | Event-Driven Integration | Application & Integration | Endorsed | [JSON](patterns/AP-004.json) |
