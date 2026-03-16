@@ -1,6 +1,6 @@
 # Architecture Pattern Library
 
-> Auto-generated index — last synced 2026-03-16T15:27:55.698Z
+> Auto-generated index — last synced 2026-03-16T20:17:22.023Z
 
 ## Patterns
 
@@ -14,6 +14,7 @@
 | AP-006 | Secure Integration Zones | Application & Integration | Endorsed | [JSON](patterns/AP-006.json) |
 | AP-007 | Adapter/Facade for Legacy Systems | Application & Integration | In Development | [JSON](patterns/AP-007.json) |
 | CK-001 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-001.json) · [SVG](patterns/CK-001.svg) |
+| CK-004 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-004.json) |
 | CP-001 | Azure Landing Zone Foundation | Cloud & Platform | In Development | [JSON](patterns/CP-001.json) · [SVG](patterns/CP-001.svg) |
 | DT-001 | Data Lake Architecture | Data & Storage | In Development | [JSON](patterns/DT-001.json) · [SVG](patterns/DT-001.svg) |
 | IN-001 | Enterprise Service Bus (Logical) | Application & Integration | Endorsed | [JSON](patterns/IN-001.json) |
