@@ -1,9 +1,9 @@
 {
-  "id": 5,
+  "id": 19,
   "patternId": "CK-001",
   "name": "McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes",
   "domain": "Containers & Kubernetes",
-  "tier": "Layer 2 — Logical",
+  "tier": "Tier 2 — Logical",
   "status": "In Development",
   "version": "1.0",
   "owner": "Rashmi Tripathi — Platform Engineer (AKS), rashmi.tripathi@mccain.ca",
@@ -159,68 +159,12 @@
   ],
   "composition": [
     {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
-    },
-    {
-      "patternId": "",
-      "patternName": "",
-      "relationship": ""
+      "patternId": "4567745765",
+      "patternName": "65463456",
+      "relationship": "76456"
     }
   ],
-  "implementationAssets": {
-    "azurePolicy": "",
-    "ccoeRunbook": "",
-    "configExample": "",
-    "githubTemplate": "",
-    "terraformModule": ""
-  },
+  "implementationAssets": {},
   "exceptionProcess": "Exceptions to platform guardrails (e.g., privileged container requirements, public API endpoint access, or use of unsigned images in enforcement mode) must be submitted to the Platform Engineering team and reviewed by the McCain Cloud Centre of Excellence (CCoE) and Information Security. Exceptions require documented business justification, a defined time-bound remediation plan, and formal sign-off from the Platform Owner and Information Security. Approved exceptions are tracked in the platform risk register and reviewed at each quarterly architecture review cycle.",
   "revisionHistory": [
     {
@@ -230,91 +174,10 @@
       "version": "1.0"
     }
   ],
-  "thirdPartyRisks": [
-    {
-      "notes": "Microsoft maintains extensive compliance certifications through their Trust Center. Certification statuses and breach information current as of knowledge cutoff and may have changed.",
-      "sources": [
-        "AI Analysis (Claude)"
-      ],
-      "category": "Cloud Services Provider",
-      "riskLevel": "low",
-      "vendorName": "microsoft",
-      "retrievedAt": "2026-03-14T22:15:14.769Z",
-      "breachHistory": [
-        {
-          "date": "2021-03",
-          "source": "Reuters",
-          "incident": "Exchange Server vulnerabilities exploited by nation-state actors affecting on-premises installations",
-          "severity": "critical",
-          "sourceUrl": "https://www.reuters.com/technology/biden-administration-blames-china-microsoft-exchange-hack-2021-07-19/"
-        },
-        {
-          "date": "2020-12",
-          "source": "BBC",
-          "incident": "SolarWinds supply chain attack affected Microsoft's internal systems",
-          "severity": "high",
-          "sourceUrl": "https://www.bbc.com/news/technology-55321643"
-        },
-        {
-          "date": "2022-03",
-          "source": "The Guardian",
-          "incident": "Lapsus$ group breached Microsoft and leaked source code",
-          "severity": "medium",
-          "sourceUrl": "https://www.theguardian.com/technology/2022/mar/22/lapsus-hackers-microsoft-okta-breach"
-        }
-      ],
-      "certifications": [
-        {
-          "name": "SOC 2 Type II",
-          "scope": "Azure, Microsoft 365, and other cloud services",
-          "source": "Microsoft Trust Center",
-          "status": "certified",
-          "sourceUrl": "https://www.microsoft.com/en-us/trust-center/compliance/soc",
-          "confidence": "high",
-          "retrievedAt": "2026-03-14T22:15:15.454Z"
-        },
-        {
-          "name": "ISO 27001",
-          "scope": "Microsoft cloud services including Azure and Office 365",
-          "source": "Microsoft Trust Center",
-          "status": "certified",
-          "sourceUrl": "https://www.microsoft.com/en-us/trust-center/compliance/iso-iec-27001",
-          "confidence": "high",
-          "retrievedAt": "2026-03-14T22:15:15.454Z"
-        },
-        {
-          "name": "FedRAMP",
-          "scope": "Azure Government and Office 365 Government",
-          "source": "Microsoft Trust Center",
-          "status": "certified",
-          "sourceUrl": "https://www.microsoft.com/en-us/trust-center/compliance/fedramp",
-          "confidence": "high",
-          "retrievedAt": "2026-03-14T22:15:15.454Z"
-        },
-        {
-          "name": "HIPAA BAA",
-          "scope": "Azure and Microsoft 365 services",
-          "source": "Microsoft Trust Center",
-          "status": "certified",
-          "sourceUrl": "https://www.microsoft.com/en-us/trust-center/compliance/hipaa",
-          "confidence": "high",
-          "retrievedAt": "2026-03-14T22:15:15.454Z"
-        },
-        {
-          "name": "PCI DSS Level 1",
-          "scope": "Azure cloud platform",
-          "source": "Microsoft Trust Center",
-          "status": "certified",
-          "sourceUrl": "https://www.microsoft.com/en-us/trust-center/compliance/pci",
-          "confidence": "high",
-          "retrievedAt": "2026-03-14T22:15:15.454Z"
-        }
-      ]
-    }
-  ],
+  "thirdPartyRisks": [],
   "submissionSource": null,
-  "diagramSvg": "<svg viewBox=\"0 0 900 600\" width=\"900\" height=\"600\" font-family=\"system-ui,-apple-system,sans-serif\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs>\n<marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n<path d=\"M0,0 L0,6 L8,3 z\" fill=\"#1B3A6B\"/>\n</marker>\n<marker id=\"arr2\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n<path d=\"M0,0 L0,6 L8,3 z\" fill=\"#0F6E56\"/>\n</marker>\n</defs>\n\n<!-- Title -->\n<rect width=\"900\" height=\"36\" fill=\"#1B3A6B\"/>\n<text x=\"450\" y=\"23\" text-anchor=\"middle\" fill=\"white\" font-size=\"13\" font-weight=\"bold\">McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes</text>\n\n<!-- Background zones -->\n<rect x=\"8\" y=\"44\" width=\"884\" height=\"548\" rx=\"6\" fill=\"#EAF1FB\" stroke=\"#1B3A6B\" stroke-width=\"1\" stroke-dasharray=\"4,3\"/>\n<text x=\"16\" y=\"58\" font-size=\"10\" fill=\"#1B3A6B\" font-weight=\"bold\">AKS Spoke Subscription</text>\n\n<!-- Cloudflare WAF -->\n<rect x=\"20\" y=\"65\" width=\"110\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.5\"/>\n<text x=\"75\" y=\"83\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Cloudflare WAF</text>\n<text x=\"75\" y=\"94\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Edge WAF/DNS</text>\n\n<!-- App Gateway -->\n<rect x=\"170\" y=\"65\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"235\" y=\"83\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">App Gateway v2</text>\n<text x=\"235\" y=\"94\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">L7 Ingress / WAF</text>\n\n<!-- Azure Firewall -->\n<rect x=\"340\" y=\"65\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"400\" y=\"83\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Azure Firewall/NAT</text>\n<text x=\"400\" y=\"94\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Egress Control</text>\n\n<!-- Entra ID + RBAC -->\n<rect x=\"500\" y=\"65\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"565\" y=\"83\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Entra ID + RBAC</text>\n<text x=\"565\" y=\"94\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Authn/Authz</text>\n\n<!-- Azure DevOps + Terraform -->\n<rect x=\"670\" y=\"65\" width=\"140\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.5\"/>\n<text x=\"740\" y=\"83\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Azure DevOps + TF</text>\n<text x=\"740\" y=\"94\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">IaC / Pipelines</text>\n\n<!-- Private AKS Cluster box -->\n<rect x=\"140\" y=\"118\" width=\"620\" height=\"330\" rx=\"8\" fill=\"#E8F5F0\" stroke=\"#0F6E56\" stroke-width=\"2\"/>\n<text x=\"450\" y=\"134\" text-anchor=\"middle\" font-size=\"11\" fill=\"#0F6E56\" font-weight=\"bold\">Private AKS Cluster (Private API / Private Link)</text>\n\n<!-- System Node Pool -->\n<rect x=\"155\" y=\"142\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"215\" y=\"160\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">System Node Pool</text>\n<text x=\"215\" y=\"171\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">CriticalAddonsOnly</text>\n\n<!-- User Node Pools -->\n<rect x=\"295\" y=\"142\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"360\" y=\"160\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">User Node Pools</text>\n<text x=\"360\" y=\"171\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Per BU / Autoscaler</text>\n\n<!-- Azure CNI Overlay -->\n<rect x=\"445\" y=\"142\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"510\" y=\"160\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Azure CNI Overlay</text>\n<text x=\"510\" y=\"171\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Pod CIDR 10.244/16</text>\n\n<!-- Azure Policy -->\n<rect x=\"595\" y=\"142\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"655\" y=\"160\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Azure Policy Add-on</text>\n<text x=\"655\" y=\"171\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">PSS / Gatekeeper</text>\n\n<!-- NGINX Ingress -->\n<rect x=\"155\" y=\"196\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"215\" y=\"214\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">NGINX Ingress</text>\n<text x=\"215\" y=\"225\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">App Routing Add-on</text>\n\n<!-- Cilium Network Policies -->\n<rect x=\"295\" y=\"196\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"360\" y=\"214\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Cilium Net Policies</text>\n<text x=\"360\" y=\"225\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">CCNP / CNP Isolation</text>\n\n<!-- Workload Identity -->\n<rect x=\"445\" y=\"196\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"510\" y=\"214\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Workload Identity</text>\n<text x=\"510\" y=\"225\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">OIDC Federated</text>\n\n<!-- Ratify + Notation -->\n<rect x=\"595\" y=\"196\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.5\"/>\n<text x=\"655\" y=\"214\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Notation v2 + Ratify</text>\n<text x=\"655\" y=\"225\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Image Signing/Admit</text>\n\n<!-- ArgoCD -->\n<rect x=\"155\" y=\"250\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"215\" y=\"268\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">ArgoCD (GitOps)</text>\n<text x=\"215\" y=\"279\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">ApplicationSet</text>\n\n<!-- Defender for Containers -->\n<rect x=\"295\" y=\"250\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"360\" y=\"268\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Defender for Containers</text>\n<text x=\"360\" y=\"279\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Runtime / MDVM</text>\n\n<!-- Observability Stack -->\n<rect x=\"445\" y=\"250\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.5\"/>\n<text x=\"510\" y=\"268\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Observability Stack</text>\n<text x=\"510\" y=\"279\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Grafana / Log Analytics</text>\n\n<!-- BU App Pods -->\n<rect x=\"235\" y=\"310\" width=\"280\" height=\"50\" rx=\"8\" fill=\"#1B3A6B\" fill-opacity=\"0.08\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" stroke-dasharray=\"4,2\"/>\n<text x=\"375\" y=\"330\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1B3A6B\" font-weight=\"bold\">BU Application Pods (Namespaced)</text>\n<text x=\"375\" y=\"345\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Namespace isolation · Taints/Tolerations · Labels</text>\n\n<!-- ACR -->\n<rect x=\"20\" y=\"390\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"80\" y=\"408\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">ACR Premium</text>\n<text x=\"80\" y=\"419\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Private Endpoint</text>\n\n<!-- Key Vault -->\n<rect x=\"160\" y=\"390\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"225\" y=\"408\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Key Vault + CSI</text>\n<text x=\"225\" y=\"419\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Secrets / Certs</text>\n\n<!-- Cost Chargeback -->\n<rect x=\"310\" y=\"390\" width=\"140\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.5\"/>\n<text x=\"380\" y=\"408\" text-anchor=\"middle\" font-size=\"10\" fill=\"#1e293b\">Cost Chargeback</text>\n<text x=\"380\" y=\"419\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">Cost Mgmt Tags / BU</text>\n\n<!-- Hub Network ref -->\n<rect x=\"470\" y=\"390\" width=\"140\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"4,2\"/>\n<text x=\"540\" y=\"408\" text-anchor=\"middle\" font-size=\"10\" fill=\"#64748b\">Hub Network</text>\n<text x=\"540\" y=\"419\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">ExpressRoute/VPN</text>\n\n<!-- Internet ref -->\n<rect x=\"630\" y=\"390\" width=\"100\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"4,2\"/>\n<text x=\"680\" y=\"408\" text-anchor=\"middle\" font-size=\"10\" fill=\"#64748b\">Internet</text>\n<text x=\"680\" y=\"419\" text-anchor=\"middle\" font-size=\"9\" fill=\"#64748b\">External Clients</text>\n\n<!-- Arrows: Cloudflare to AppGW -->\n<line x1=\"130\" y1=\"82\" x2=\"168\" y2=\"82\" stroke=\"#BA7517\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n<!-- AppGW to NGINX -->\n<line x1=\"235\" y1=\"99\" x2=\"215\" y2=\"194\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<!-- NGINX to BU Pods -->\n<line x1=\"215\" y1=\"230\" x2=\"300\" y2=\"310\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n<!-- CNI to BU Pods -->\n<line x1=\"445\" y1=\"168\" x2=\"400\" y2=\"310\" stroke=\"#0F6E56\" stroke-width=\"1\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr2)\"/>\n<!-- BU Pods to Firewall egress -->\n<line x1=\"375\" y1=\"360\" x2=\"400\" y2=\"99\" stroke=\"#BA7517\" stroke-width=\"1\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr)\"/>\n<!-- ArgoCD to Cilium -->\n<line x1=\"275\" y1=\"265\" x2=\"293\" y2=\"215\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n<!-- Workload Identity to Key Vault -->\n<line x1=\"510\" y1=\"230\" x2=\"280\" y2=\"390\" stroke=\"#1B3A6B\" stroke-width=\"1\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr)\"/>\n<!-- Ratify to ACR -->\n<line x1=\"595\" y1=\"220\" x2=\"140\" y2=\"405\" stroke=\"#BA7517\" stroke-width=\"1\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr)\"/>\n<!-- Hub to AppGW -->\n<line x1=\"540\" y1=\"390\" x2=\"300\" y2=\"99\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"4,2\" marker-end=\"url(#arr)\"/>\n<!-- Internet to Cloudflare -->\n<line x1=\"680\" y1=\"390\" x2=\"80\" y2=\"99\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"4,2\" marker-end=\"url(#arr)\"/>\n\n<!-- Step labels -->\n<text x=\"135\" y=\"78\" font-size=\"8\" fill=\"#BA7517\">7</text>\n<text x=\"246\" y=\"152\" font-size=\"8\" fill=\"#1B3A6B\">3</text>\n<text x=\"248\" y=\"248\" font-size=\"8\" fill=\"#0F6E56\">5,6</text>\n<text x=\"280\" y=\"302\" font-size=\"8\" fill=\"#0F6E56\">6</text>\n<text x=\"403\" y=\"200\" font-size=\"8\" fill=\"#BA7517\">9</text>\n<text x=\"283\" y=\"258\" font-size=\"8\" fill=\"#0F6E56\">10</text>\n<text x=\"490\" y=\"310\" font-size=\"8\" fill=\"#1B3A6B\">4</text>\n<text x=\"350\" y=\"385\" font-size=\"8\" fill=\"#BA7517\">11</text>\n\n<!-- Legend -->\n<rect x=\"20\" y=\"456\" width=\"860\" height=\"28\" rx=\"6\" fill=\"white\" stroke=\"#e2e8f0\"/>\n<circle cx=\"40\" cy=\"470\" r=\"5\" fill=\"#1B3A6B\"/>\n<text x=\"50\" y=\"474\" font-size=\"9\" fill=\"#1e293b\">Core Platform</text>\n<circle cx=\"140\" cy=\"470\" r=\"5\" fill=\"#0F6E56\"/>\n<text x=\"150\" y=\"474\" font-size=\"9\" fill=\"#1e293b\">AKS Internal</text>\n<circle cx=\"240\" cy=\"470\" r=\"5\" fill=\"#BA7517\"/>\n<text x=\"250\" y=\"474\" font-size=\"9\" fill=\"#1e293b\">Security/Supply Chain</text>\n<line x1=\"370\" y1=\"470\" x2=\"400\" y2=\"470\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<text x=\"405\" y=\"474\" font-size=\"9\" fill=\"#1e293b\">Traffic Flow</text>\n<line x1=\"480\" y1=\"470\" x2=\"510\" y2=\"470\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr)\"/>\n<text x=\"515\" y=\"474\" font-size=\"9\" fill=\"#64748b\">External Ref</text>\n<text x=\"700\" y=\"474\" font-size=\"9\" fill=\"#64748b\">Tier 2 — Logical | Containers &amp; Kubernetes</text>\n</svg>",
+  "diagramSvg": null,
   "azureDesign": null,
-  "createdAt": "2026-03-13T19:04:34.464Z",
-  "updatedAt": "2026-03-14T22:18:08.246Z"
+  "createdAt": "2026-03-18T18:47:12.939Z",
+  "updatedAt": "2026-03-18T18:47:12.939Z"
 }
