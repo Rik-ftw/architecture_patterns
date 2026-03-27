@@ -1,6 +1,6 @@
 # Architecture Pattern Library
 
-> Auto-generated index — last synced 2026-03-16T20:17:22.023Z
+> Auto-generated index — last synced 2026-03-27T11:34:10.241Z
 
 ## Patterns
 
@@ -9,12 +9,13 @@
 | AP-001 | API Gateway Pattern | Application & Integration | Endorsed | [JSON](patterns/AP-001.json) · [SVG](patterns/AP-001.svg) |
 | AP-002 | Service Mesh for Microservices | Application & Integration | Endorsed | [JSON](patterns/AP-002.json) · [SVG](patterns/AP-002.svg) |
 | AP-003 | Backend-for-Frontend (BFF) | Application & Integration | Endorsed | [JSON](patterns/AP-003.json) |
-| AP-004 | Event-Driven Integration | Application & Integration | Endorsed | [JSON](patterns/AP-004.json) |
+| AP-004 | Event-Driven Integration | Application & Integration | Endorsed | [JSON](patterns/AP-004.json) · [SVG](patterns/AP-004.svg) |
 | AP-005 | Saga & Distributed Transaction | Application & Integration | Endorsed | [JSON](patterns/AP-005.json) |
 | AP-006 | Secure Integration Zones | Application & Integration | Endorsed | [JSON](patterns/AP-006.json) |
 | AP-007 | Adapter/Facade for Legacy Systems | Application & Integration | In Development | [JSON](patterns/AP-007.json) |
 | CK-001 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-001.json) · [SVG](patterns/CK-001.svg) |
-| CK-004 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-004.json) |
+| CK-001 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-001.json) · [SVG](patterns/CK-001.svg) |
+| CK-004 | McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes | Containers & Kubernetes | In Development | [JSON](patterns/CK-004.json) · [SVG](patterns/CK-004.svg) |
 | CP-001 | Azure Landing Zone Foundation | Cloud & Platform | In Development | [JSON](patterns/CP-001.json) · [SVG](patterns/CP-001.svg) |
 | DT-001 | Data Lake Architecture | Data & Storage | In Development | [JSON](patterns/DT-001.json) · [SVG](patterns/DT-001.svg) |
 | IN-001 | Enterprise Service Bus (Logical) | Application & Integration | Endorsed | [JSON](patterns/IN-001.json) |
