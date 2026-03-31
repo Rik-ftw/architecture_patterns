@@ -1,0 +1,413 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Architecture Intake Workflow API",
+    "version": "1.0.0",
+    "description": "RESTful API for the AI-enabled application and solution intake workflow system. Supports intake submission, AI triage, workflow state management, and review lifecycle."
+  },
+  "servers": [
+    { "url": "/api/v1", "description": "API v1 base path" }
+  ],
+  "paths": {
+    "/intake/requests": {
+      "post": {
+        "operationId": "createIntakeRequest",
+        "summary": "Submit a new intake request",
+        "tags": ["Intake"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IntakeRequestInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intake request created and queued for AI triage",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntakeRequestResponse" }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listIntakeRequests",
+        "summary": "List intake requests with filtering, sorting, and pagination",
+        "tags": ["Intake"],
+        "parameters": [
+          { "name": "status", "in": "query", "schema": { "type": "string" } },
+          { "name": "requestType", "in": "query", "schema": { "type": "string" } },
+          { "name": "priority", "in": "query", "schema": { "type": "string" } },
+          { "name": "domain", "in": "query", "schema": { "type": "string" } },
+          { "name": "assignee", "in": "query", "schema": { "type": "string" } },
+          { "name": "routingLane", "in": "query", "schema": { "type": "string" } },
+          { "name": "search", "in": "query", "schema": { "type": "string" }, "description": "Full-text search across title and description" },
+          { "name": "sortBy", "in": "query", "schema": { "type": "string", "enum": ["createdAt", "priority", "riskScore", "slaDeadline"] } },
+          { "name": "page", "in": "query", "schema": { "type": "integer", "default": 1 } },
+          { "name": "pageSize", "in": "query", "schema": { "type": "integer", "default": 25 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of intake requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": { "type": "array", "items": { "$ref": "#/components/schemas/IntakeRequestSummary" } },
+                    "pagination": { "$ref": "#/components/schemas/Pagination" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intake/requests/{requestId}": {
+      "get": {
+        "operationId": "getIntakeRequest",
+        "summary": "Get full intake request with workflow state and AI triage results",
+        "tags": ["Intake"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IntakeRequestFull" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateIntakeRequest",
+        "summary": "Update an intake request (only in draft or needs_info state)",
+        "tags": ["Intake"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/IntakeRequestInput" }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Request updated" }
+        }
+      }
+    },
+    "/intake/requests/{requestId}/submit": {
+      "post": {
+        "operationId": "submitIntakeRequest",
+        "summary": "Submit a draft request into the workflow pipeline",
+        "tags": ["Workflow"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": {
+            "description": "Request submitted and AI triage initiated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": { "type": "string" },
+                    "status": { "type": "string", "enum": ["submitted"] },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intake/requests/{requestId}/triage": {
+      "get": {
+        "operationId": "getTriageResult",
+        "summary": "Get AI triage results for a request",
+        "tags": ["AI Triage"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AiTriageResult" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/intake/requests/{requestId}/transition": {
+      "post": {
+        "operationId": "transitionWorkflow",
+        "summary": "Trigger a workflow state transition (triage approve, review decision, etc.)",
+        "tags": ["Workflow"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["event"],
+                "properties": {
+                  "event": { "type": "string", "description": "State machine event name (e.g., APPROVE_TRIAGE, REVIEW_APPROVED)" },
+                  "actor": { "type": "string" },
+                  "reason": { "type": "string" },
+                  "conditions": { "type": "array", "items": { "type": "string" } },
+                  "metadata": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transition completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "requestId": { "type": "string" },
+                    "previousState": { "type": "string" },
+                    "currentState": { "type": "string" },
+                    "availableEvents": { "type": "array", "items": { "type": "string" } }
+                  }
+                }
+              }
+            }
+          },
+          "409": { "description": "Invalid transition from current state" }
+        }
+      }
+    },
+    "/intake/requests/{requestId}/reviews": {
+      "get": {
+        "operationId": "listReviews",
+        "summary": "List all reviews for a request",
+        "tags": ["Reviews"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Review" } }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "submitReview",
+        "summary": "Submit a review decision",
+        "tags": ["Reviews"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReviewInput" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Review recorded and workflow advanced" }
+        }
+      }
+    },
+    "/intake/requests/{requestId}/comments": {
+      "get": {
+        "operationId": "listComments",
+        "summary": "List comments/discussion on a request",
+        "tags": ["Collaboration"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }]
+      },
+      "post": {
+        "operationId": "addComment",
+        "summary": "Add a comment to a request",
+        "tags": ["Collaboration"],
+        "parameters": [{ "name": "requestId", "in": "path", "required": true, "schema": { "type": "string" } }],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["body"],
+                "properties": {
+                  "body": { "type": "string" },
+                  "visibility": { "type": "string", "enum": ["public", "internal_reviewers"] }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/copilot/prefill": {
+      "post": {
+        "operationId": "aiCopilotPrefill",
+        "summary": "AI parses natural language input and returns structured form field suggestions",
+        "tags": ["AI Copilot"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["naturalLanguageInput"],
+                "properties": {
+                  "naturalLanguageInput": { "type": "string" },
+                  "currentFormData": { "type": "object" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Suggested field values extracted from natural language",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "suggestedFields": { "type": "object", "description": "Map of field IDs to suggested values" },
+                    "confidence": { "type": "number" },
+                    "explanation": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ai/copilot/chat": {
+      "post": {
+        "operationId": "aiCopilotChat",
+        "summary": "Conversational AI assistant for intake questions",
+        "tags": ["AI Copilot"],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["message"],
+                "properties": {
+                  "message": { "type": "string" },
+                  "context": { "type": "object", "description": "Current form state for contextual answers" },
+                  "conversationId": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/dashboard/metrics": {
+      "get": {
+        "operationId": "getDashboardMetrics",
+        "summary": "Aggregated metrics for the intake dashboard",
+        "tags": ["Dashboard"],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "totalRequests": { "type": "integer" },
+                    "byStatus": { "type": "object" },
+                    "byPriority": { "type": "object" },
+                    "byDomain": { "type": "object" },
+                    "byRoutingLane": { "type": "object" },
+                    "avgTimeToDecision": { "type": "object" },
+                    "slaBreaches": { "type": "integer" },
+                    "aiTriageAccuracy": { "type": "number" },
+                    "overrideRate": { "type": "number" },
+                    "topPatterns": { "type": "array" },
+                    "pendingReviews": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IntakeRequestInput": { "$ref": "./intake-request.schema.json" },
+      "IntakeRequestResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "message": { "type": "string" }
+        }
+      },
+      "IntakeRequestSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "requestType": { "type": "string" },
+          "priority": { "type": "string" },
+          "status": { "type": "string" },
+          "routingLane": { "type": "string" },
+          "riskLevel": { "type": "string" },
+          "assignee": { "type": "string" },
+          "requestor": { "type": "string" },
+          "domain": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "slaDeadline": { "type": "string", "format": "date-time" },
+          "slaBreached": { "type": "boolean" }
+        }
+      },
+      "IntakeRequestFull": {
+        "type": "object",
+        "description": "Complete request with intake data, workflow state, triage results, and review history"
+      },
+      "AiTriageResult": { "$ref": "./workflow-state.schema.json#/properties/aiTriageResult" },
+      "Review": {
+        "type": "object",
+        "properties": {
+          "reviewType": { "type": "string" },
+          "reviewer": { "type": "string" },
+          "status": { "type": "string" },
+          "decision": { "type": "string" },
+          "conditions": { "type": "array", "items": { "type": "string" } },
+          "comments": { "type": "string" },
+          "reviewedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "ReviewInput": {
+        "type": "object",
+        "required": ["reviewType", "decision"],
+        "properties": {
+          "reviewType": { "type": "string", "enum": ["architecture", "security", "vendor", "arb", "ccoe"] },
+          "decision": { "type": "string", "enum": ["approved", "rejected", "conditional", "deferred"] },
+          "conditions": { "type": "array", "items": { "type": "string" } },
+          "comments": { "type": "string" }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "pageSize": { "type": "integer" },
+          "totalItems": { "type": "integer" },
+          "totalPages": { "type": "integer" }
+        }
+      }
+    }
+  }
+}

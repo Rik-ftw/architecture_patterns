@@ -1,0 +1,220 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "intake-request.schema.json",
+  "title": "Application & Solution Intake Request",
+  "description": "Schema for submitting new application, solution, or architecture change requests into the intake pipeline.",
+  "type": "object",
+  "required": [
+    "requestType",
+    "title",
+    "description",
+    "businessJustification",
+    "requestor",
+    "priority",
+    "targetDomain"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^INT-[0-9]{6}$",
+      "description": "Auto-generated intake request ID (e.g., INT-000001)"
+    },
+    "requestType": {
+      "type": "string",
+      "enum": [
+        "new_application",
+        "solution_change",
+        "pattern_exception",
+        "vendor_onboarding",
+        "architecture_review",
+        "security_assessment",
+        "decommission",
+        "proof_of_concept"
+      ],
+      "description": "The type of intake request"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 200,
+      "description": "Short descriptive title for the request"
+    },
+    "description": {
+      "type": "string",
+      "minLength": 50,
+      "maxLength": 5000,
+      "description": "Detailed description of the application or solution being proposed"
+    },
+    "businessJustification": {
+      "type": "object",
+      "required": ["problemStatement", "expectedOutcome", "sponsorName"],
+      "properties": {
+        "problemStatement": {
+          "type": "string",
+          "minLength": 20,
+          "description": "What business problem does this solve?"
+        },
+        "expectedOutcome": {
+          "type": "string",
+          "description": "Expected business outcome and value"
+        },
+        "sponsorName": {
+          "type": "string",
+          "description": "Executive sponsor for this request"
+        },
+        "programme": {
+          "type": "string",
+          "description": "Associated programme or initiative"
+        },
+        "budgetCode": {
+          "type": ["string", "null"],
+          "description": "Budget or cost center code"
+        },
+        "estimatedCost": {
+          "type": "object",
+          "properties": {
+            "capitalEx": { "type": "number", "minimum": 0 },
+            "operatingEx": { "type": "number", "minimum": 0 },
+            "currency": { "type": "string", "default": "USD" }
+          }
+        }
+      }
+    },
+    "requestor": {
+      "type": "object",
+      "required": ["name", "email", "department", "role"],
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "department": { "type": "string" },
+        "role": { "type": "string" },
+        "phone": { "type": ["string", "null"] }
+      }
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Business priority of the request"
+    },
+    "targetDomain": {
+      "type": "string",
+      "enum": [
+        "application_integration",
+        "containers_kubernetes",
+        "cloud_platform",
+        "data_storage",
+        "network_connectivity",
+        "security_controls",
+        "ot_automation",
+        "identity_access",
+        "observability",
+        "cross_domain"
+      ],
+      "description": "Primary architecture domain this request falls under"
+    },
+    "technicalContext": {
+      "type": "object",
+      "properties": {
+        "currentState": {
+          "type": "string",
+          "description": "Description of the current technical landscape"
+        },
+        "proposedTechnologies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Technologies or products being proposed"
+        },
+        "integrationPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "system": { "type": "string" },
+              "direction": { "type": "string", "enum": ["inbound", "outbound", "bidirectional"] },
+              "protocol": { "type": "string" },
+              "dataClassification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] }
+            }
+          },
+          "description": "Systems this solution will integrate with"
+        },
+        "dataRequirements": {
+          "type": "object",
+          "properties": {
+            "dataClassification": { "type": "string", "enum": ["public", "internal", "confidential", "restricted"] },
+            "piiInvolved": { "type": "boolean" },
+            "dataResidency": { "type": "string" },
+            "retentionPeriod": { "type": "string" },
+            "volumeEstimate": { "type": "string" }
+          }
+        },
+        "hostingPreference": {
+          "type": "string",
+          "enum": ["azure_cloud", "on_premises", "hybrid", "saas", "multi_cloud", "undecided"]
+        },
+        "scalabilityRequirements": {
+          "type": "object",
+          "properties": {
+            "expectedUsers": { "type": "integer" },
+            "peakTransactionsPerSecond": { "type": "integer" },
+            "availabilitySLA": { "type": "string" },
+            "rpoMinutes": { "type": "integer" },
+            "rtoMinutes": { "type": "integer" }
+          }
+        },
+        "environmentsNeeded": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["dev", "test", "staging", "uat", "production", "dr"] }
+        }
+      }
+    },
+    "complianceContext": {
+      "type": "object",
+      "properties": {
+        "regulatoryRequirements": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Applicable regulations (GDPR, SOX, HIPAA, etc.)"
+        },
+        "internalPolicies": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Internal policies that apply"
+        },
+        "securityTier": {
+          "type": "string",
+          "enum": ["standard", "elevated", "critical"],
+          "description": "Required security posture tier"
+        }
+      }
+    },
+    "timeline": {
+      "type": "object",
+      "properties": {
+        "requestedStartDate": { "type": "string", "format": "date" },
+        "requestedGoLiveDate": { "type": "string", "format": "date" },
+        "hardDeadline": { "type": "boolean", "default": false },
+        "deadlineReason": { "type": ["string", "null"] }
+      }
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "filename": { "type": "string" },
+          "type": { "type": "string", "enum": ["architecture_diagram", "requirements_doc", "vendor_proposal", "cost_estimate", "security_assessment", "other"] },
+          "url": { "type": "string", "format": "uri" }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" },
+        "submittedVia": { "type": "string", "enum": ["portal", "api", "email", "teams", "servicenow"] },
+        "version": { "type": "integer", "default": 1 }
+      }
+    }
+  }
+}

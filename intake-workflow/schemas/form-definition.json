@@ -1,0 +1,390 @@
+{
+  "title": "Intake Request Form Definition",
+  "description": "Front-end-ready form definition with steps, field groups, validation rules, conditional logic, and AI copilot hooks. Designed for React/Next.js multi-step form rendering.",
+  "version": "1.0.0",
+  "formId": "intake-request-v1",
+
+  "steps": [
+    {
+      "id": "request_type",
+      "title": "What do you need?",
+      "subtitle": "Tell us what kind of request this is so we can route it correctly.",
+      "order": 1,
+      "aiAssist": {
+        "enabled": true,
+        "feature": "smart_start",
+        "description": "User can describe their need in natural language and AI pre-fills the form"
+      },
+      "fields": [
+        {
+          "id": "natural_language_input",
+          "type": "textarea",
+          "label": "Describe what you need in your own words (optional)",
+          "placeholder": "e.g., We need a new customer portal that integrates with our SAP system and stores PII data in Azure...",
+          "required": false,
+          "aiAssist": {
+            "feature": "form_prefill",
+            "description": "AI parses free-text and pre-fills subsequent fields with extracted values"
+          }
+        },
+        {
+          "id": "requestType",
+          "type": "radio_card",
+          "label": "Request Type",
+          "required": true,
+          "options": [
+            { "value": "new_application", "label": "New Application", "icon": "plus-circle", "description": "A brand new application or service" },
+            { "value": "solution_change", "label": "Solution Change", "icon": "edit", "description": "Modification to an existing application or solution" },
+            { "value": "pattern_exception", "label": "Pattern Exception", "icon": "alert-triangle", "description": "Request to deviate from an endorsed architecture pattern" },
+            { "value": "vendor_onboarding", "label": "Vendor Onboarding", "icon": "truck", "description": "Introduce a new vendor or technology product" },
+            { "value": "architecture_review", "label": "Architecture Review", "icon": "search", "description": "Request a review of a proposed architecture" },
+            { "value": "security_assessment", "label": "Security Assessment", "icon": "shield", "description": "Security review of a solution or vendor" },
+            { "value": "decommission", "label": "Decommission", "icon": "trash-2", "description": "Retire an existing application or service" },
+            { "value": "proof_of_concept", "label": "Proof of Concept", "icon": "beaker", "description": "Time-boxed PoC with controlled scope" }
+          ]
+        },
+        {
+          "id": "title",
+          "type": "text",
+          "label": "Request Title",
+          "placeholder": "Short, descriptive title for your request",
+          "required": true,
+          "validation": { "minLength": 10, "maxLength": 200 }
+        },
+        {
+          "id": "priority",
+          "type": "select",
+          "label": "Business Priority",
+          "required": true,
+          "options": [
+            { "value": "critical", "label": "Critical — Business-blocking, immediate attention needed" },
+            { "value": "high", "label": "High — Significant business impact, time-sensitive" },
+            { "value": "medium", "label": "Medium — Important but flexible timeline" },
+            { "value": "low", "label": "Low — Nice to have, no urgency" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "business_context",
+      "title": "Business Justification",
+      "subtitle": "Help us understand the business value and sponsorship.",
+      "order": 2,
+      "fields": [
+        {
+          "id": "description",
+          "type": "richtext",
+          "label": "Detailed Description",
+          "placeholder": "Describe the application or solution you're proposing...",
+          "required": true,
+          "validation": { "minLength": 50, "maxLength": 5000 },
+          "aiAssist": {
+            "feature": "writing_assist",
+            "description": "AI helps improve clarity and completeness of the description"
+          }
+        },
+        {
+          "id": "businessJustification.problemStatement",
+          "type": "textarea",
+          "label": "What business problem does this solve?",
+          "required": true,
+          "validation": { "minLength": 20 }
+        },
+        {
+          "id": "businessJustification.expectedOutcome",
+          "type": "textarea",
+          "label": "Expected Business Outcome",
+          "required": true
+        },
+        {
+          "id": "businessJustification.sponsorName",
+          "type": "text",
+          "label": "Executive Sponsor",
+          "required": true,
+          "aiAssist": { "feature": "org_lookup", "description": "Typeahead from organizational directory" }
+        },
+        {
+          "id": "businessJustification.programme",
+          "type": "text",
+          "label": "Programme / Initiative",
+          "required": false
+        },
+        {
+          "id": "businessJustification.budgetCode",
+          "type": "text",
+          "label": "Budget / Cost Center Code",
+          "required": false
+        },
+        {
+          "id": "businessJustification.estimatedCost",
+          "type": "cost_input",
+          "label": "Estimated Cost",
+          "required": false,
+          "subfields": [
+            { "id": "capitalEx", "label": "Capital Expenditure", "type": "currency" },
+            { "id": "operatingEx", "label": "Operating Expenditure (annual)", "type": "currency" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "technical_details",
+      "title": "Technical Context",
+      "subtitle": "Provide the technical details so we can match against architecture patterns.",
+      "order": 3,
+      "aiAssist": {
+        "enabled": true,
+        "feature": "pattern_suggestion",
+        "description": "As fields are completed, AI suggests relevant endorsed patterns in a sidebar"
+      },
+      "fields": [
+        {
+          "id": "targetDomain",
+          "type": "select",
+          "label": "Primary Architecture Domain",
+          "required": true,
+          "options": [
+            { "value": "application_integration", "label": "Application & Integration" },
+            { "value": "containers_kubernetes", "label": "Containers & Kubernetes" },
+            { "value": "cloud_platform", "label": "Cloud & Platform" },
+            { "value": "data_storage", "label": "Data & Storage" },
+            { "value": "network_connectivity", "label": "Network & Connectivity" },
+            { "value": "security_controls", "label": "Security & Controls" },
+            { "value": "ot_automation", "label": "OT & Automation" },
+            { "value": "identity_access", "label": "Identity & Access Management" },
+            { "value": "observability", "label": "Observability & Monitoring" },
+            { "value": "cross_domain", "label": "Cross-Domain / Multiple" }
+          ]
+        },
+        {
+          "id": "technicalContext.currentState",
+          "type": "textarea",
+          "label": "Current State Description",
+          "placeholder": "Describe the existing technical landscape this will change or replace...",
+          "required": false
+        },
+        {
+          "id": "technicalContext.proposedTechnologies",
+          "type": "tag_input",
+          "label": "Proposed Technologies / Products",
+          "placeholder": "Type to search approved vendors or add new...",
+          "required": false,
+          "aiAssist": {
+            "feature": "vendor_autocomplete",
+            "description": "Typeahead from vendor registry with approval status badges"
+          }
+        },
+        {
+          "id": "technicalContext.hostingPreference",
+          "type": "radio_card",
+          "label": "Hosting Preference",
+          "required": false,
+          "options": [
+            { "value": "azure_cloud", "label": "Azure Cloud", "icon": "cloud" },
+            { "value": "on_premises", "label": "On-Premises", "icon": "server" },
+            { "value": "hybrid", "label": "Hybrid", "icon": "git-merge" },
+            { "value": "saas", "label": "SaaS", "icon": "globe" },
+            { "value": "multi_cloud", "label": "Multi-Cloud", "icon": "clouds" },
+            { "value": "undecided", "label": "Undecided", "icon": "help-circle" }
+          ]
+        },
+        {
+          "id": "technicalContext.integrationPoints",
+          "type": "repeater",
+          "label": "Integration Points",
+          "description": "Systems this solution will integrate with",
+          "required": false,
+          "subfields": [
+            { "id": "system", "type": "text", "label": "System Name", "required": true },
+            { "id": "direction", "type": "select", "label": "Direction", "options": ["inbound", "outbound", "bidirectional"] },
+            { "id": "protocol", "type": "text", "label": "Protocol (REST, GraphQL, SFTP, etc.)" },
+            { "id": "dataClassification", "type": "select", "label": "Data Classification", "options": ["public", "internal", "confidential", "restricted"] }
+          ]
+        },
+        {
+          "id": "technicalContext.environmentsNeeded",
+          "type": "checkbox_group",
+          "label": "Environments Needed",
+          "options": [
+            { "value": "dev", "label": "Development" },
+            { "value": "test", "label": "Test" },
+            { "value": "staging", "label": "Staging" },
+            { "value": "uat", "label": "UAT" },
+            { "value": "production", "label": "Production" },
+            { "value": "dr", "label": "Disaster Recovery" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "data_and_compliance",
+      "title": "Data & Compliance",
+      "subtitle": "Help us assess security and regulatory requirements.",
+      "order": 4,
+      "conditionalDisplay": {
+        "hideIf": "requestType == 'decommission'"
+      },
+      "fields": [
+        {
+          "id": "technicalContext.dataRequirements.dataClassification",
+          "type": "select",
+          "label": "Highest Data Classification",
+          "required": true,
+          "options": [
+            { "value": "public", "label": "Public — No restrictions" },
+            { "value": "internal", "label": "Internal — Company use only" },
+            { "value": "confidential", "label": "Confidential — Need-to-know basis" },
+            { "value": "restricted", "label": "Restricted — Highest sensitivity (PII, financial)" }
+          ]
+        },
+        {
+          "id": "technicalContext.dataRequirements.piiInvolved",
+          "type": "toggle",
+          "label": "Does this solution process Personally Identifiable Information (PII)?",
+          "required": true
+        },
+        {
+          "id": "technicalContext.dataRequirements.dataResidency",
+          "type": "text",
+          "label": "Data Residency Requirements",
+          "placeholder": "e.g., Must remain in Canada / EU...",
+          "conditionalDisplay": {
+            "showIf": "technicalContext.dataRequirements.dataClassification in ['confidential', 'restricted']"
+          }
+        },
+        {
+          "id": "complianceContext.regulatoryRequirements",
+          "type": "checkbox_group",
+          "label": "Applicable Regulations",
+          "options": [
+            { "value": "GDPR", "label": "GDPR (EU Data Protection)" },
+            { "value": "SOX", "label": "SOX (Sarbanes-Oxley)" },
+            { "value": "PIPEDA", "label": "PIPEDA (Canadian Privacy)" },
+            { "value": "HIPAA", "label": "HIPAA (Health Information)" },
+            { "value": "PCI_DSS", "label": "PCI-DSS (Payment Card)" },
+            { "value": "ISO27001", "label": "ISO 27001" },
+            { "value": "NIST", "label": "NIST Framework" },
+            { "value": "OTHER", "label": "Other (specify below)" }
+          ]
+        },
+        {
+          "id": "complianceContext.securityTier",
+          "type": "radio",
+          "label": "Required Security Posture",
+          "required": false,
+          "options": [
+            { "value": "standard", "label": "Standard — Default security controls" },
+            { "value": "elevated", "label": "Elevated — Additional controls required" },
+            { "value": "critical", "label": "Critical — Maximum security posture" }
+          ],
+          "aiAssist": {
+            "feature": "auto_suggest",
+            "description": "AI suggests tier based on data classification, PII, and regulations selected"
+          }
+        }
+      ]
+    },
+    {
+      "id": "scalability_timeline",
+      "title": "Scale & Timeline",
+      "subtitle": "Help us understand performance needs and delivery expectations.",
+      "order": 5,
+      "fields": [
+        {
+          "id": "technicalContext.scalabilityRequirements.expectedUsers",
+          "type": "number",
+          "label": "Expected Number of Users",
+          "required": false
+        },
+        {
+          "id": "technicalContext.scalabilityRequirements.availabilitySLA",
+          "type": "select",
+          "label": "Availability SLA Required",
+          "options": [
+            { "value": "99", "label": "99% (~3.65 days downtime/year)" },
+            { "value": "99.9", "label": "99.9% (~8.7 hours downtime/year)" },
+            { "value": "99.95", "label": "99.95% (~4.4 hours downtime/year)" },
+            { "value": "99.99", "label": "99.99% (~52 minutes downtime/year)" }
+          ]
+        },
+        {
+          "id": "timeline.requestedStartDate",
+          "type": "date",
+          "label": "Requested Start Date",
+          "required": false
+        },
+        {
+          "id": "timeline.requestedGoLiveDate",
+          "type": "date",
+          "label": "Target Go-Live Date",
+          "required": false
+        },
+        {
+          "id": "timeline.hardDeadline",
+          "type": "toggle",
+          "label": "Is this a hard deadline?",
+          "required": false
+        },
+        {
+          "id": "timeline.deadlineReason",
+          "type": "text",
+          "label": "Deadline Reason",
+          "conditionalDisplay": { "showIf": "timeline.hardDeadline == true" }
+        }
+      ]
+    },
+    {
+      "id": "attachments_review",
+      "title": "Attachments & Review",
+      "subtitle": "Add supporting documents and review your submission.",
+      "order": 6,
+      "fields": [
+        {
+          "id": "attachments",
+          "type": "file_upload",
+          "label": "Supporting Documents",
+          "required": false,
+          "accept": [".pdf", ".docx", ".pptx", ".xlsx", ".png", ".jpg", ".svg", ".drawio", ".vsdx"],
+          "maxFiles": 10,
+          "maxSizeMB": 25,
+          "categories": [
+            "architecture_diagram",
+            "requirements_doc",
+            "vendor_proposal",
+            "cost_estimate",
+            "security_assessment",
+            "other"
+          ]
+        },
+        {
+          "id": "submission_summary",
+          "type": "review_panel",
+          "label": "Review Your Submission",
+          "description": "AI-generated summary of your request before submission",
+          "aiAssist": {
+            "feature": "pre_submit_summary",
+            "description": "AI generates a plain-English summary of the request and flags potential issues before submission"
+          }
+        }
+      ]
+    }
+  ],
+
+  "globalAiFeatures": {
+    "copilot_chat": {
+      "enabled": true,
+      "description": "Persistent AI chat assistant available throughout the form to answer questions about patterns, vendors, and requirements",
+      "position": "right_sidebar"
+    },
+    "similar_request_lookup": {
+      "enabled": true,
+      "description": "As the user types, show similar past requests and their outcomes",
+      "trigger": "after_step_2"
+    },
+    "real_time_pattern_matching": {
+      "enabled": true,
+      "description": "Live pattern matching sidebar that updates as technical details are entered",
+      "trigger": "during_step_3"
+    }
+  }
+}
