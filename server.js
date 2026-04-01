@@ -1,6 +1,8 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { pool } = require('./db');
+const { getVendors } = require('./configCache');
 
 const app = express();
 const PORT = 5000;
@@ -35,13 +37,19 @@ app.get('/api/patterns/:file', (req, res) => {
   }
 });
 
-app.get('/api/vendors', (req, res) => {
-  const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'vendors', 'registry.json'), 'utf8'));
-  const sanitized = data.map(v => {
-    const { sslCache, ...rest } = v;
-    return rest;
-  });
-  res.json(sanitized);
+app.get('/api/vendors', async (req, res) => {
+  try {
+    const vendors = await getVendors();
+    res.json(vendors);
+  } catch (err) {
+    console.error('Vendors API error:', err);
+    try {
+      const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'vendors', 'registry.json'), 'utf8'));
+      res.json(data);
+    } catch {
+      res.status(500).json({ error: 'Failed to load vendors' });
+    }
+  }
 });
 
 app.use('/api/intake', require('./routes/intake'));
@@ -51,6 +59,11 @@ app.use('/api/ai', require('./routes/aiReview'));
 app.use('/api/github', require('./routes/github'));
 app.use('/api/operational-support', require('./routes/operationalSupport'));
 app.use('/api/risk', require('./routes/riskEnrichment'));
+app.use('/api/admin', require('./routes/admin'));
+
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`EA Platform running on http://0.0.0.0:${PORT}`);

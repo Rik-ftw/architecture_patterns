@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Anthropic = require('@anthropic-ai/sdk');
-const { db } = require('../db');
+const { pool, parseJson } = require('../db');
+const { getVendors, getSystemConfig, getPolicies } = require('../configCache');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -123,15 +124,17 @@ function loadPatterns() {
   }).filter(Boolean);
 }
 
-function loadVendors() {
-  try { return JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vendors', 'registry.json'), 'utf8')); } catch { return []; }
+function buildPolicySummary(policies) {
+  if (!policies || !policies.length) return '  No active policies configured.';
+  return policies.map(p => {
+    const rules = Array.isArray(p.rules) ? p.rules : (typeof p.rules === 'string' ? JSON.parse(p.rules) : []);
+    const critical = rules.filter(r => r.severity === 'Critical').map(r => r.id);
+    const high = rules.filter(r => r.severity === 'High').map(r => r.id);
+    return `  - **${p.name}** (${p.source || p.category}, v${p.version || 'N/A'}): ${rules.length} controls. Critical: ${critical.join(', ') || 'none'}. High: ${high.slice(0,5).join(', ')}${high.length > 5 ? '…' : ''}`;
+  }).join('\n');
 }
 
-function parseJson(val, fallback) {
-  try { return JSON.parse(val); } catch { return fallback; }
-}
-
-function buildReviewPrompt(intake, patterns, allVendors) {
+function buildReviewPrompt(intake, patterns, allVendors, activePolicies) {
   const relatedPatterns = patterns.filter(p => (intake.relatedPatternIds || []).includes(p.patternId));
   const endorsedPatterns = patterns.filter(p => p.status === 'Endorsed');
   const selectedVendors = allVendors.filter(v => (intake.vendorIds || []).map(Number).includes(v.id));
@@ -218,6 +221,12 @@ ${relatedPatternDetails}
 ${patternCatalogSummary}
 
 ---
+## ACTIVE COMPLIANCE POLICIES & STANDARDS:
+${buildPolicySummary(activePolicies)}
+
+These policies are mandatory or strongly recommended for all McCain architecture solutions. For each relevant policy above, assess whether the submitted architecture complies, partially complies, or has gaps. Call out specific control IDs where there are clear gaps.
+
+---
 ## AUTOMATED RISK ASSESSMENT RESULT
 
 - Total Risk Score: ${intake.risk_score || 'Not calculated'}/100
@@ -259,6 +268,9 @@ Respond ONLY with a valid JSON object (no markdown, no prose outside the JSON) m
     { "priority": "Consider", "action": "<optional improvement>" }
   ],
   "architectureNotes": "<longer-form architecture narrative, 3-5 sentences with specific Azure service suggestions or design guidance relevant to the request>",
+  "policyCompliance": [
+    { "policy": "<policy name e.g. Zero Trust Architecture>", "status": "Compliant" | "Partial" | "Non-Compliant" | "Not Assessed", "gaps": ["<specific control ID and gap description>"], "notes": "<brief assessment>" }
+  ],
   "reviewComplexity": "Standard" | "Elevated" | "Complex" | "Board-level",
   "estimatedReviewEffort": "<e.g. 2-4 hours, 1-2 days, 1 week>"
 }`;
@@ -290,72 +302,6 @@ Respond with ONLY a JSON object:
   "oneThingToFix": "<the single most important thing to address before submitting>"
 }`;
 }
-
-router.post('/review/:id', async (req, res) => {
-  try {
-    const row = db.prepare('SELECT * FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-    if (!row) return res.status(404).json({ error: 'Intake not found' });
-
-    const intake = {
-      ...row,
-      relatedPatternIds: parseJson(row.related_pattern_ids, []),
-      vendorIds: parseJson(row.vendor_ids, []),
-      newVendors: parseJson(row.new_vendors, []),
-      dataTypes: parseJson(row.data_types, []),
-      authMethods: parseJson(row.auth_methods, []),
-      components: parseJson(row.components, []),
-      complianceRequirements: parseJson(row.compliance_requirements, []),
-      riskBreakdown: parseJson(row.risk_breakdown, {}),
-      riskFlags: parseJson(row.risk_flags, []),
-    };
-
-    const patterns = loadPatterns();
-    const vendors = loadVendors();
-    const client = new Anthropic();
-
-    const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 4096,
-      messages: [{ role: 'user', content: buildReviewPrompt(intake, patterns, vendors) }]
-    });
-
-    let reviewText = message.content[0].text.trim();
-    if (reviewText.startsWith('```')) reviewText = reviewText.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    const review = JSON.parse(reviewText);
-    review.generatedAt = new Date().toISOString();
-    review.model = 'claude-sonnet-4-5';
-
-    db.prepare(`UPDATE intake_requests SET ai_review=?, updated_at=datetime('now') WHERE id=?`)
-      .run(JSON.stringify(review), row.id);
-
-    res.json({ review });
-  } catch (err) {
-    console.error('AI review error:', err);
-    res.status(500).json({ error: err.message || 'AI review failed' });
-  }
-});
-
-router.post('/quick-assess', async (req, res) => {
-  try {
-    const intake = req.body;
-    const patterns = loadPatterns();
-    const client = new Anthropic();
-
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5',
-      max_tokens: 512,
-      messages: [{ role: 'user', content: buildQuickAssessPrompt(intake, patterns) }]
-    });
-
-    let text = message.content[0].text.trim();
-    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    const result = JSON.parse(text);
-    res.json(result);
-  } catch (err) {
-    console.error('Quick assess error:', err);
-    res.status(500).json({ error: err.message || 'Quick assessment failed' });
-  }
-});
 
 function buildDiagramPrompt(intake, patterns, allVendors) {
   const selectedVendors = allVendors.filter(v => (intake.vendorIds || []).map(Number).includes(v.id));
@@ -423,10 +369,93 @@ Respond with ONLY a valid JSON object — no markdown, no code fences, no explan
 }`;
 }
 
+async function getAnthropicClient() {
+  const config = await getSystemConfig().catch(() => ({}));
+  return new Anthropic();
+}
+
+router.post('/review/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
+    const row = result.rows[0];
+
+    const intake = {
+      ...row,
+      relatedPatternIds: parseJson(row.related_pattern_ids, []),
+      vendorIds: parseJson(row.vendor_ids, []),
+      newVendors: parseJson(row.new_vendors, []),
+      dataTypes: parseJson(row.data_types, []),
+      authMethods: parseJson(row.auth_methods, []),
+      components: parseJson(row.components, []),
+      complianceRequirements: parseJson(row.compliance_requirements, []),
+      riskBreakdown: parseJson(row.risk_breakdown, {}),
+      riskFlags: parseJson(row.risk_flags, []),
+    };
+
+    const [patterns, vendors, config, policies] = await Promise.all([
+      Promise.resolve(loadPatterns()),
+      getVendors(),
+      getSystemConfig().catch(() => ({})),
+      getPolicies().catch(() => [])
+    ]);
+
+    const client = new Anthropic();
+    const model = config.ai_model_review || 'claude-sonnet-4-5';
+    const maxTokens = parseInt(config.ai_max_tokens_review || '4096');
+
+    const message = await client.messages.create({
+      model,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: buildReviewPrompt(intake, patterns, vendors, policies) }]
+    });
+
+    let reviewText = message.content[0].text.trim();
+    if (reviewText.startsWith('```')) reviewText = reviewText.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+    const review = JSON.parse(reviewText);
+    review.generatedAt = new Date().toISOString();
+    review.model = model;
+
+    await pool.query(`UPDATE intake_requests SET ai_review=$1, updated_at=NOW() WHERE id=$2`,
+      [JSON.stringify(review), row.id]);
+
+    res.json({ review });
+  } catch (err) {
+    console.error('AI review error:', err);
+    res.status(500).json({ error: err.message || 'AI review failed' });
+  }
+});
+
+router.post('/quick-assess', async (req, res) => {
+  try {
+    const intake = req.body;
+    const patterns = loadPatterns();
+    const config = await getSystemConfig().catch(() => ({}));
+    const client = new Anthropic();
+    const model = config.ai_model_quick_assess || 'claude-haiku-4-5';
+    const maxTokens = parseInt(config.ai_max_tokens_quick || '512');
+
+    const message = await client.messages.create({
+      model,
+      max_tokens: maxTokens,
+      messages: [{ role: 'user', content: buildQuickAssessPrompt(intake, patterns) }]
+    });
+
+    let text = message.content[0].text.trim();
+    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+    const result = JSON.parse(text);
+    res.json(result);
+  } catch (err) {
+    console.error('Quick assess error:', err);
+    res.status(500).json({ error: err.message || 'Quick assessment failed' });
+  }
+});
+
 router.post('/diagram/:id', async (req, res) => {
   try {
-    const row = db.prepare('SELECT * FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-    if (!row) return res.status(404).json({ error: 'Intake not found' });
+    const result = await pool.query('SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
+    const row = result.rows[0];
 
     const intake = {
       ...row,
@@ -438,13 +467,19 @@ router.post('/diagram/:id', async (req, res) => {
       components: parseJson(row.components, []),
     };
 
-    const patterns = loadPatterns();
-    const vendors = loadVendors();
+    const [patterns, vendors, config] = await Promise.all([
+      Promise.resolve(loadPatterns()),
+      getVendors(),
+      getSystemConfig().catch(() => ({}))
+    ]);
+
     const client = new Anthropic();
+    const model = config.ai_model_diagram || 'claude-sonnet-4-5';
+    const maxTokens = parseInt(config.ai_max_tokens_diagram || '2048');
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 2048,
+      model,
+      max_tokens: maxTokens,
       messages: [{ role: 'user', content: buildDiagramPrompt(intake, patterns, vendors) }]
     });
 
@@ -452,10 +487,10 @@ router.post('/diagram/:id', async (req, res) => {
     if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
     const diagram = JSON.parse(text);
     diagram.generatedAt = new Date().toISOString();
-    diagram.model = 'claude-sonnet-4-5';
+    diagram.model = model;
 
-    db.prepare(`UPDATE intake_requests SET ai_diagram=?, updated_at=datetime('now') WHERE id=?`)
-      .run(JSON.stringify(diagram), row.id);
+    await pool.query(`UPDATE intake_requests SET ai_diagram=$1, updated_at=NOW() WHERE id=$2`,
+      [JSON.stringify(diagram), row.id]);
 
     res.json({ diagram });
   } catch (err) {
@@ -464,20 +499,30 @@ router.post('/diagram/:id', async (req, res) => {
   }
 });
 
-router.get('/diagram/:id', (req, res) => {
-  const row = db.prepare('SELECT ai_diagram FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-  if (!row) return res.status(404).json({ error: 'Not found' });
-  const diagram = parseJson(row.ai_diagram, null);
-  if (!diagram) return res.status(404).json({ error: 'No diagram generated yet' });
-  res.json({ diagram });
+router.get('/diagram/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT ai_diagram FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
+    const diagram = parseJson(result.rows[0].ai_diagram, null);
+    if (!diagram) return res.status(404).json({ error: 'No diagram generated yet' });
+    res.json({ diagram });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/review/:id', (req, res) => {
-  const row = db.prepare('SELECT ai_review FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-  if (!row) return res.status(404).json({ error: 'Not found' });
-  const review = parseJson(row.ai_review, null);
-  if (!review) return res.status(404).json({ error: 'No AI review generated yet' });
-  res.json({ review });
+router.get('/review/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT ai_review FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
+    const review = parseJson(result.rows[0].ai_review, null);
+    if (!review) return res.status(404).json({ error: 'No AI review generated yet' });
+    res.json({ review });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 function multerErrorHandler(err, req, res, next) {
@@ -521,10 +566,12 @@ router.post('/parse-documents', (req, res, next) => {
     }
 
     const combinedText = textParts.join('\n\n');
+    const config = await getSystemConfig().catch(() => ({}));
     const client = new Anthropic();
+    const model = config.ai_model_review || 'claude-sonnet-4-5';
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-5',
+      model,
       max_tokens: 2048,
       messages: [{ role: 'user', content: buildDocumentExtractionPrompt(combinedText) }]
     });

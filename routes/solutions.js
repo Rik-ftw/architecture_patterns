@@ -1,12 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { db, generateSolutionRefId } = require('../db');
+const { pool, parseJson, generateSolutionRefId } = require('../db');
 const fs = require('fs');
 const path = require('path');
-
-function parseJson(val, fallback) {
-  try { return JSON.parse(val); } catch { return fallback; }
-}
 
 function loadPatterns() {
   const dir = path.join(__dirname, '..', 'patterns');
@@ -26,61 +22,84 @@ function serialize(row) {
   };
 }
 
-router.get('/', (req, res) => {
-  const rows = db.prepare('SELECT * FROM solution_designs ORDER BY created_at DESC').all();
-  res.json(rows.map(serialize));
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM solution_designs ORDER BY created_at DESC');
+    res.json(result.rows.map(serialize));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.get('/:id', (req, res) => {
-  const row = db.prepare('SELECT * FROM solution_designs WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-  if (!row) return res.status(404).json({ error: 'Not found' });
-  const patterns = loadPatterns();
-  const parsed = serialize(row);
-  parsed.patterns = patterns.filter(p => parsed.patternIds.includes(p.patternId));
-  res.json(parsed);
+router.get('/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
+    const patterns = loadPatterns();
+    const parsed = serialize(result.rows[0]);
+    parsed.patterns = patterns.filter(p => parsed.patternIds.includes(p.patternId));
+    res.json(parsed);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', (req, res) => {
-  const d = req.body;
-  const refId = generateSolutionRefId();
-  const result = db.prepare(`INSERT INTO solution_designs
-    (reference_id, title, description, business_context, pattern_ids, vendor_ids, deployment_regions, estimated_cost_band, complexity, owner, business_unit, status)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`).run(
-    refId, d.title, d.description, d.businessContext,
-    JSON.stringify(d.patternIds || []),
-    JSON.stringify(d.vendorIds || []),
-    JSON.stringify(d.deploymentRegions || []),
-    d.estimatedCostBand, d.complexity, d.owner, d.businessUnit,
-    d.status || 'Draft'
-  );
-  const row = db.prepare('SELECT * FROM solution_designs WHERE id=?').get(result.lastInsertRowid);
-  res.status(201).json(serialize(row));
+router.post('/', async (req, res) => {
+  try {
+    const d = req.body;
+    const refId = await generateSolutionRefId();
+    const result = await pool.query(`INSERT INTO solution_designs
+      (reference_id, title, description, business_context, pattern_ids, vendor_ids, deployment_regions, estimated_cost_band, complexity, owner, business_unit, status)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+      [refId, d.title, d.description, d.businessContext,
+       JSON.stringify(d.patternIds || []), JSON.stringify(d.vendorIds || []),
+       JSON.stringify(d.deploymentRegions || []),
+       d.estimatedCostBand, d.complexity, d.owner, d.businessUnit, d.status || 'Draft']
+    );
+    res.status(201).json(serialize(result.rows[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.patch('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM solution_designs WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Not found' });
-  const d = req.body;
-  const merged = { ...serialize(existing), ...d };
-  db.prepare(`UPDATE solution_designs SET title=?, description=?, business_context=?, pattern_ids=?, vendor_ids=?,
-    deployment_regions=?, estimated_cost_band=?, complexity=?, owner=?, business_unit=?, status=?, updated_at=datetime('now')
-    WHERE id=?`).run(
-    merged.title, merged.description, merged.businessContext || merged.business_context,
-    JSON.stringify(merged.patternIds || []), JSON.stringify(merged.vendorIds || []),
-    JSON.stringify(merged.deploymentRegions || []),
-    merged.estimatedCostBand || merged.estimated_cost_band,
-    merged.complexity, merged.owner, merged.businessUnit || merged.business_unit,
-    merged.status, existing.id
-  );
-  const row = db.prepare('SELECT * FROM solution_designs WHERE id=?').get(existing.id);
-  res.json(serialize(row));
+router.patch('/:id', async (req, res) => {
+  try {
+    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
+    const existing = serialize(existingResult.rows[0]);
+    const d = req.body;
+    const merged = { ...existing, ...d };
+    await pool.query(`UPDATE solution_designs SET title=$1, description=$2, business_context=$3, pattern_ids=$4, vendor_ids=$5,
+      deployment_regions=$6, estimated_cost_band=$7, complexity=$8, owner=$9, business_unit=$10, status=$11, updated_at=NOW()
+      WHERE id=$12`,
+      [merged.title, merged.description, merged.businessContext || merged.business_context,
+       JSON.stringify(merged.patternIds || []), JSON.stringify(merged.vendorIds || []),
+       JSON.stringify(merged.deploymentRegions || []),
+       merged.estimatedCostBand || merged.estimated_cost_band,
+       merged.complexity, merged.owner, merged.businessUnit || merged.business_unit,
+       merged.status, existing.id]
+    );
+    const updated = await pool.query('SELECT * FROM solution_designs WHERE id=$1', [existing.id]);
+    res.json(serialize(updated.rows[0]));
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.delete('/:id', (req, res) => {
-  const existing = db.prepare('SELECT * FROM solution_designs WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
-  if (!existing) return res.status(404).json({ error: 'Not found' });
-  db.prepare('DELETE FROM solution_designs WHERE id=?').run(existing.id);
-  res.json({ success: true });
+router.delete('/:id', async (req, res) => {
+  try {
+    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
+    await pool.query('DELETE FROM solution_designs WHERE id=$1', [existingResult.rows[0].id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
