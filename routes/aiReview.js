@@ -4,6 +4,117 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { db } = require('../db');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const multer = require('multer');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+const AdmZip = require('adm-zip');
+
+const ACCEPTED_CODE_EXTS = new Set([
+  '.js', '.ts', '.jsx', '.tsx', '.py', '.java', '.cs', '.go', '.rb', '.php',
+  '.yaml', '.yml', '.json', '.xml', '.toml', '.ini', '.env', '.sh', '.bash',
+  '.tf', '.hcl', '.md', '.txt', '.csv', '.sql', '.html', '.css', '.dockerfile'
+]);
+
+const MAX_EXTRACT_CHARS = 120000;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 20 * 1024 * 1024, files: 10 },
+  fileFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const allowed = new Set(['.pdf', '.docx', '.txt', '.zip', ...ACCEPTED_CODE_EXTS]);
+    if (allowed.has(ext)) return cb(null, true);
+    cb(new Error(`Unsupported file type: ${ext}`));
+  }
+});
+
+async function extractTextFromBuffer(filename, buffer) {
+  const ext = path.extname(filename).toLowerCase();
+  if (ext === '.pdf') {
+    try { const d = await pdfParse(buffer); return d.text || ''; } catch { return ''; }
+  }
+  if (ext === '.docx') {
+    try { const r = await mammoth.extractRawText({ buffer }); return r.value || ''; } catch { return ''; }
+  }
+  if (ext === '.zip') {
+    try {
+      const zip = new AdmZip(buffer);
+      const entries = zip.getEntries();
+      const texts = [];
+      let totalExtractedBytes = 0;
+      const MAX_ZIP_ENTRIES = 200;
+      const MAX_ZIP_EXTRACTED_BYTES = 10 * 1024 * 1024;
+      let processed = 0;
+      for (const entry of entries) {
+        if (entry.isDirectory) continue;
+        if (processed >= MAX_ZIP_ENTRIES) break;
+        const entryExt = path.extname(entry.entryName).toLowerCase();
+        if (ACCEPTED_CODE_EXTS.has(entryExt) || entryExt === '.txt') {
+          try {
+            const entryData = entry.getData();
+            totalExtractedBytes += entryData.length;
+            if (totalExtractedBytes > MAX_ZIP_EXTRACTED_BYTES) break;
+            const content = entryData.toString('utf8');
+            texts.push(`--- ${entry.entryName} ---\n${content}`);
+            processed++;
+          } catch { }
+        }
+      }
+      return texts.join('\n\n');
+    } catch { return ''; }
+  }
+  if (ACCEPTED_CODE_EXTS.has(ext) || ext === '.txt') {
+    try { return buffer.toString('utf8'); } catch { return ''; }
+  }
+  return '';
+}
+
+function buildDocumentExtractionPrompt(combinedText) {
+  const truncated = combinedText.length > MAX_EXTRACT_CHARS
+    ? combinedText.slice(0, MAX_EXTRACT_CHARS) + '\n[... content truncated for context limit ...]'
+    : combinedText;
+
+  return `You are a Senior Enterprise Architect at McCain Foods. A user has uploaded one or more documents (code, PDF, DOCX, text files) related to an architecture project they want to submit for review. Your job is to read the extracted document text and identify architecture-relevant information to pre-fill an intake form.
+
+Extract as much relevant information as possible from the text below. If a field cannot be determined, return null or an empty array for that field — do NOT guess or invent values. Be concise and factual.
+
+EXTRACTED DOCUMENT TEXT:
+---
+${truncated}
+---
+
+Respond ONLY with a valid JSON object matching this exact schema. No markdown, no prose outside the JSON:
+
+{
+  "title": "<concise project/request title, max 80 chars, or null>",
+  "description": "<what the project does and why — 2-5 sentences, or null>",
+  "strategicObjective": "<how it aligns to business/strategic goals, or null>",
+  "architectureType": "<one of: API & Integration | Data Platform | Infrastructure & Cloud | Security & Identity | Application Modernisation | OT / IoT | Network & Connectivity | Other — or null>",
+  "hostingModel": "<one of: Public Cloud (Azure) | Public Cloud (AWS) | Private Cloud | On-Premises | Hybrid | SaaS | PaaS — or null>",
+  "deploymentTarget": "<one of: Production | Non-Production | Both | DR — or null>",
+  "components": ["<component name>"],
+  "dataClassification": "<one of: Public | Internal | Confidential | Restricted — or null>",
+  "dataTypes": ["<one or more of: PII | PHI | Financial | OT/SCADA Data | Credentials/Secrets | Operational Metrics | Configuration Data | Log Data | None>"],
+  "authMethods": ["<one or more of: OAuth2/OIDC | SAML | API Key | Certificate/mTLS | Windows Integrated (Kerberos) | None>"],
+  "encryptionAtRest": <true | false | null>,
+  "encryptionInTransit": <true | false | null>,
+  "hasMfa": <true | false | null>,
+  "hasWaf": <true | false | null>,
+  "hasMonitoring": <true | false | null>,
+  "isZeroTrustAligned": <true | false | null>,
+  "isPublicFacing": <true | false | null>,
+  "integrationPoints": <integer or null>,
+  "newVendors": ["<unvetted vendor or SaaS product names found in documents>"],
+  "complianceRequirements": ["<one or more of: GDPR | SOX | ISO 27001 | IEC 62443 | HIPAA | PCI-DSS | NIST CSF | None>"],
+  "hasLegacyDependencies": <true | false | null>,
+  "legacySystems": "<description of legacy systems if present, or null>",
+  "techStackNotes": "<additional technology stack notes, or null>",
+  "programmeDomain": "<programme or business domain if identifiable, or null>",
+  "businessUnit": "<business unit or team if identifiable, or null>",
+  "projectTimeline": "<one of: Immediate (< 4 weeks) | Short-term (1-3 months) | Medium-term (3-6 months) | Long-term (6-12 months) | Strategic (12+ months) — or null>"
+}`;
+}
 
 function loadPatterns() {
   const dir = path.join(__dirname, '..', 'patterns');
@@ -356,6 +467,66 @@ router.get('/review/:id', (req, res) => {
   const review = parseJson(row.ai_review, null);
   if (!review) return res.status(404).json({ error: 'No AI review generated yet' });
   res.json({ review });
+});
+
+function multerErrorHandler(err, req, res, next) {
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ error: 'One or more files exceed the 20 MB size limit.' });
+  }
+  if (err && err.code === 'LIMIT_FILE_COUNT') {
+    return res.status(400).json({ error: 'Too many files — maximum 10 files per upload.' });
+  }
+  if (err && err.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ error: 'Unexpected upload field.' });
+  }
+  if (err) {
+    return res.status(400).json({ error: err.message || 'File upload error.' });
+  }
+  next();
+}
+
+router.post('/parse-documents', (req, res, next) => {
+  upload.array('files', 10)(req, res, err => {
+    if (err) return multerErrorHandler(err, req, res, next);
+    next();
+  });
+}, async (req, res) => {
+  try {
+    const files = req.files;
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded.' });
+    }
+
+    const textParts = [];
+    for (const file of files) {
+      const text = await extractTextFromBuffer(file.originalname, file.buffer);
+      if (text && text.trim()) {
+        textParts.push(`=== FILE: ${file.originalname} ===\n${text.trim()}`);
+      }
+    }
+
+    if (textParts.length === 0) {
+      return res.status(422).json({ error: 'No readable text could be extracted from the uploaded files.' });
+    }
+
+    const combinedText = textParts.join('\n\n');
+    const client = new Anthropic();
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: buildDocumentExtractionPrompt(combinedText) }]
+    });
+
+    let text = message.content[0].text.trim();
+    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+    const extracted = JSON.parse(text);
+
+    res.json({ extracted });
+  } catch (err) {
+    console.error('Document parse error:', err);
+    res.status(500).json({ error: err.message || 'Document parsing failed' });
+  }
 });
 
 module.exports = router;

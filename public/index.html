@@ -291,6 +291,27 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .quick-ai-box .qa-rating{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a78bfa;margin-bottom:.4rem}
 .quick-ai-box .qa-headline{font-size:.9rem;font-weight:600;margin-bottom:.5rem}
 .quick-ai-box .qa-fix{font-size:.78rem;color:var(--accent-light);padding:.4rem .6rem;background:rgba(16,153,119,.08);border-radius:6px;border-left:2px solid var(--accent)}
+/* ─── Document Upload Panel ─── */
+.doc-upload-panel{background:var(--surface);border:1px solid rgba(16,153,119,.3);border-radius:12px;padding:1.3rem 1.4rem;margin-bottom:1.2rem;position:relative;overflow:hidden}
+.doc-upload-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-light),#60a5fa)}
+.doc-upload-panel h3{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-light);margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem}
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:2rem 1.5rem;text-align:center;cursor:pointer;transition:border-color .18s,background .18s;background:var(--surface2)}
+.drop-zone.dragover{border-color:var(--accent);background:rgba(16,153,119,.08)}
+.drop-zone-icon{font-size:1.8rem;margin-bottom:.5rem}
+.drop-zone-label{font-size:.85rem;font-weight:600;margin-bottom:.25rem}
+.drop-zone-hint{font-size:.72rem;color:var(--muted);line-height:1.5}
+.doc-file-list{display:flex;flex-direction:column;gap:.35rem;margin-top:.8rem}
+.doc-file-item{display:flex;align-items:center;gap:.55rem;padding:.35rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem}
+.doc-file-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-file-size{color:var(--muted);font-size:.7rem;flex-shrink:0}
+.doc-file-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;line-height:1;padding:0 .15rem;flex-shrink:0}
+.doc-file-remove:hover{color:var(--risk-critical)}
+.doc-parse-progress{display:flex;align-items:center;gap:.6rem;color:var(--accent-light);font-size:.82rem;padding:.8rem;background:rgba(16,153,119,.06);border-radius:8px;margin-top:.8rem}
+.doc-parse-spin{width:16px;height:16px;border:2px solid rgba(21,196,154,.3);border-top-color:var(--accent-light);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.doc-prefill-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:8px;background:rgba(16,153,119,.1);border:1px solid rgba(16,153,119,.25);color:var(--accent-light);font-size:.8rem;margin-top:.8rem}
+.doc-prefill-banner-close{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.85rem;margin-left:auto;padding:0;line-height:1;flex-shrink:0}
+.doc-error-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:8px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);color:var(--risk-critical);font-size:.8rem;margin-top:.8rem}
+
 /* ─── Architecture Diagram Panel ─── */
 .diagram-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.1rem 1rem;margin-bottom:.9rem}
 .diagram-panel h3{font-size:.78rem;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem}
@@ -827,14 +848,130 @@ function renderVendorSection(r) {
 
 // ─── New Intake Wizard ────────────────────────────────────────────────────────
 function startNewIntake() {
-  S.view='new-intake'; S.wizardStep=1; S.wizardData={}; S.wizardRisk=null; renderSidebar(); renderWizard();
+  S.view='new-intake'; S.wizardStep=1; S.wizardData={}; S.wizardRisk=null; S._docFiles=[]; S._docPrefilled=false; renderSidebar(); renderWizard();
 }
 function renderWizard() {
   const steps=['Overview','Technology','Vendors','Security & Data','Dependencies','Risk & Submit'];
   let h=`<div class="page-title"><h2>New Architecture Request</h2></div>`;
+  h+=renderDocUploadPanel();
   h+=`<div class="wizard-steps">${steps.map((s,i)=>{const n=i+1;const cls=n===S.wizardStep?'active':n<S.wizardStep?'done':'';return`<div class="wizard-step ${cls}" onclick="gotoStep(${n})"><span class="step-num">${n}</span>${s}</div>`;}).join('')}</div>`;
   h+=`<div id="wizard-body">${renderWizardStep(S.wizardStep)}</div>`;
   setMain(h);
+  initDocDropZone();
+}
+
+function renderDocUploadPanel() {
+  const files = S._docFiles || [];
+  let h = `<div class="doc-upload-panel">
+    <h3>📄 Upload Documents <span style="font-weight:400;font-size:.68rem;color:var(--muted);text-transform:none;letter-spacing:0">— optional, auto-fills the form</span></h3>
+    <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.55">Upload project documents, architecture specs, code files, or a zipped repo. Claude will extract architecture information and pre-fill the form fields.</p>
+    <div class="drop-zone" id="doc-drop-zone" onclick="document.getElementById('doc-file-input').click()">
+      <input type="file" id="doc-file-input" multiple accept=".pdf,.docx,.txt,.zip,.js,.ts,.jsx,.tsx,.py,.java,.cs,.go,.rb,.yaml,.yml,.json,.xml,.sh,.tf,.md" style="display:none" onchange="docFilesSelected(this.files)"/>
+      <div class="drop-zone-icon">📂</div>
+      <div class="drop-zone-label">Drop files here or click to browse</div>
+      <div class="drop-zone-hint">PDF · DOCX · TXT · ZIP · JS · TS · PY · YAML · JSON · XML · and more<br>Up to 10 files · 20 MB each</div>
+    </div>`;
+  if (files.length > 0) {
+    h += `<div class="doc-file-list">`;
+    files.forEach((f, i) => {
+      const kb = (f.size / 1024).toFixed(0);
+      const sz = f.size > 1024 * 1024 ? (f.size / 1048576).toFixed(1) + ' MB' : kb + ' KB';
+      h += `<div class="doc-file-item"><span style="font-size:.9rem">📄</span><span class="doc-file-name">${f.name}</span><span class="doc-file-size">${sz}</span><button class="doc-file-remove" onclick="docRemoveFile(${i})" title="Remove">✕</button></div>`;
+    });
+    h += `</div>
+    <div style="margin-top:.8rem;display:flex;gap:.5rem;align-items:center">
+      <button class="btn btn-primary btn-sm" id="doc-parse-btn" onclick="docParseFiles()">✦ Analyse &amp; Pre-fill Form</button>
+      <button class="btn btn-ghost btn-sm" onclick="docClearFiles()">Clear</button>
+    </div>`;
+  }
+  if (S._docPrefilled) {
+    h += `<div class="doc-prefill-banner">✓ Draft pre-filled from your uploaded documents. Review and edit the fields below before submitting.<button class="doc-prefill-banner-close" onclick="S._docPrefilled=false;this.parentElement.style.display='none'">✕</button></div>`;
+  }
+  h += `<div id="doc-status"></div></div>`;
+  return h;
+}
+
+function initDocDropZone() {
+  const zone = document.getElementById('doc-drop-zone');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    docFilesSelected(e.dataTransfer.files);
+  });
+}
+
+function docFilesSelected(fileList) {
+  if (!S._docFiles) S._docFiles = [];
+  const existing = new Set(S._docFiles.map(f => f.name + f.size));
+  Array.from(fileList).forEach(f => {
+    if (!existing.has(f.name + f.size)) { S._docFiles.push(f); existing.add(f.name + f.size); }
+  });
+  renderWizard();
+}
+
+function docRemoveFile(idx) {
+  if (S._docFiles) S._docFiles.splice(idx, 1);
+  renderWizard();
+}
+
+function docClearFiles() {
+  S._docFiles = []; S._docPrefilled = false;
+  renderWizard();
+}
+
+async function docParseFiles() {
+  if (!S._docFiles || S._docFiles.length === 0) return;
+  const statusEl = document.getElementById('doc-status');
+  const btn = document.getElementById('doc-parse-btn');
+  if (btn) btn.disabled = true;
+  if (statusEl) statusEl.innerHTML = `<div class="doc-parse-progress"><div class="doc-parse-spin"></div>Extracting text and analysing with Claude — this may take 15–30 seconds…</div>`;
+
+  try {
+    const formData = new FormData();
+    S._docFiles.forEach(f => formData.append('files', f));
+    const resp = await fetch('/api/ai/parse-documents', { method: 'POST', body: formData });
+    let data;
+    try { data = await resp.json(); } catch { throw new Error('Server returned an unexpected response. Please try again.'); }
+    if (!resp.ok) throw new Error(data.error || 'Parsing failed');
+
+    const ex = data.extracted;
+    const d = S.wizardData;
+
+    if (ex.title && !d.title) d.title = ex.title;
+    if (ex.description && !d.description) d.description = ex.description;
+    if (ex.strategicObjective && !d.strategicObjective) d.strategicObjective = ex.strategicObjective;
+    if (ex.architectureType && !d.architectureType) d.architectureType = ex.architectureType;
+    if (ex.hostingModel && !d.hostingModel) d.hostingModel = ex.hostingModel;
+    if (ex.deploymentTarget && !d.deploymentTarget) d.deploymentTarget = ex.deploymentTarget;
+    if (ex.dataClassification && !d.dataClassification) d.dataClassification = ex.dataClassification;
+    if (ex.businessUnit && !d.businessUnit) d.businessUnit = ex.businessUnit;
+    if (ex.programmeDomain && !d.programmeDomain) d.programmeDomain = ex.programmeDomain;
+    if (ex.projectTimeline && !d.projectTimeline) d.projectTimeline = ex.projectTimeline;
+    if (ex.techStackNotes && !d.techStackNotes) d.techStackNotes = ex.techStackNotes;
+    if (ex.legacySystems && !d.legacySystems) d.legacySystems = ex.legacySystems;
+    if (typeof ex.integrationPoints === 'number' && !d.integrationPoints) d.integrationPoints = ex.integrationPoints;
+    if (typeof ex.isPublicFacing === 'boolean' && d.isPublicFacing === undefined) d.isPublicFacing = ex.isPublicFacing;
+    if (typeof ex.encryptionAtRest === 'boolean' && d.encryptionAtRest === undefined) d.encryptionAtRest = ex.encryptionAtRest;
+    if (typeof ex.encryptionInTransit === 'boolean' && d.encryptionInTransit === undefined) d.encryptionInTransit = ex.encryptionInTransit;
+    if (typeof ex.hasMfa === 'boolean' && d.hasMfa === undefined) d.hasMfa = ex.hasMfa;
+    if (typeof ex.hasWaf === 'boolean' && d.hasWaf === undefined) d.hasWaf = ex.hasWaf;
+    if (typeof ex.hasMonitoring === 'boolean' && d.hasMonitoring === undefined) d.hasMonitoring = ex.hasMonitoring;
+    if (typeof ex.isZeroTrustAligned === 'boolean' && d.isZeroTrustAligned === undefined) d.isZeroTrustAligned = ex.isZeroTrustAligned;
+    if (typeof ex.hasLegacyDependencies === 'boolean' && d.hasLegacyDependencies === undefined) d.hasLegacyDependencies = ex.hasLegacyDependencies;
+    ['components','dataTypes','authMethods','newVendors','complianceRequirements'].forEach(k => {
+      if (Array.isArray(ex[k]) && ex[k].length > 0 && (!d[k] || d[k].length === 0)) d[k] = ex[k];
+    });
+
+    S._docPrefilled = true;
+    S.wizardStep = 1;
+    renderWizard();
+  } catch (err) {
+    const st = document.getElementById('doc-status');
+    if (st) st.innerHTML = `<div class="doc-error-banner">⚠ ${err.message || 'An error occurred during document analysis. You can continue filling the form manually.'}</div>`;
+    if (btn) btn.disabled = false;
+  }
 }
 function renderWizardStep(step){
   const d=S.wizardData;

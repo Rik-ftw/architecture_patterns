@@ -96,6 +96,18 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - "Generate Diagram" / "Regenerate Diagram" button in intake detail header (blue accent `#60a5fa`)
 - Endpoints: `POST /api/ai/diagram/:id` (generate + store), `GET /api/ai/diagram/:id` (fetch stored)
 
+### Document Upload & Architecture Draft Pre-fill
+- **Optional document upload panel** shown above the wizard steps when creating a New Architecture Request
+- Supports drag-and-drop or browse: PDF, DOCX, TXT, ZIP archives (of git repos), and common code file types (.js, .ts, .py, .yaml, .json, .xml, .tf, .md, etc.)
+- Up to 10 files, 20 MB each
+- Server-side text extraction: `pdf-parse` for PDFs, `mammoth` for DOCX, `adm-zip` for ZIP files, UTF-8 decode for code/text files
+- Combined extracted text sent to Claude Sonnet 4.5 which returns structured JSON matching the intake wizard fields
+- Wizard fields auto-populated from Claude response without overwriting values the user may have already entered
+- Dismissible "Draft pre-filled from uploaded documents" confirmation banner shown after successful extraction
+- If parsing or AI extraction fails, user sees a clear error and can continue manually
+- Files processed in memory (multer `memoryStorage`) — not written to disk, no long-term persistence
+- Endpoint: `POST /api/ai/parse-documents` (multipart form upload, returns `{ extracted: {...} }`)
+
 ### Claude AI Architecture Reviews
 - **Full Review** — generated on demand from any intake detail page; stored in database as JSON; regeneratable
   - Overall rating (Endorsed / Approved with Conditions / Requires Rework / Not Recommended)
@@ -137,6 +149,7 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - `POST /api/ai/quick-assess` — Run Claude Haiku quick scan (wizard step 6; not persisted)
 - `POST /api/ai/diagram/:id` — Generate + store architecture diagram (Mermaid flowchart) for an intake
 - `GET /api/ai/diagram/:id` — Fetch stored diagram for an intake request
+- `POST /api/ai/parse-documents` — Parse uploaded documents (multipart) and return Claude-extracted intake field JSON
 
 ## Running
 ```bash
