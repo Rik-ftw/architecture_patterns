@@ -11,6 +11,24 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS solution_designs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference_id TEXT UNIQUE NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    business_context TEXT,
+    pattern_ids TEXT DEFAULT '[]',
+    vendor_ids TEXT DEFAULT '[]',
+    deployment_regions TEXT DEFAULT '[]',
+    estimated_cost_band TEXT,
+    complexity TEXT,
+    owner TEXT,
+    business_unit TEXT,
+    status TEXT DEFAULT 'Draft',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS intake_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     reference_id TEXT UNIQUE NOT NULL,
@@ -104,4 +122,16 @@ function generateRefId() {
   return `${prefix}-${year}-${String(seq).padStart(4, '0')}`;
 }
 
-module.exports = { db, generateRefId };
+function generateSolutionRefId() {
+  const prefix = 'ESD';
+  const year = new Date().getFullYear();
+  const last = db.prepare(`SELECT reference_id FROM solution_designs ORDER BY id DESC LIMIT 1`).get();
+  let seq = 1;
+  if (last) {
+    const match = last.reference_id.match(/(\d+)$/);
+    if (match) seq = parseInt(match[1]) + 1;
+  }
+  return `${prefix}-${year}-${String(seq).padStart(4, '0')}`;
+}
+
+module.exports = { db, generateRefId, generateSolutionRefId };

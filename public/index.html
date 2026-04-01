@@ -1,205 +1,274 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>EA Platform</title>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>McCain EA Platform</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0f1117;--surface:#1a1d27;--surface2:#222536;--surface3:#2a2e42;
-  --border:#2e3245;--accent:#4f8ef7;--accent2:#7c5cbf;--text:#e2e4f0;--muted:#8b90ab;
-  --endorsed:#2ecc71;--review:#f39c12;--dev:#3498db;
+  --bg:#080e1d;
+  --surface:#0d1729;
+  --surface2:#122040;
+  --surface3:#1B3A6B;
+  --border:#1e3155;
+  --accent:#109977;
+  --accent-light:#15c49a;
+  --accent2:#1B3A6B;
+  --text:#dde4f0;
+  --muted:#7090b8;
+  --navy:#1B3A6B;
+  --teal:#109977;
+  --endorsed:#109977;
+  --review:#d4830a;
+  --dev:#2980b9;
+  --deprecated:#4a5568;
   --risk-low:#2ecc71;--risk-medium:#f39c12;--risk-high:#e67e22;--risk-critical:#e74c3c;
-  --status-draft:#8b90ab;--status-submitted:#3498db;--status-under-review:#f39c12;
-  --status-approved:#2ecc71;--status-rejected:#e74c3c;--status-deferred:#9b59b6;--status-withdrawn:#555;
+  --status-draft:#6b7a9e;--status-submitted:#2980b9;--status-under-review:#d4830a;
+  --status-approved:#109977;--status-rejected:#e74c3c;--status-deferred:#7c5cbf;--status-withdrawn:#4a5568;
 }
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
-header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
-header h1{font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
-header .tagline{color:var(--muted);font-size:.8rem}
-.layout{display:flex;height:calc(100vh - 53px)}
-nav{width:230px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:.75rem 0;flex-shrink:0;display:flex;flex-direction:column}
-.nav-section{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:.8rem 1.1rem .3rem;font-weight:700}
-nav button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.42rem 1.1rem;cursor:pointer;font-size:.82rem;transition:background .12s,color .12s;border-left:3px solid transparent;display:flex;align-items:center;gap:.5rem}
+header{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.08);padding:.7rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+.logo{display:flex;align-items:center;gap:.6rem}
+.logo-mark{width:32px;height:32px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.9rem;color:#fff;letter-spacing:-.02em}
+header h1{font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+header .tagline{color:rgba(255,255,255,.5);font-size:.75rem;border-left:1px solid rgba(255,255,255,.15);padding-left:.9rem;margin-left:.3rem}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+.portal-badge{background:rgba(21,196,154,.15);color:var(--accent-light);border:1px solid rgba(21,196,154,.25);border-radius:5px;padding:.2rem .6rem;font-size:.72rem;font-weight:700;letter-spacing:.04em}
+
+.layout{display:flex;height:calc(100vh - 51px)}
+nav{width:225px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:.6rem 0;flex-shrink:0}
+.nav-logo-section{padding:.5rem 1rem .8rem;border-bottom:1px solid var(--border);margin-bottom:.4rem}
+.nav-section{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:.7rem 1rem .25rem;font-weight:700}
+nav button{display:flex;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.4rem 1rem;cursor:pointer;font-size:.81rem;transition:background .12s,color .12s;border-left:3px solid transparent;align-items:center;gap:.5rem;line-height:1.3}
 nav button:hover{background:var(--surface2);color:var(--text)}
-nav button.active{background:var(--surface2);border-left-color:var(--accent);color:var(--accent)}
-nav button .ni{font-size:.68rem;color:var(--muted);font-family:monospace;opacity:.8}
-nav .divider{height:1px;background:var(--border);margin:.5rem 1.1rem}
-main{flex:1;overflow-y:auto;padding:1.75rem 2rem}
+nav button.active{background:rgba(16,153,119,.1);border-left-color:var(--accent);color:var(--accent)}
+nav button .ni{font-size:.65rem;color:var(--muted);font-family:monospace;margin-left:auto;background:var(--surface2);border-radius:4px;padding:.05rem .3rem}
+nav button.active .ni{color:var(--accent)}
+.divider{height:1px;background:var(--border);margin:.4rem .8rem}
 
-/* cards & stats */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem;margin-bottom:1.5rem}
-.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem}
-.stat-val{font-size:1.8rem;font-weight:700;line-height:1}
-.stat-label{font-size:.72rem;color:var(--muted);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em}
-.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;cursor:pointer;transition:border-color .18s,transform .13s}
-.card:hover{border-color:var(--accent);transform:translateY(-2px)}
-.card-id{font-size:.68rem;font-family:monospace;color:var(--muted)}
-.card-name{font-size:.95rem;font-weight:600;margin:.35rem 0 .4rem}
-.card-sub{font-size:.77rem;color:var(--muted)}
+main{flex:1;overflow-y:auto;padding:1.6rem 2rem}
 
-/* badges */
-.badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;padding:.18rem .55rem;border-radius:999px;font-weight:600;white-space:nowrap}
-.badge-endorsed,.badge-approved{background:#1a3d2b;color:var(--endorsed)}
-.badge-review,.badge-under-review{background:#3d2f0d;color:var(--review)}
-.badge-dev,.badge-submitted,.badge-in-development{background:#0d2540;color:var(--dev)}
-.badge-draft,.badge-withdrawn{background:#2a2a2a;color:var(--muted)}
-.badge-rejected{background:#3d1212;color:var(--risk-critical)}
-.badge-deferred{background:#2d1b3d;color:#9b59b6}
-.badge-low{background:#1a3d2b;color:var(--risk-low)}
-.badge-medium{background:#3d2f0d;color:var(--risk-medium)}
-.badge-high{background:#3d2005;color:var(--risk-high)}
-.badge-critical{background:#3d1212;color:var(--risk-critical)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.8rem;margin-bottom:1.4rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:3px;height:100%;background:var(--accent-color,var(--accent))}
+.stat-val{font-size:1.7rem;font-weight:800;line-height:1;color:var(--accent-color,var(--text))}
+.stat-label{font-size:.68rem;color:var(--muted);margin-top:.28rem;text-transform:uppercase;letter-spacing:.05em}
+.stat-sub{font-size:.7rem;color:var(--muted);margin-top:.1rem}
 
-/* tables */
+.page-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem}
+.page-title h2{font-size:1.15rem;font-weight:700}
+.page-title .subtitle{font-size:.8rem;color:var(--muted);margin-top:.15rem}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;cursor:pointer;transition:border-color .18s,transform .12s,box-shadow .18s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.card-id{font-size:.66rem;font-family:monospace;color:var(--muted)}
+.card-name{font-size:.9rem;font-weight:600;margin:.3rem 0 .35rem;line-height:1.35}
+.card-sub{font-size:.74rem;color:var(--muted)}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.9rem}
+
+.badge{display:inline-flex;align-items:center;font-size:.67rem;padding:.17rem .5rem;border-radius:999px;font-weight:700;white-space:nowrap}
+.badge-endorsed,.badge-approved,.badge-published{background:rgba(16,153,119,.15);color:var(--endorsed);border:1px solid rgba(16,153,119,.25)}
+.badge-review,.badge-under-review{background:rgba(212,131,10,.15);color:var(--review);border:1px solid rgba(212,131,10,.25)}
+.badge-dev,.badge-submitted,.badge-in-development{background:rgba(41,128,185,.15);color:var(--dev);border:1px solid rgba(41,128,185,.25)}
+.badge-draft,.badge-withdrawn,.badge-deprecated{background:rgba(74,85,104,.2);color:var(--muted);border:1px solid var(--border)}
+.badge-rejected{background:rgba(231,76,60,.15);color:var(--risk-critical);border:1px solid rgba(231,76,60,.25)}
+.badge-deferred{background:rgba(124,92,191,.15);color:#9b7ef0;border:1px solid rgba(124,92,191,.25)}
+.badge-low{background:rgba(46,204,113,.15);color:var(--risk-low);border:1px solid rgba(46,204,113,.25)}
+.badge-medium{background:rgba(243,156,18,.15);color:var(--risk-medium);border:1px solid rgba(243,156,18,.25)}
+.badge-high{background:rgba(230,126,34,.15);color:var(--risk-high);border:1px solid rgba(230,126,34,.25)}
+.badge-critical{background:rgba(231,76,60,.15);color:var(--risk-critical);border:1px solid rgba(231,76,60,.25)}
+
 .table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
-table{width:100%;border-collapse:collapse;font-size:.82rem}
-th{text-align:left;padding:.55rem .9rem;background:var(--surface2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
-td{padding:.55rem .9rem;border-bottom:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.81rem}
+th{text-align:left;padding:.5rem .85rem;background:var(--surface2);color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+td{padding:.52rem .85rem;border-bottom:1px solid var(--border)}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--surface2)}
+tr:hover td{background:rgba(16,153,119,.04)}
 tbody tr{cursor:pointer}
 
-/* buttons */
-.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.btn{display:inline-flex;align-items:center;gap:.35rem;padding:.42rem .9rem;border-radius:7px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap}
 .btn:hover{opacity:.88;transform:translateY(-1px)}
 .btn-primary{background:var(--accent);color:#fff}
-.btn-secondary{background:var(--surface3);color:var(--text);border:1px solid var(--border)}
-.btn-success{background:#1a6b3d;color:#fff}
-.btn-danger{background:#6b1a1a;color:#fff}
-.btn-warning{background:#6b4a0d;color:#fff}
-.btn-sm{padding:.3rem .7rem;font-size:.76rem}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-success{background:#155e3e;color:#fff}
+.btn-danger{background:#5c1a1a;color:#fff}
+.btn-warning{background:#5c3a0a;color:#fff}
+.btn-sm{padding:.28rem .65rem;font-size:.74rem}
 .btn-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
 .btn-ghost:hover{color:var(--text);border-color:var(--accent)}
 
-/* forms */
-.form-group{margin-bottom:1.1rem}
-.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.04em}
-.form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.55rem .85rem;color:var(--text);font-size:.875rem;transition:border-color .15s}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:.73rem;font-weight:700;color:var(--muted);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+.form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.5rem .8rem;color:var(--text);font-size:.85rem;transition:border-color .15s}
 .form-control:focus{outline:none;border-color:var(--accent)}
-textarea.form-control{resize:vertical;min-height:90px}
+textarea.form-control{resize:vertical;min-height:85px}
 select.form-control{cursor:pointer}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
-.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.4rem}
-.checkbox-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;cursor:pointer;border:1px solid var(--border);font-size:.82rem;transition:border-color .15s}
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:.35rem}
+.checkbox-item{display:flex;align-items:center;gap:.45rem;padding:.38rem .55rem;background:var(--surface2);border-radius:6px;cursor:pointer;border:1px solid var(--border);font-size:.8rem;transition:border-color .15s}
 .checkbox-item:hover{border-color:var(--accent)}
-.checkbox-item input{accent-color:var(--accent);cursor:pointer}
-.tag-input-wrap{display:flex;flex-wrap:wrap;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.4rem .6rem;min-height:42px;cursor:text}
+.checkbox-item input{accent-color:var(--accent);cursor:pointer;flex-shrink:0}
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:.35rem;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.38rem .55rem;min-height:40px;cursor:text}
 .tag-input-wrap:focus-within{border-color:var(--accent)}
-.tag{display:inline-flex;align-items:center;gap:.3rem;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:.15rem .5rem;font-size:.78rem}
-.tag-remove{cursor:pointer;color:var(--muted);font-size:.85rem;line-height:1}
+.tag{display:inline-flex;align-items:center;gap:.28rem;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:.13rem .45rem;font-size:.75rem}
+.tag-remove{cursor:pointer;color:var(--muted);line-height:1;font-size:.8rem}
 .tag-remove:hover{color:var(--risk-critical)}
-.tag-input{background:none;border:none;color:var(--text);font-size:.82rem;min-width:120px;outline:none;flex:1}
+.tag-input{background:none;border:none;color:var(--text);font-size:.8rem;min-width:120px;outline:none;flex:1}
 
-/* wizard */
-.wizard-steps{display:flex;gap:0;margin-bottom:2rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)}
-.wizard-step{flex:1;padding:.55rem .5rem;text-align:center;font-size:.72rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;position:relative}
+.wizard-steps{display:flex;gap:0;margin-bottom:1.75rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)}
+.wizard-step{flex:1;padding:.5rem .4rem;text-align:center;font-size:.69rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;line-height:1.3}
 .wizard-step:last-child{border-right:none}
-.wizard-step.active{background:var(--accent);color:#fff;font-weight:700}
-.wizard-step.done{background:var(--surface3);color:var(--endorsed)}
-.wizard-step .step-num{display:block;font-size:.65rem;margin-bottom:.1rem;opacity:.7}
-.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+.wizard-step.active{background:var(--navy);color:#fff;font-weight:700}
+.wizard-step.done{background:rgba(16,153,119,.12);color:var(--accent)}
+.wizard-step .step-num{display:block;font-size:.62rem;margin-bottom:.08rem;opacity:.7}
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)}
 
-/* risk score */
-.risk-gauge{display:flex;flex-direction:column;align-items:center;padding:1.5rem;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
-.risk-circle{position:relative;width:130px;height:130px}
+.risk-gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:1.2rem;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
+.risk-circle{position:relative;width:120px;height:120px}
 .risk-circle svg{transform:rotate(-90deg)}
 .risk-circle-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.risk-score-num{font-size:2rem;font-weight:800;line-height:1}
-.risk-score-max{font-size:.7rem;color:var(--muted)}
-.risk-tier-badge{font-size:.95rem;font-weight:700;margin-top:.6rem;padding:.3rem .9rem;border-radius:999px}
-.risk-bars{display:flex;flex-direction:column;gap:.6rem;flex:1}
-.risk-bar-row{display:flex;align-items:center;gap:.7rem}
-.risk-bar-label{font-size:.75rem;color:var(--muted);width:140px;flex-shrink:0}
-.risk-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:999px;overflow:hidden}
+.risk-score-num{font-size:1.9rem;font-weight:900;line-height:1}
+.risk-score-max{font-size:.65rem;color:var(--muted)}
+.risk-bars{display:flex;flex-direction:column;gap:.55rem;flex:1}
+.risk-bar-row{display:flex;align-items:center;gap:.65rem}
+.risk-bar-label{font-size:.72rem;color:var(--muted);width:135px;flex-shrink:0}
+.risk-bar-track{flex:1;height:7px;background:var(--surface);border-radius:999px;overflow:hidden}
 .risk-bar-fill{height:100%;border-radius:999px;transition:width .5s}
-.risk-bar-val{font-size:.72rem;font-weight:700;width:40px;text-align:right;flex-shrink:0}
-.risk-panel{display:flex;gap:1.5rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
-.flags-list,.recs-list{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem}
-.flags-list li{display:flex;gap:.5rem;font-size:.8rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--risk-high)}
-.recs-list li{display:flex;gap:.5rem;font-size:.8rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--accent)}
-.flags-list li::before{content:'⚠';flex-shrink:0}
+.risk-bar-val{font-size:.7rem;font-weight:700;width:38px;text-align:right;flex-shrink:0}
+.risk-panel-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.1rem}
+.risk-panel-inner{display:flex;gap:1.2rem;align-items:flex-start}
+.flags-list,.recs-list{list-style:none;display:flex;flex-direction:column;gap:.4rem;margin-top:.5rem}
+.flags-list li{display:flex;gap:.45rem;font-size:.78rem;padding:.38rem .55rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--risk-high)}
+.recs-list li{display:flex;gap:.45rem;font-size:.78rem;padding:.38rem .55rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--accent)}
+.flags-list li::before{content:'⚠';flex-shrink:0;font-size:.8rem}
 .recs-list li::before{content:'→';flex-shrink:0;color:var(--accent)}
 
-/* detail */
-.detail-header{margin-bottom:1.5rem}
-.detail-header h2{font-size:1.5rem;font-weight:700;margin:.3rem 0}
-.detail-meta{color:var(--muted);font-size:.82rem}
-.detail-badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
-.section-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.section-card h3{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:.85rem}
-.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.kv-item label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block}
-.kv-item span{font-size:.86rem}
-.history-list{display:flex;flex-direction:column;gap:.6rem}
-.history-item{display:flex;gap:.75rem;align-items:flex-start;padding:.5rem;border-radius:7px;background:var(--surface2)}
-.history-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem}
-.history-text{font-size:.8rem}
-.history-time{font-size:.7rem;color:var(--muted)}
-.comment-box{background:var(--surface2);border-radius:8px;padding:.85rem;margin-bottom:.6rem;font-size:.83rem}
-.comment-author{font-weight:700;font-size:.8rem}
-.comment-role{color:var(--muted);font-size:.72rem}
-.comment-time{color:var(--muted);font-size:.7rem}
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.9rem}
+.section-card h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.kv-item label{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block}
+.kv-item span{font-size:.84rem}
+.detail-header{margin-bottom:1.3rem}
+.detail-header h2{font-size:1.4rem;font-weight:700;line-height:1.3}
+.detail-meta{color:var(--muted);font-size:.8rem;margin-top:.25rem}
+.detail-badges{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.55rem}
 
-/* modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
-.modal-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.modal-header h3{font-size:1rem;font-weight:700}
-.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
+.history-list{display:flex;flex-direction:column;gap:.5rem}
+.history-item{display:flex;gap:.7rem;align-items:flex-start;padding:.45rem;border-radius:7px;background:var(--surface2)}
+.history-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem}
+.history-text{font-size:.78rem}
+.history-time{font-size:.68rem;color:var(--muted)}
+.comment-box{background:var(--surface2);border-radius:8px;padding:.8rem;margin-bottom:.5rem}
+.comment-author{font-weight:700;font-size:.78rem}
+.comment-role{color:var(--muted);font-size:.7rem}
+.comment-time{color:var(--muted);font-size:.68rem}
+
+/* Kanban board */
+.kanban-board{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;align-items:start}
+.kanban-col{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.kanban-col-header{padding:.65rem 1rem;display:flex;align-items:center;justify-content:space-between;font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.kanban-col-endorsed .kanban-col-header{background:rgba(16,153,119,.15);color:var(--endorsed)}
+.kanban-col-review .kanban-col-header{background:rgba(212,131,10,.15);color:var(--review)}
+.kanban-col-dev .kanban-col-header{background:rgba(41,128,185,.15);color:var(--dev)}
+.kanban-col-deprecated .kanban-col-header{background:rgba(74,85,104,.2);color:var(--muted)}
+.kanban-col-body{padding:.6rem;display:flex;flex-direction:column;gap:.5rem;min-height:80px}
+.kanban-card{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.65rem .75rem;cursor:pointer;transition:border-color .15s,transform .12s}
+.kanban-card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.kanban-card-id{font-size:.63rem;font-family:monospace;color:var(--muted)}
+.kanban-card-name{font-size:.8rem;font-weight:600;margin:.2rem 0 .3rem;line-height:1.3}
+.kanban-card-domain{font-size:.7rem;color:var(--muted)}
+.kanban-count{background:rgba(255,255,255,.1);border-radius:4px;padding:.05rem .35rem;font-size:.72rem}
+
+/* Solution designs */
+.solution-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;cursor:pointer;transition:border-color .18s,transform .12s}
+.solution-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.solution-pattern-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+.pattern-chip{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:.12rem .4rem;font-size:.67rem;font-family:monospace}
+
+/* KPI charts */
+.kpi-bar-chart{display:flex;flex-direction:column;gap:.5rem}
+.kpi-bar-row{display:flex;align-items:center;gap:.7rem}
+.kpi-bar-label{font-size:.75rem;color:var(--muted);width:140px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-bar-track{flex:1;height:10px;background:var(--surface2);border-radius:999px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:999px}
+.kpi-bar-val{font-size:.72rem;font-weight:700;width:30px;text-align:right;flex-shrink:0}
+.activity-feed{display:flex;flex-direction:column;gap:.4rem}
+.activity-item{display:flex;gap:.65rem;align-items:flex-start;padding:.4rem;border-radius:6px;background:var(--surface2);font-size:.77rem}
+.activity-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:.35rem}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal-header{padding:1.1rem 1.4rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:.95rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer}
 .modal-close:hover{color:var(--text)}
-.modal-body{padding:1.5rem}
-.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end}
+.modal-body{padding:1.3rem 1.4rem}
+.modal-footer{padding:.9rem 1.4rem;border-top:1px solid var(--border);display:flex;gap:.5rem;justify-content:flex-end}
 
-/* alert */
-.alert{padding:.75rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem;display:flex;gap:.5rem;align-items:flex-start}
-.alert-warning{background:#3d2f0d;border:1px solid #6b4a0d;color:var(--review)}
-.alert-info{background:#0d2540;border:1px solid #1a4a7a;color:var(--dev)}
-.alert-success{background:#1a3d2b;border:1px solid #2e6b45;color:var(--endorsed)}
-.alert-danger{background:#3d1212;border:1px solid #6b2020;color:var(--risk-critical)}
+/* Alert */
+.alert{padding:.7rem .9rem;border-radius:8px;font-size:.8rem;margin-bottom:.9rem;display:flex;gap:.45rem;align-items:flex-start}
+.alert-warning{background:rgba(212,131,10,.1);border:1px solid rgba(212,131,10,.25);color:var(--review)}
+.alert-info{background:rgba(41,128,185,.1);border:1px solid rgba(41,128,185,.25);color:var(--dev)}
+.alert-success{background:rgba(16,153,119,.1);border:1px solid rgba(16,153,119,.25);color:var(--endorsed)}
+.alert-danger{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);color:var(--risk-critical)}
 
-/* misc */
-.page-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem}
-.page-title h2{font-size:1.2rem;font-weight:700}
-.search-bar{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.5rem .85rem;color:var(--text);font-size:.85rem;width:100%;margin-bottom:1rem}
+/* Team portal */
+.portal-header{background:linear-gradient(135deg,var(--navy) 0%,#0d2548 100%);border-radius:12px;padding:2rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.portal-header::after{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;background:rgba(16,153,119,.1);border-radius:50%}
+.portal-header h2{font-size:1.4rem;font-weight:800;margin-bottom:.4rem}
+.portal-header p{color:rgba(255,255,255,.65);font-size:.85rem;max-width:550px;line-height:1.6}
+
+/* misc utils */
+.search-bar{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.48rem .8rem;color:var(--text);font-size:.83rem;width:100%;margin-bottom:.9rem}
 .search-bar:focus{outline:none;border-color:var(--accent)}
-.tabs{display:flex;gap:.2rem;margin-bottom:1rem;border-bottom:1px solid var(--border)}
-.tab{padding:.45rem 1rem;cursor:pointer;font-size:.82rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
+.tabs{display:flex;gap:.15rem;margin-bottom:.9rem;border-bottom:1px solid var(--border)}
+.tab{padding:.42rem .9rem;cursor:pointer;font-size:.8rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-.empty{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
-.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.83rem;margin-bottom:1rem;display:flex;align-items:center;gap:.3rem;padding:0}
+.empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:.88rem}
+.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.8rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.3rem;padding:0}
 .back-btn:hover{text-decoration:underline}
-.flex{display:flex}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.mt-1{margin-top:.4rem}.mt-2{margin-top:.8rem}.mt-3{margin-top:1.2rem}
-.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-1{flex:1}
-.text-muted{color:var(--muted)}.text-sm{font-size:.8rem}.font-mono{font-family:monospace}
-.tag-list{display:flex;flex-wrap:wrap;gap:.3rem}
-.svg-container{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow:auto;max-height:480px}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:1.4rem;align-items:start}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem}
+.flex{display:flex}.gap-1{gap:.3rem}.gap-2{gap:.55rem}.gap-3{gap:.8rem}
+.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-wrap{flex-wrap:wrap}
+.mt-1{margin-top:.35rem}.mt-2{margin-top:.7rem}.mt-3{margin-top:1.1rem}
+.text-muted{color:var(--muted)}.text-sm{font-size:.78rem}.text-xs{font-size:.7rem}.font-mono{font-family:monospace}.font-bold{font-weight:700}
+.tag-list{display:flex;flex-wrap:wrap;gap:.28rem}
+.svg-container{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:.9rem;overflow:auto;max-height:440px}
 .svg-container img{max-width:100%}
-ul.arrow-list{list-style:none;display:flex;flex-direction:column;gap:.3rem}
-ul.arrow-list li{padding:.35rem 0;font-size:.84rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem}
+ul.arrow-list{list-style:none;display:flex;flex-direction:column;gap:.28rem}
+ul.arrow-list li{padding:.3rem 0;font-size:.82rem;border-bottom:1px solid var(--border);display:flex;gap:.45rem}
 ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
-.guardrails-table{width:100%;border-collapse:collapse;font-size:.82rem}
-.guardrails-table th{text-align:left;padding:.45rem .7rem;background:var(--surface2);color:var(--muted);font-size:.72rem;text-transform:uppercase}
-.guardrails-table td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.guardrails-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.guardrails-table th{text-align:left;padding:.42rem .65rem;background:var(--surface2);color:var(--muted);font-size:.68rem;text-transform:uppercase}
+.guardrails-table td{padding:.42rem .65rem;border-bottom:1px solid var(--border)}
 .sev-required{color:var(--risk-critical);font-weight:700}
 .sev-recommended{color:var(--review);font-weight:600}
 .sev-optional{color:var(--dev)}
-.use-cases-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-.use-case-box{background:var(--surface2);border-radius:8px;padding:.8rem;font-size:.82rem}
+.use-cases-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem}
+.use-case-box{background:var(--surface2);border-radius:8px;padding:.75rem;font-size:.8rem;line-height:1.5}
 .use-case-box.use{border-left:3px solid var(--endorsed)}
 .use-case-box.dont{border-left:3px solid var(--risk-critical)}
-.use-case-box strong{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.25rem;color:var(--muted)}
-.two-col{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start}
-@media(max-width:900px){.two-col{grid-template-columns:1fr}.form-row,.form-row-3{grid-template-columns:1fr}}
-@media(max-width:700px){nav{display:none}}
+.use-case-box strong{font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.22rem;color:var(--muted)}
+@media(max-width:1000px){.kanban-board{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}.three-col{grid-template-columns:1fr 1fr}}
+@media(max-width:700px){nav{display:none}.form-row,.form-row-3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <header>
-  <h1>EA Platform</h1>
-  <span class="tagline">Enterprise Architecture Pattern & Intake System</span>
+  <div class="logo">
+    <div class="logo-mark">EA</div>
+    <div>
+      <h1>McCain EA Platform</h1>
+    </div>
+  </div>
+  <span class="tagline">Enterprise Architecture · Pattern Library · Intake & Review</span>
+  <div class="header-right">
+    <button class="btn btn-sm btn-ghost" onclick="showTeamPortal()" id="portal-toggle">⬡ Team Portal</button>
+  </div>
 </header>
 <div class="layout">
   <nav id="sidebar"></nav>
@@ -209,284 +278,453 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 <!-- Review Modal -->
 <div id="reviewModal" class="modal-overlay" style="display:none">
   <div class="modal">
-    <div class="modal-header">
-      <h3 id="reviewModalTitle">Review Action</h3>
-      <button class="modal-close" onclick="closeModal('reviewModal')">✕</button>
-    </div>
+    <div class="modal-header"><h3 id="reviewModalTitle">Review Action</h3><button class="modal-close" onclick="closeModal('reviewModal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Reviewer Name</label>
-        <input class="form-control" id="reviewerName" placeholder="Your name" />
-      </div>
-      <div class="form-group">
-        <label>Review Notes</label>
-        <textarea class="form-control" id="reviewerNotes" placeholder="Provide rationale, conditions, or required remediations..." style="min-height:100px"></textarea>
-      </div>
-      <div id="approvedPatternGroup" class="form-group" style="display:none">
-        <label>Linked Pattern ID (optional)</label>
-        <input class="form-control" id="approvedPatternId" placeholder="e.g. AP-001" />
-      </div>
+      <div class="form-group"><label>Reviewer Name</label><input class="form-control" id="reviewerName" placeholder="Your name"/></div>
+      <div class="form-group"><label>Review Notes</label><textarea class="form-control" id="reviewerNotes" placeholder="Rationale, conditions, or required remediations..." style="min-height:90px"></textarea></div>
+      <div id="approvedPatternGroup" class="form-group" style="display:none"><label>Linked Pattern ID (optional)</label><input class="form-control" id="approvedPatternId" placeholder="e.g. AP-001"/></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('reviewModal')">Cancel</button>
-      <button class="btn btn-primary" id="reviewSubmitBtn" onclick="submitReview()">Submit</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('reviewModal')">Cancel</button><button class="btn btn-primary" onclick="submitReview()">Submit</button></div>
   </div>
 </div>
 
 <!-- Comment Modal -->
 <div id="commentModal" class="modal-overlay" style="display:none">
   <div class="modal">
-    <div class="modal-header">
-      <h3>Add Comment</h3>
-      <button class="modal-close" onclick="closeModal('commentModal')">✕</button>
-    </div>
+    <div class="modal-header"><h3>Add Comment</h3><button class="modal-close" onclick="closeModal('commentModal')">✕</button></div>
     <div class="modal-body">
-      <div class="form-group">
-        <label>Your Name</label>
-        <input class="form-control" id="commentAuthor" placeholder="Name" />
-      </div>
-      <div class="form-group">
-        <label>Role</label>
-        <input class="form-control" id="commentRole" placeholder="e.g. Architecture Reviewer" />
-      </div>
-      <div class="form-group">
-        <label>Comment</label>
-        <textarea class="form-control" id="commentText" placeholder="Your comment..." style="min-height:100px"></textarea>
-      </div>
+      <div class="form-group"><label>Name</label><input class="form-control" id="commentAuthor" placeholder="Your name"/></div>
+      <div class="form-group"><label>Role</label><input class="form-control" id="commentRole" placeholder="e.g. Architecture Reviewer"/></div>
+      <div class="form-group"><label>Comment</label><textarea class="form-control" id="commentText" placeholder="Your comment..." style="min-height:90px"></textarea></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('commentModal')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitComment()">Post Comment</button>
-    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('commentModal')">Cancel</button><button class="btn btn-primary" onclick="submitComment()">Post</button></div>
+  </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div id="deleteModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header"><h3>Confirm Delete</h3><button class="modal-close" onclick="closeModal('deleteModal')">✕</button></div>
+    <div class="modal-body"><p class="text-sm">Are you sure you want to delete <strong id="deleteTarget"></strong>? This cannot be undone.</p></div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('deleteModal')">Cancel</button><button class="btn btn-danger" id="deleteConfirmBtn">Delete</button></div>
   </div>
 </div>
 
 <script>
 // ─── State ───────────────────────────────────────────────────────────────────
-let state = {
-  view: 'dashboard',
-  patterns: [], vendors: [], intakes: [], intakeStats: null,
-  currentIntake: null, currentPattern: null,
-  wizardStep: 1, wizardData: {}, wizardRisk: null,
-  reviewAction: null, reviewIntakeId: null,
-  commentIntakeId: null,
-  tabFilter: 'All',
-  searchQ: '',
+const S = {
+  view:'dashboard', patterns:[], vendors:[], intakes:[], intakeStats:null, solutions:[],
+  currentIntake:null, currentPattern:null, currentSolution:null,
+  wizardStep:1, wizardData:{}, wizardRisk:null,
+  reviewAction:null, reviewIntakeId:null, commentIntakeId:null,
+  tabFilter:'All', searchQ:'', deleteCallback:null,
 };
 
-// ─── API helpers ──────────────────────────────────────────────────────────────
+// ─── API ─────────────────────────────────────────────────────────────────────
 const api = {
-  async get(url) { const r = await fetch(url); if (!r.ok) throw await r.json(); return r.json(); },
-  async post(url, body) { const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if (!r.ok) throw await r.json(); return r.json(); },
-  async patch(url, body) { const r = await fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if (!r.ok) throw await r.json(); return r.json(); },
-  async del(url) { const r = await fetch(url,{method:'DELETE'}); if (!r.ok) throw await r.json(); return r.json(); },
+  get: url => fetch(url).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
+  post: (url,b) => fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
+  patch: (url,b) => fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
+  del: url => fetch(url,{method:'DELETE'}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
 };
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
+// ─── Init ─────────────────────────────────────────────────────────────────────
 async function init() {
-  setMain('<p class="text-muted">Loading...</p>');
-  [state.patterns, state.vendors] = await Promise.all([api.get('/api/patterns'), api.get('/api/vendors')]);
-  state.patterns.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
-  await loadIntakes();
+  setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  [S.patterns, S.vendors] = await Promise.all([api.get('/api/patterns'), api.get('/api/vendors')]);
+  S.patterns.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
+  await Promise.all([loadIntakes(), loadSolutions()]);
   renderSidebar();
   showDashboard();
 }
 
 async function loadIntakes() {
-  try {
-    [state.intakes, state.intakeStats] = await Promise.all([api.get('/api/intake'), api.get('/api/intake/stats')]);
-  } catch(e) { state.intakes=[]; state.intakeStats=null; }
+  try { [S.intakes, S.intakeStats] = await Promise.all([api.get('/api/intake'), api.get('/api/intake/stats')]); }
+  catch { S.intakes=[]; S.intakeStats=null; }
+}
+async function loadSolutions() {
+  try { S.solutions = await api.get('/api/solutions'); } catch { S.solutions=[]; }
 }
 
-function setMain(html) { document.getElementById('main').innerHTML = html; }
+function setMain(h){ document.getElementById('main').innerHTML=h; }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
 function renderSidebar() {
-  const v = state.view;
-  const domains = [...new Set(state.patterns.map(p=>p.domain))].sort();
-  let html = `
-    <button class="${v==='dashboard'?'active':''}" onclick="showDashboard()">◈ Dashboard</button>
+  const v=S.view;
+  const domains=[...new Set(S.patterns.map(p=>p.domain))].sort();
+  const pending=(S.intakes||[]).filter(i=>['Submitted','Under Review'].includes(i.status)).length;
+  let h=`
+    <button class="${v==='dashboard'?'active':''}" onclick="showDashboard()">◈ Executive Dashboard</button>
+    <button class="${v==='kanban'?'active':''}" onclick="showKanban()">⊞ Pattern Board</button>
+    <div class="divider"></div>
     <div class="nav-section">Intake</div>
     <button class="${v==='new-intake'?'active':''}" onclick="startNewIntake()">＋ New Request</button>
-    <button class="${v==='intake-list'?'active':''}" onclick="showIntakeList()">≡ All Requests <span class="ni">${state.intakes.length}</span></button>
-    <button class="${v==='review-queue'?'active':''}" onclick="showReviewQueue()">⊙ Review Queue <span class="ni">${state.intakes.filter(i=>['Submitted','Under Review'].includes(i.status)).length}</span></button>
+    <button class="${v==='intake-list'?'active':''}" onclick="showIntakeList()">≡ All Requests <span class="ni">${S.intakes.length}</span></button>
+    <button class="${v==='review-queue'?'active':''}" onclick="showReviewQueue()">⊙ Review Queue <span class="ni">${pending}</span></button>
+    <div class="divider"></div>
+    <div class="nav-section">Solution Designs</div>
+    <button class="${v==='new-solution'?'active':''}" onclick="startNewSolution()">＋ New Solution</button>
+    <button class="${v==='solutions-list'?'active':''}" onclick="showSolutionsList()">≡ All Solutions <span class="ni">${S.solutions.length}</span></button>
     <div class="divider"></div>
     <div class="nav-section">Pattern Library</div>`;
   domains.forEach(d=>{
-    html+=`<div class="nav-section" style="font-size:.6rem;padding:.5rem 1.1rem .2rem;opacity:.7">${d}</div>`;
-    state.patterns.filter(p=>p.domain===d).forEach(p=>{
-      const isActive = v==='pattern-detail' && state.currentPattern && state.currentPattern.patternId===p.patternId;
-      html+=`<button class="${isActive?'active':''}" onclick="showPattern('${p.patternId}')"><span class="ni">${p.patternId}</span>${p.name}</button>`;
+    h+=`<div class="nav-section" style="font-size:.58rem;padding:.42rem 1rem .15rem;opacity:.65">${d}</div>`;
+    S.patterns.filter(p=>p.domain===d).forEach(p=>{
+      const isA=v==='pattern-detail'&&S.currentPattern&&S.currentPattern.patternId===p.patternId;
+      h+=`<button class="${isA?'active':''}" onclick="showPattern('${p.patternId}')"><span class="ni" style="margin-left:0;margin-right:.3rem">${p.patternId}</span>${p.name}</button>`;
     });
   });
-  html+=`<div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${state.vendors.length}</span></button>`;
-  document.getElementById('sidebar').innerHTML = html;
+  h+=`<div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${S.vendors.length}</span></button>`;
+  document.getElementById('sidebar').innerHTML=h;
 }
 
-// ─── Dashboard ────────────────────────────────────────────────────────────────
+// ─── Executive Dashboard ─────────────────────────────────────────────────────
 async function showDashboard() {
-  state.view='dashboard'; renderSidebar();
-  await loadIntakes();
-  const s = state.intakeStats || {};
-  const byStat = {};
-  (s.byStatus||[]).forEach(r=>byStat[r.status]=r.n);
-  const byTier = {};
-  (s.byTier||[]).forEach(r=>byTier[r.risk_tier]=r.n);
-  const pendingReview = (byStat['Submitted']||0) + (byStat['Under Review']||0);
+  S.view='dashboard'; renderSidebar();
+  await Promise.all([loadIntakes(), loadSolutions()]);
+  const st=S.intakeStats||{};
+  const byStat={}; (st.byStatus||[]).forEach(r=>byStat[r.status]=r.n);
+  const byTier={}; (st.byTier||[]).forEach(r=>byTier[r.risk_tier]=r.n);
+  const endorsed=S.patterns.filter(p=>p.status==='Endorsed').length;
+  const pct=S.patterns.length?Math.round(endorsed/S.patterns.length*100):0;
+  const critical=S.vendors.filter(v=>v.criticality==='Critical').length;
+  const pending=(byStat['Submitted']||0)+(byStat['Under Review']||0);
 
-  let html = `<div class="page-title"><h2>Dashboard</h2><button class="btn btn-primary" onclick="startNewIntake()">＋ New Architecture Request</button></div>`;
+  let h=`<div class="page-title"><h2>Executive Dashboard</h2><button class="btn btn-primary btn-sm" onclick="startNewIntake()">＋ New Architecture Request</button></div>`;
 
-  html += `<div class="stats-grid">
-    <div class="stat-card"><div class="stat-val">${s.total||0}</div><div class="stat-label">Total Requests</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--status-submitted)">${pendingReview}</div><div class="stat-label">Pending Review</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--status-approved)">${byStat['Approved']||0}</div><div class="stat-label">Approved</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--risk-critical)">${byTier['Critical']||0}</div><div class="stat-label">Critical Risk</div></div>
-    <div class="stat-card"><div class="stat-val">${state.patterns.length}</div><div class="stat-label">Patterns</div></div>
-    <div class="stat-card"><div class="stat-val">${state.vendors.length}</div><div class="stat-label">Vendors</div></div>
+  h+=`<div class="stats-grid">
+    <div class="stat-card" style="--accent-color:var(--text)"><div class="stat-val">${S.patterns.length}</div><div class="stat-label">Total Patterns</div></div>
+    <div class="stat-card" style="--accent-color:var(--endorsed)"><div class="stat-val">${pct}%</div><div class="stat-label">Endorsed Rate</div><div class="stat-sub">${endorsed} of ${S.patterns.length} patterns</div></div>
+    <div class="stat-card" style="--accent-color:var(--dev)"><div class="stat-val">${st.total||0}</div><div class="stat-label">Intake Requests</div></div>
+    <div class="stat-card" style="--accent-color:var(--review)"><div class="stat-val">${pending}</div><div class="stat-label">Pending Review</div></div>
+    <div class="stat-card" style="--accent-color:var(--risk-critical)"><div class="stat-val">${byTier['Critical']||0}</div><div class="stat-label">Critical Risk</div></div>
+    <div class="stat-card" style="--accent-color:var(--risk-critical)"><div class="stat-val">${critical}</div><div class="stat-label">Critical Vendors</div></div>
   </div>`;
 
-  const tiers = ['Critical','High','Medium','Low'];
-  const tierColors = {Critical:'var(--risk-critical)',High:'var(--risk-high)',Medium:'var(--risk-medium)',Low:'var(--risk-low)'};
-  if (Object.keys(byTier).length) {
-    html += `<div class="section-card" style="margin-bottom:1rem"><h3>Risk Distribution</h3><div class="flex gap-2" style="flex-wrap:wrap">`;
-    tiers.forEach(t=>{if(byTier[t]) html+=`<div class="stat-card" style="flex:1;min-width:100px"><div class="stat-val" style="color:${tierColors[t]}">${byTier[t]}</div><div class="stat-label">${t} Risk</div></div>`;});
-    html += `</div></div>`;
-  }
+  // Pattern health + domain breakdown
+  const domains=[...new Set(S.patterns.map(p=>p.domain))].sort();
+  const domainCounts={}; domains.forEach(d=>domainCounts[d]=S.patterns.filter(p=>p.domain===d).length);
+  const maxDomain=Math.max(...Object.values(domainCounts),1);
+  const statusGroups=[{label:'Endorsed',key:'Endorsed',color:'var(--endorsed)'},{label:'In Development',key:'In Development',color:'var(--dev)'},{label:'Under Review',key:'Under Review',color:'var(--review)'},{label:'Deprecated',key:'Deprecated',color:'var(--deprecated)'}];
 
-  const recent = s.recent||[];
-  html += `<div class="section-card"><h3>Recent Requests</h3>`;
-  if (!recent.length) html += `<p class="text-muted text-sm">No requests yet. <button class="btn btn-sm btn-primary" onclick="startNewIntake()">Create first request</button></p>`;
-  else {
-    html += `<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Status</th><th>Risk</th><th>Submitted</th></tr></thead><tbody>`;
-    recent.forEach(r=>{
-      html+=`<tr onclick="showIntakeDetail('${r.reference_id}')">
-        <td class="font-mono text-sm">${r.reference_id}</td>
-        <td>${r.title}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
-        <td class="text-muted text-sm">${fmtDate(r.created_at)}</td>
-      </tr>`;
-    });
-    html += `</tbody></table></div>`;
+  h+=`<div class="three-col">
+  <div class="section-card" style="grid-column:span 1"><h3>Pattern Health</h3><div class="kpi-bar-chart">`;
+  statusGroups.forEach(sg=>{
+    const n=S.patterns.filter(p=>p.status===sg.key).length;
+    const pct2=S.patterns.length?Math.round(n/S.patterns.length*100):0;
+    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label">${sg.label}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct2}%;background:${sg.color}"></div></div><div class="kpi-bar-val" style="color:${sg.color}">${n}</div></div>`;
+  });
+  h+=`</div></div>
+  <div class="section-card" style="grid-column:span 1"><h3>Patterns by Domain</h3><div class="kpi-bar-chart">`;
+  domains.forEach(d=>{
+    const n=domainCounts[d];
+    const pct3=Math.round(n/maxDomain*100);
+    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label" title="${d}">${d}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct3}%;background:var(--navy)"></div></div><div class="kpi-bar-val">${n}</div></div>`;
+  });
+  h+=`</div></div>
+  <div class="section-card" style="grid-column:span 1"><h3>Risk Distribution</h3><div class="kpi-bar-chart">`;
+  [{t:'Critical',c:'var(--risk-critical)'},{t:'High',c:'var(--risk-high)'},{t:'Medium',c:'var(--risk-medium)'},{t:'Low',c:'var(--risk-low)'}].forEach(({t,c})=>{
+    const n=byTier[t]||0;const tot=st.total||1;
+    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label">${t} Risk</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${Math.round(n/tot*100)}%;background:${c}"></div></div><div class="kpi-bar-val" style="color:${c}">${n}</div></div>`;
+  });
+  h+=`</div></div></div>`;
+
+  // Recent intakes + recent solutions
+  const recent=st.recent||[];
+  h+=`<div class="two-col">
+  <div class="section-card"><h3>Recent Intake Requests</h3>`;
+  if(!recent.length) h+=`<p class="text-sm text-muted">No requests yet. <button class="btn btn-sm btn-primary" onclick="startNewIntake()">Create first</button></p>`;
+  else{
+    h+=`<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Status</th><th>Risk</th></tr></thead><tbody>`;
+    recent.forEach(r=>{h+=`<tr onclick="showIntakeDetail('${r.reference_id}')"><td class="font-mono text-xs">${r.reference_id}</td><td>${r.title}</td><td>${statusBadge(r.status)}</td><td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td></tr>`;});
+    h+=`</tbody></table></div>`;
   }
-  html += `</div>`;
-  setMain(html);
+  h+=`</div>
+  <div>
+  <div class="section-card"><h3>Vendor Criticality</h3><div class="kpi-bar-chart">`;
+  ['Critical','High','Medium','Low'].forEach(c=>{
+    const n=S.vendors.filter(v=>v.criticality===c).length;
+    const pct4=Math.round(n/S.vendors.length*100);
+    const col={Critical:'var(--risk-critical)',High:'var(--risk-high)',Medium:'var(--risk-medium)',Low:'var(--risk-low)'}[c];
+    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label">${c}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct4}%;background:${col}"></div></div><div class="kpi-bar-val" style="color:${col}">${n}</div></div>`;
+  });
+  h+=`</div></div>
+  <div class="section-card"><h3>Solution Designs</h3>`;
+  if(!S.solutions.length) h+=`<p class="text-sm text-muted">No solutions yet. <button class="btn btn-sm btn-primary" onclick="startNewSolution()">Create first</button></p>`;
+  else S.solutions.slice(0,4).forEach(s=>{h+=`<div onclick="showSolutionDetail(${s.id})" style="cursor:pointer;padding:.4rem;border-radius:6px;margin-bottom:.3rem;background:var(--surface2)"><div class="text-sm font-bold">${s.title}</div><div class="flex gap-1 mt-1"><span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span><span class="text-xs text-muted">${(s.patternIds||[]).length} patterns</span></div></div>`;});
+  h+=`</div></div></div>`;
+  setMain(h);
+}
+
+// ─── Kanban Board ─────────────────────────────────────────────────────────────
+function showKanban() {
+  S.view='kanban'; renderSidebar();
+  const cols=[{key:'Endorsed',cls:'endorsed'},{key:'In Development',cls:'dev'},{key:'Under Review',cls:'review'},{key:'Deprecated',cls:'deprecated'}];
+  let h=`<div class="page-title"><h2>Pattern Board</h2><div class="flex gap-2"><button class="btn btn-secondary btn-sm" onclick="showPatternList()">List View</button></div></div>`;
+  h+=`<div class="kanban-board">`;
+  cols.forEach(({key,cls})=>{
+    const cards=S.patterns.filter(p=>p.status===key);
+    h+=`<div class="kanban-col kanban-col-${cls}"><div class="kanban-col-header">${key}<span class="kanban-count">${cards.length}</span></div><div class="kanban-col-body">`;
+    if(!cards.length) h+=`<div style="text-align:center;color:var(--muted);font-size:.75rem;padding:.8rem 0">No patterns</div>`;
+    cards.forEach(p=>{
+      h+=`<div class="kanban-card" onclick="showPattern('${p.patternId}')">
+        <div class="kanban-card-id">${p.patternId} · v${p.version||'?'}</div>
+        <div class="kanban-card-name">${p.name}</div>
+        <div class="kanban-card-domain">${p.domain}</div>
+        ${p.ccoeCertified==='Yes'?'<span class="badge badge-endorsed" style="margin-top:.3rem;font-size:.62rem">CCoE</span>':''}
+      </div>`;
+    });
+    h+=`</div></div>`;
+  });
+  h+=`</div>`;
+  setMain(h);
+}
+
+// ─── Solution Designs ─────────────────────────────────────────────────────────
+function showSolutionsList() {
+  S.view='solutions-list'; renderSidebar();
+  let h=`<div class="page-title"><h2>Solution Designs</h2><button class="btn btn-primary btn-sm" onclick="startNewSolution()">＋ New Solution</button></div>`;
+  if(!S.solutions.length){
+    h+=`<div class="empty">No solution designs yet. Compose patterns into deployable Azure solutions.<br><br><button class="btn btn-primary" onclick="startNewSolution()">Create First Solution</button></div>`;
+  } else {
+    h+=`<div class="overview-grid">`;
+    S.solutions.forEach(s=>{
+      const pats=S.patterns.filter(p=>(s.patternIds||[]).includes(p.patternId));
+      h+=`<div class="solution-card" onclick="showSolutionDetail(${s.id})">
+        <div class="flex justify-between items-center">
+          <div class="font-mono text-xs text-muted">${s.reference_id}</div>
+          <span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span>
+        </div>
+        <div class="card-name">${s.title}</div>
+        ${s.business_unit?`<div class="card-sub">${s.business_unit}</div>`:''}
+        <div class="solution-pattern-chips">
+          ${pats.map(p=>`<span class="pattern-chip">${p.patternId}</span>`).join('')}
+          ${(s.patternIds||[]).length===0?'<span class="text-xs text-muted">No patterns selected</span>':''}
+        </div>
+        <div class="flex gap-2 mt-2">
+          ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${s.complexity}</span>`:''}
+          ${s.estimated_cost_band?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${s.estimated_cost_band}</span>`:''}
+        </div>
+      </div>`;
+    });
+    h+=`</div>`;
+  }
+  setMain(h);
+}
+
+async function showSolutionDetail(id) {
+  S.view='solution-detail'; renderSidebar();
+  setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  const s=await api.get(`/api/solutions/${id}`);
+  S.currentSolution=s;
+  const pats=s.patterns||[];
+  let h=`<button class="back-btn" onclick="showSolutionsList()">← Back to Solutions</button>
+  <div class="two-col">
+  <div>
+  <div class="detail-header">
+    <div class="font-mono text-xs text-muted">${s.reference_id}</div>
+    <h2>${s.title}</h2>
+    <div class="detail-meta">${s.business_unit||''}</div>
+    <div class="detail-badges mt-1">
+      <span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span>
+      ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--text)">${s.complexity}</span>`:''}
+      ${s.estimated_cost_band?`<span class="badge" style="background:var(--surface2);color:var(--muted)">Cost: ${s.estimated_cost_band}</span>`:''}
+    </div>
+    <div class="flex gap-2 mt-2">
+      ${s.status!=='Published'?`<button class="btn btn-success btn-sm" onclick="updateSolutionStatus(${s.id},'Published')">Publish</button>`:''}
+      <button class="btn btn-danger btn-sm" onclick="confirmDeleteSolution(${s.id},'${s.reference_id}')">Delete</button>
+    </div>
+  </div>
+  ${s.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${s.description}</p></div>`:''}
+  ${s.business_context?`<div class="section-card"><h3>Business Context</h3><p class="text-sm" style="line-height:1.65">${s.business_context}</p></div>`:''}
+  ${pats.length?`<div class="section-card"><h3>Composed Patterns (${pats.length})</h3>
+    ${pats.map(p=>`<div class="flex justify-between items-center" style="padding:.45rem;background:var(--surface2);border-radius:7px;margin-bottom:.4rem;cursor:pointer" onclick="showPattern('${p.patternId}')">
+      <div><span class="font-mono text-xs text-muted">${p.patternId}</span><div class="text-sm font-bold" style="margin-top:.1rem">${p.name}</div></div>
+      <div class="flex gap-1"><span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}">${p.status}</span></div>
+    </div>`).join('')}
+  </div>`:''}
+  </div>
+  <div class="section-card">
+    <h3>Solution Details</h3>
+    <div class="kv-grid">
+      <div class="kv-item"><label>Owner</label><span>${s.owner||'–'}</span></div>
+      <div class="kv-item"><label>Business Unit</label><span>${s.business_unit||'–'}</span></div>
+      <div class="kv-item"><label>Complexity</label><span>${s.complexity||'–'}</span></div>
+      <div class="kv-item"><label>Est. Cost Band</label><span>${s.estimated_cost_band||'–'}</span></div>
+      <div class="kv-item"><label>Patterns</label><span>${(s.patternIds||[]).length}</span></div>
+      <div class="kv-item"><label>Created</label><span>${fmtDate(s.created_at)}</span></div>
+    </div>
+    ${s.deploymentRegions&&s.deploymentRegions.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Regions</label><div class="tag-list mt-1">${s.deploymentRegions.map(r=>`<span class="badge" style="background:var(--surface2);color:var(--text)">${r}</span>`).join('')}</div></div>`:''}
+  </div>
+  </div>`;
+  setMain(h);
+}
+
+function startNewSolution() {
+  S.view='new-solution'; renderSidebar();
+  const d={patternIds:[],vendorIds:[],deploymentRegions:[]};
+  const regions=['Australia East','Australia Southeast','Canada Central','East US','East US 2','North Europe','South Africa North','Southeast Asia','UK South','West Europe'];
+  let h=`<div class="page-title"><h2>New Solution Design</h2></div>
+  <div class="two-col">
+  <div>
+  <div class="form-row">
+    <div class="form-group"><label>Solution Title *</label><input class="form-control" id="sd_title" placeholder="e.g. OT Telemetry Pipeline to Azure"/></div>
+    <div class="form-group"><label>Status</label><select class="form-control" id="sd_status"><option>Draft</option><option>Published</option></select></div>
+  </div>
+  <div class="form-group"><label>Description</label><textarea class="form-control" id="sd_description" placeholder="Describe the solution and what it achieves..."></textarea></div>
+  <div class="form-group"><label>Business Context</label><textarea class="form-control" id="sd_businessContext" placeholder="The business problem this solution addresses..."></textarea></div>
+  <div class="form-row">
+    <div class="form-group"><label>Owner</label><input class="form-control" id="sd_owner" placeholder="Solution owner name"/></div>
+    <div class="form-group"><label>Business Unit</label><input class="form-control" id="sd_businessUnit" placeholder="e.g. Supply Chain"/></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Complexity</label><select class="form-control" id="sd_complexity"><option value="">Select...</option>${opts(['Low','Medium','High','Very High'],null)}</select></div>
+    <div class="form-group"><label>Estimated Cost Band</label><select class="form-control" id="sd_costBand"><option value="">Select...</option>${opts(['Low (< $10k/mo)','Medium ($10k–50k/mo)','High ($50k–200k/mo)','Enterprise (> $200k/mo)'],null)}</select></div>
+  </div>
+  <div class="form-group"><label>Deployment Regions</label>
+    <div class="checkbox-grid">${regions.map(r=>`<label class="checkbox-item"><input type="checkbox" value="${r}" onchange="toggleSDArr('deploymentRegions','${r}')"/>${r}</label>`).join('')}</div>
+  </div>
+  <div class="form-group"><label>Compose from Patterns</label>
+    <div class="checkbox-grid">`;
+  S.patterns.forEach(p=>{
+    h+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" onchange="toggleSDArr('patternIds','${p.patternId}')"/><span class="font-mono text-xs" style="color:var(--muted)">${p.patternId}</span> ${p.name} <span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}" style="margin-left:auto">${p.status}</span></label>`;
+  });
+  h+=`</div></div>
+  <div class="wizard-nav" style="margin-top:0;padding-top:1rem">
+    <button class="btn btn-secondary" onclick="showSolutionsList()">Cancel</button>
+    <button class="btn btn-primary" onclick="submitSolution()">Create Solution Design</button>
+  </div>
+  </div>
+  <div class="section-card"><h3>Tips</h3>
+    <p class="text-sm text-muted" style="line-height:1.65">Compose related patterns into a unified solution design to document how they interact in a real deployment scenario.</p>
+    <ul class="arrow-list mt-2">
+      <li class="text-sm">Select 2–5 closely related patterns</li>
+      <li class="text-sm">Describe the end-to-end business flow</li>
+      <li class="text-sm">Specify Azure regions for geo compliance</li>
+      <li class="text-sm">Use the cost band to inform budget planning</li>
+    </ul>
+  </div>
+  </div>`;
+  S._sdData={patternIds:[],vendorIds:[],deploymentRegions:[]};
+  setMain(h);
+}
+
+function toggleSDArr(field,val) {
+  if(!S._sdData) S._sdData={patternIds:[],vendorIds:[],deploymentRegions:[]};
+  const arr=S._sdData[field]||[];
+  const idx=arr.indexOf(val);
+  if(idx===-1) arr.push(val); else arr.splice(idx,1);
+  S._sdData[field]=arr;
+}
+
+async function submitSolution() {
+  const t=document.getElementById('sd_title').value;
+  if(!t){alert('Please enter a solution title.');return;}
+  const payload={
+    title:t, description:document.getElementById('sd_description').value,
+    businessContext:document.getElementById('sd_businessContext').value,
+    owner:document.getElementById('sd_owner').value, businessUnit:document.getElementById('sd_businessUnit').value,
+    complexity:document.getElementById('sd_complexity').value,
+    estimatedCostBand:document.getElementById('sd_costBand').value,
+    status:document.getElementById('sd_status').value,
+    patternIds:S._sdData.patternIds||[], vendorIds:S._sdData.vendorIds||[],
+    deploymentRegions:S._sdData.deploymentRegions||[],
+  };
+  try{const s=await api.post('/api/solutions',payload);await loadSolutions();renderSidebar();showSolutionDetail(s.id);}
+  catch(e){alert('Failed: '+(e.error||JSON.stringify(e)));}
+}
+
+async function updateSolutionStatus(id,status) {
+  await api.patch(`/api/solutions/${id}`,{status});await loadSolutions();renderSidebar();showSolutionDetail(id);
+}
+
+function confirmDeleteSolution(id,ref) {
+  document.getElementById('deleteTarget').textContent=ref;
+  document.getElementById('deleteConfirmBtn').onclick=async()=>{
+    await api.del(`/api/solutions/${id}`);closeModal('deleteModal');await loadSolutions();renderSidebar();showSolutionsList();
+  };
+  document.getElementById('deleteModal').style.display='flex';
 }
 
 // ─── Intake List ──────────────────────────────────────────────────────────────
 async function showIntakeList(tab) {
-  state.view='intake-list'; if(tab) state.tabFilter=tab; renderSidebar();
+  S.view='intake-list'; if(tab) S.tabFilter=tab; renderSidebar();
   await loadIntakes();
-  const statuses = ['All','Draft','Submitted','Under Review','Approved','Rejected','Deferred','Withdrawn'];
-  let filtered = state.intakes;
-  if (state.tabFilter !== 'All') filtered = filtered.filter(i=>i.status===state.tabFilter);
-  if (state.searchQ) {
-    const q = state.searchQ.toLowerCase();
-    filtered = filtered.filter(i=>(i.title||'').toLowerCase().includes(q)||(i.reference_id||'').toLowerCase().includes(q)||(i.requestor_name||'').toLowerCase().includes(q)||(i.business_unit||'').toLowerCase().includes(q));
+  const statuses=['All','Draft','Submitted','Under Review','Approved','Rejected','Deferred','Withdrawn'];
+  let filtered=S.intakes;
+  if(S.tabFilter!=='All') filtered=filtered.filter(i=>i.status===S.tabFilter);
+  if(S.searchQ){const q=S.searchQ.toLowerCase();filtered=filtered.filter(i=>(i.title+i.reference_id+(i.requestor_name||'')+(i.business_unit||'')).toLowerCase().includes(q));}
+  let h=`<div class="page-title"><h2>All Requests</h2><button class="btn btn-primary btn-sm" onclick="startNewIntake()">＋ New Request</button></div>`;
+  h+=`<input class="search-bar" placeholder="Search by title, reference, requestor, business unit..." value="${S.searchQ||''}" oninput="S.searchQ=this.value;showIntakeList()">`;
+  h+=`<div class="tabs">${statuses.map(s=>`<button class="tab ${S.tabFilter===s?'active':''}" onclick="showIntakeList('${s}')">${s}</button>`).join('')}</div>`;
+  if(!filtered.length){h+=`<div class="empty">No requests found.</div>`;}
+  else{
+    h+=`<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Domain</th><th>Requestor</th><th>Status</th><th>Risk</th><th>Created</th></tr></thead><tbody>`;
+    filtered.forEach(r=>{h+=`<tr onclick="showIntakeDetail('${r.reference_id}')"><td class="font-mono text-xs">${r.reference_id}</td><td><strong>${r.title}</strong></td><td class="text-sm text-muted">${r.programme_domain||r.architecture_type||'–'}</td><td class="text-sm">${r.requestor_name||'–'}</td><td>${statusBadge(r.status)}</td><td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td><td class="text-xs text-muted">${fmtDate(r.created_at)}</td></tr>`;});
+    h+=`</tbody></table></div>`;
   }
-  let html = `<div class="page-title"><h2>All Requests</h2><button class="btn btn-primary" onclick="startNewIntake()">＋ New Request</button></div>`;
-  html += `<input class="search-bar" placeholder="Search by title, reference, requestor, business unit..." value="${state.searchQ||''}" oninput="state.searchQ=this.value;showIntakeList()">`;
-  html += `<div class="tabs">${statuses.map(s=>`<button class="tab ${state.tabFilter===s?'active':''}" onclick="showIntakeList('${s}')">${s}</button>`).join('')}</div>`;
-  if (!filtered.length) {
-    html += `<div class="empty">No requests found. <button class="btn btn-sm btn-primary" onclick="startNewIntake()">Create one</button></div>`;
-  } else {
-    html += `<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Domain</th><th>Requestor</th><th>Status</th><th>Risk Score</th><th>Created</th></tr></thead><tbody>`;
-    filtered.forEach(r=>{
-      html+=`<tr onclick="showIntakeDetail('${r.reference_id}')">
-        <td class="font-mono text-sm">${r.reference_id}</td>
-        <td><strong>${r.title}</strong></td>
-        <td class="text-muted text-sm">${r.programme_domain||r.architecture_type||'–'}</td>
-        <td class="text-sm">${r.requestor_name||'–'}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
-        <td class="text-muted text-sm">${fmtDate(r.created_at)}</td>
-      </tr>`;
-    });
-    html += `</tbody></table></div>`;
-  }
-  setMain(html);
+  setMain(h);
 }
 
 // ─── Review Queue ─────────────────────────────────────────────────────────────
 async function showReviewQueue() {
-  state.view='review-queue'; renderSidebar();
+  S.view='review-queue'; renderSidebar();
   await loadIntakes();
-  const queue = state.intakes.filter(i=>['Submitted','Under Review'].includes(i.status));
+  const queue=S.intakes.filter(i=>['Submitted','Under Review'].includes(i.status));
   queue.sort((a,b)=>(b.risk_score||0)-(a.risk_score||0));
-  let html = `<div class="page-title"><h2>Review Queue</h2><span class="text-muted text-sm">${queue.length} item(s) pending</span></div>`;
-  if (!queue.length) {
-    html+=`<div class="empty">Review queue is empty — all submissions have been actioned.</div>`;
-  } else {
-    html+=`<div class="alert alert-info">Items are sorted by risk score (highest first). Critical and High risk items require Architecture Board review before approval.</div>`;
-    html+=`<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Reference</th><th>Title</th><th>Domain</th><th>Requestor</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>`;
+  let h=`<div class="page-title"><h2>Review Queue <span class="text-muted text-sm" style="font-weight:400">${queue.length} pending</span></h2></div>`;
+  if(!queue.length){h+=`<div class="empty">Review queue is empty.</div>`;}
+  else{
+    h+=`<div class="alert alert-info">Sorted by risk score (highest first). Critical risk items require Architecture Board review.</div>`;
+    h+=`<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Reference</th><th>Title</th><th>Requestor</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>`;
     queue.forEach(r=>{
-      html+=`<tr>
-        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
-        <td class="font-mono text-sm" style="cursor:pointer" onclick="showIntakeDetail('${r.reference_id}')">${r.reference_id}</td>
+      h+=`<tr><td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
+        <td class="font-mono text-xs" style="cursor:pointer" onclick="showIntakeDetail('${r.reference_id}')">${r.reference_id}</td>
         <td style="cursor:pointer" onclick="showIntakeDetail('${r.reference_id}')"><strong>${r.title}</strong></td>
-        <td class="text-sm text-muted">${r.programme_domain||'–'}</td>
-        <td class="text-sm">${r.requestor_name||'–'}</td>
-        <td>${statusBadge(r.status)}</td>
-        <td class="text-sm text-muted">${fmtDate(r.submitted_at||r.created_at)}</td>
-        <td>
-          <div class="flex gap-2">
-            ${r.status==='Submitted'?`<button class="btn btn-sm btn-secondary" onclick="openReviewModal('${r.id}','Under Review')">Review</button>`:''}
-            <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.id}','Approved')">Approve</button>
-            <button class="btn btn-sm btn-warning" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>
-            <button class="btn btn-sm btn-danger" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>
-          </div>
-        </td>
-      </tr>`;
+        <td class="text-sm">${r.requestor_name||'–'}</td><td>${statusBadge(r.status)}</td>
+        <td class="text-xs text-muted">${fmtDate(r.submitted_at||r.created_at)}</td>
+        <td><div class="flex gap-1">
+          ${r.status==='Submitted'?`<button class="btn btn-sm btn-secondary" onclick="openReviewModal('${r.id}','Under Review')">Review</button>`:''}
+          <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.id}','Approved')">Approve</button>
+          <button class="btn btn-sm btn-warning" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>
+          <button class="btn btn-sm btn-danger" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>
+        </div></td></tr>`;
     });
-    html+=`</tbody></table></div>`;
+    h+=`</tbody></table></div>`;
   }
-  setMain(html);
+  setMain(h);
 }
 
 // ─── Intake Detail ────────────────────────────────────────────────────────────
 async function showIntakeDetail(id) {
-  state.view='intake-detail'; renderSidebar();
-  setMain('<p class="text-muted">Loading...</p>');
-  const r = await api.get(`/api/intake/${id}`);
-  state.currentIntake = r;
+  S.view='intake-detail'; renderSidebar();
+  setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  const r=await api.get(`/api/intake/${id}`); S.currentIntake=r;
+  const canReview=['Submitted','Under Review'].includes(r.status);
+  const canSubmit=r.status==='Draft';
 
-  const canReview = ['Submitted','Under Review'].includes(r.status);
-  const canSubmit = r.status === 'Draft';
-  const canWithdraw = ['Submitted','Under Review'].includes(r.status);
-
-  let html = `<button class="back-btn" onclick="showIntakeList()">← Back to All Requests</button>`;
-
-  html += `<div class="two-col">
+  let h=`<button class="back-btn" onclick="showIntakeList()">← Back to All Requests</button>
+  <div class="two-col">
   <div>
   <div class="detail-header">
-    <div class="font-mono text-sm text-muted">${r.reference_id}</div>
+    <div class="font-mono text-xs text-muted">${r.reference_id}</div>
     <h2>${r.title}</h2>
     <div class="detail-meta">${r.architecture_type||''} · ${r.programme_domain||''} · Requestor: <strong>${r.requestor_name||'–'}</strong></div>
     <div class="detail-badges">
       ${statusBadge(r.status)}
       ${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):''}
-      ${r.business_unit?`<span class="badge" style="background:var(--surface3);color:var(--text)">${r.business_unit}</span>`:''}
-      ${r.project_timeline?`<span class="badge" style="background:var(--surface3);color:var(--muted)">${r.project_timeline}</span>`:''}
+      ${r.business_unit?`<span class="badge" style="background:var(--surface2);color:var(--text)">${r.business_unit}</span>`:''}
     </div>
-    <div class="flex gap-2 mt-2">`;
-
-  if (canSubmit) html+=`<button class="btn btn-primary btn-sm" onclick="openReviewModal('${r.id}','Submitted','submit')">Submit for Review</button>`;
-  if (canReview) {
-    html+=`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button>`;
-    html+=`<button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>`;
-    html+=`<button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`;
-    if(r.status==='Submitted') html+=`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`;
-  }
-  if (canWithdraw) html+=`<button class="btn btn-ghost btn-sm" onclick="openReviewModal('${r.id}','Withdrawn')">Withdraw</button>`;
-  html+=`<button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">+ Comment</button>
+    <div class="flex gap-2 mt-2">
+      ${canSubmit?`<button class="btn btn-primary btn-sm" onclick="openReviewModal('${r.id}','Submitted','submit')">Submit for Review</button>`:''}
+      ${canReview?`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button><button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button><button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`:''}
+      ${canReview&&r.status==='Submitted'?`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`:''}
+      <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
     </div>
-  </div>`;
-
-  if (r.description) html+=`<div class="section-card"><h3>Description</h3><p style="font-size:.86rem;line-height:1.65">${r.description}</p></div>`;
-  if (r.strategic_objective) html+=`<div class="section-card"><h3>Strategic Objective</h3><p style="font-size:.86rem;line-height:1.65">${r.strategic_objective}</p></div>`;
-
-  html+=`<div class="section-card"><h3>Technology Profile</h3><div class="kv-grid">
+  </div>
+  ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
+  ${r.strategic_objective?`<div class="section-card"><h3>Strategic Objective</h3><p class="text-sm" style="line-height:1.65">${r.strategic_objective}</p></div>`:''}
+  <div class="section-card"><h3>Technology Profile</h3><div class="kv-grid">
     <div class="kv-item"><label>Architecture Type</label><span>${r.architecture_type||'–'}</span></div>
     <div class="kv-item"><label>Hosting Model</label><span>${r.hosting_model||'–'}</span></div>
     <div class="kv-item"><label>Deployment Target</label><span>${r.deployment_target||'–'}</span></div>
@@ -494,514 +732,273 @@ async function showIntakeDetail(id) {
     <div class="kv-item"><label>Public Facing</label><span>${r.is_public_facing?'Yes':'No'}</span></div>
     <div class="kv-item"><label>Legacy Dependencies</label><span>${r.has_legacy_dependencies?'Yes':'No'}</span></div>
   </div>
-  ${r.components&&r.components.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Components</label><div class="tag-list mt-1">${r.components.map(c=>`<span class="badge" style="background:var(--surface3);color:var(--text)">${c}</span>`).join('')}</div></div>`:''}
-  ${r.tech_stack_notes?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Notes</label><p class="text-sm mt-1">${r.tech_stack_notes}</p></div>`:''}
-  </div>`;
-
-  html+=`<div class="section-card"><h3>Security & Data</h3><div class="kv-grid">
+  ${r.components&&r.components.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Components</label><div class="tag-list mt-1">${r.components.map(c=>`<span class="badge" style="background:var(--surface2);color:var(--text)">${c}</span>`).join('')}</div></div>`:''}
+  </div>
+  <div class="section-card"><h3>Security & Data</h3><div class="kv-grid">
     <div class="kv-item"><label>Data Classification</label><span>${r.data_classification||'–'}</span></div>
     <div class="kv-item"><label>External Data Sharing</label><span>${r.external_data_sharing?'Yes':'No'}</span></div>
-    <div class="kv-item"><label>Encryption at Rest</label><span>${r.encryption_at_rest?'✓ Yes':'✗ Not confirmed'}</span></div>
-    <div class="kv-item"><label>Encryption in Transit</label><span>${r.encryption_in_transit?'✓ Yes':'✗ Not confirmed'}</span></div>
-    <div class="kv-item"><label>MFA</label><span>${r.has_mfa?'✓ Yes':'✗ Not confirmed'}</span></div>
-    <div class="kv-item"><label>WAF</label><span>${r.has_waf?'✓ Yes':'✗ Not confirmed'}</span></div>
-    <div class="kv-item"><label>Monitoring</label><span>${r.has_monitoring?'✓ Yes':'✗ Not confirmed'}</span></div>
-    <div class="kv-item"><label>Zero Trust Aligned</label><span>${r.is_zero_trust_aligned?'✓ Yes':'✗ Not declared'}</span></div>
+    <div class="kv-item"><label>Encryption at Rest</label><span style="color:${r.encryption_at_rest?'var(--endorsed)':'var(--risk-high)'}">${r.encryption_at_rest?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Encryption in Transit</label><span style="color:${r.encryption_in_transit?'var(--endorsed)':'var(--risk-high)'}">${r.encryption_in_transit?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>MFA</label><span style="color:${r.has_mfa?'var(--endorsed)':'var(--risk-medium)'}">${r.has_mfa?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>WAF</label><span style="color:${r.has_waf?'var(--endorsed)':'var(--risk-medium)'}">${r.has_waf?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Monitoring</label><span style="color:${r.has_monitoring?'var(--endorsed)':'var(--risk-medium)'}">${r.has_monitoring?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Zero Trust Aligned</label><span style="color:${r.is_zero_trust_aligned?'var(--endorsed)':'var(--muted)'}">${r.is_zero_trust_aligned?'✓ Yes':'✗ Not declared'}</span></div>
   </div>
-  ${r.dataTypes&&r.dataTypes.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Data Types</label><div class="tag-list mt-1">${r.dataTypes.map(t=>`<span class="badge badge-review">${t}</span>`).join('')}</div></div>`:''}
-  ${r.authMethods&&r.authMethods.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Auth Methods</label><div class="tag-list mt-1">${r.authMethods.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
-  ${r.complianceRequirements&&r.complianceRequirements.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Compliance</label><div class="tag-list mt-1">${r.complianceRequirements.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
-  </div>`;
+  ${r.dataTypes&&r.dataTypes.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Data Types</label><div class="tag-list mt-1">${r.dataTypes.map(t=>`<span class="badge badge-review">${t}</span>`).join('')}</div></div>`:''}
+  ${r.authMethods&&r.authMethods.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Auth Methods</label><div class="tag-list mt-1">${r.authMethods.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
+  ${r.complianceRequirements&&r.complianceRequirements.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Compliance</label><div class="tag-list mt-1">${r.complianceRequirements.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
+  </div>
+  ${(r.vendorIds&&r.vendorIds.length)||(r.newVendors&&r.newVendors.length)?renderVendorSection(r):''}
+  ${r.relatedPatternIds&&r.relatedPatternIds.length?`<div class="section-card"><h3>Related Patterns</h3><div class="tag-list">${S.patterns.filter(p=>r.relatedPatternIds.includes(p.patternId)).map(p=>`<span class="badge badge-${p.status==='Endorsed'?'endorsed':'dev'}" style="cursor:pointer" onclick="showPattern('${p.patternId}')">${p.patternId} — ${p.name}</span>`).join('')}</div></div>`:''}
+  ${r.has_legacy_dependencies&&r.legacy_systems?`<div class="section-card"><h3>Legacy Systems</h3><p class="text-sm">${r.legacy_systems}</p></div>`:''}
+  ${r.deviates_from_patterns?`<div class="section-card"><h3>Pattern Deviation</h3><div class="alert alert-warning" style="margin-bottom:0">⚠ Deviates from established patterns.${r.deviation_justification?' Justification: '+r.deviation_justification:''}</div></div>`:''}
+  ${r.reviewer_notes?`<div class="section-card"><h3>Reviewer Notes</h3><p class="text-sm">${r.reviewer_notes}</p><p class="text-xs text-muted mt-1">— ${r.reviewer_name||'Reviewer'}, ${fmtDate(r.reviewed_at)}</p></div>`:''}
+  ${r.comments&&r.comments.length?`<div class="section-card"><h3>Comments (${r.comments.length})</h3>${r.comments.map(c=>`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`).join('')}</div>`:''}
+  </div>
+  <div>
+    ${r.risk_tier&&r.riskBreakdown?renderRiskPanel(r.risk_score,r.risk_tier,r.riskBreakdown,r.riskFlags||[],r.riskRecommendations||[]):''}
+    ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
+  </div></div>`;
+  setMain(h);
+}
 
-  if (r.vendorIds&&r.vendorIds.length || r.newVendors&&r.newVendors.length) {
-    const known = state.vendors.filter(v=>r.vendorIds.includes(v.id));
-    html+=`<div class="section-card"><h3>Vendors</h3>`;
-    if(known.length){html+=`<div class="table-wrap" style="margin-bottom:.7rem"><table><thead><tr><th>Vendor</th><th>Product</th><th>Criticality</th><th>Hosting</th></tr></thead><tbody>`;
-      known.forEach(v=>html+=`<tr><td>${v.vendorCompany}</td><td>${v.productService}</td><td>${critBadge(v.criticality)}</td><td class="text-sm text-muted">${v.hostingModel||''}</td></tr>`);
-      html+=`</tbody></table></div>`;}
-    if(r.newVendors&&r.newVendors.length) html+=`<div><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">New Vendors (Unvetted)</label><div class="tag-list mt-1">${r.newVendors.map(n=>`<span class="badge badge-review">⚠ ${n}</span>`).join('')}</div></div>`;
-    html+=`</div>`;
-  }
-
-  if (r.relatedPatternIds&&r.relatedPatternIds.length) {
-    const related = state.patterns.filter(p=>r.relatedPatternIds.includes(p.patternId));
-    html+=`<div class="section-card"><h3>Related Patterns</h3><div class="tag-list">${related.map(p=>`<span class="badge ${p.status==='Endorsed'?'badge-endorsed':'badge-dev'}" style="cursor:pointer" onclick="showPattern('${p.patternId}')">${p.patternId} — ${p.name}</span>`).join('')}</div></div>`;
-  }
-
-  if (r.has_legacy_dependencies && r.legacy_systems) html+=`<div class="section-card"><h3>Legacy Systems</h3><p class="text-sm">${r.legacy_systems}</p></div>`;
-  if (r.deviates_from_patterns) html+=`<div class="section-card"><h3>Pattern Deviation</h3><div class="alert alert-warning" style="margin-bottom:0">⚠ This request deviates from established patterns. ${r.deviation_justification?`<br><strong>Justification:</strong> ${r.deviation_justification}`:''}</div></div>`;
-  if (r.reviewer_notes) html+=`<div class="section-card"><h3>Reviewer Notes</h3><p class="text-sm">${r.reviewer_notes}</p><p class="text-sm text-muted mt-1">— ${r.reviewer_name||'Reviewer'} at ${fmtDate(r.reviewed_at)}</p></div>`;
-
-  // Comments
-  if (r.comments&&r.comments.length) {
-    html+=`<div class="section-card"><h3>Comments (${r.comments.length})</h3>`;
-    r.comments.forEach(c=>{
-      html+=`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`;
-    });
-    html+=`</div>`;
-  }
-
-  html+=`</div><!-- end left col -->`;
-
-  // Right column: risk panel
-  html+=`<div>`;
-  if (r.risk_tier && r.riskBreakdown) {
-    html+=renderRiskPanel(r.risk_score, r.risk_tier, r.riskBreakdown, r.riskFlags||[], r.riskRecommendations||[]);
-  }
-
-  // History
-  if (r.history&&r.history.length) {
-    html+=`<div class="section-card mt-3"><h3>Audit History</h3><div class="history-list">`;
-    r.history.forEach(h=>{
-      html+=`<div class="history-item"><div class="history-dot"></div><div><div class="history-text"><strong>${h.action}</strong>${h.actor?` by ${h.actor}`:''}</div>${h.notes?`<div class="text-sm text-muted">${h.notes}</div>`:''}<div class="history-time">${fmtDate(h.created_at)}</div></div></div>`;
-    });
-    html+=`</div></div>`;
-  }
-  html+=`</div></div>`;
-
-  setMain(html);
+function renderVendorSection(r) {
+  const known=S.vendors.filter(v=>(r.vendorIds||[]).includes(v.id));
+  let h=`<div class="section-card"><h3>Vendors</h3>`;
+  if(known.length){h+=`<div class="table-wrap" style="margin-bottom:.6rem"><table><thead><tr><th>Vendor</th><th>Product</th><th>Criticality</th><th>Hosting</th></tr></thead><tbody>`;
+    known.forEach(v=>h+=`<tr><td>${v.vendorCompany}</td><td>${v.productService}</td><td>${critBadge(v.criticality)}</td><td class="text-xs text-muted">${v.hostingModel||''}</td></tr>`);
+    h+=`</tbody></table></div>`;}
+  if(r.newVendors&&r.newVendors.length) h+=`<div><label class="text-xs text-muted" style="text-transform:uppercase">Unvetted Vendors</label><div class="tag-list mt-1">${r.newVendors.map(n=>`<span class="badge badge-review">⚠ ${n}</span>`).join('')}</div></div>`;
+  return h+`</div>`;
 }
 
 // ─── New Intake Wizard ────────────────────────────────────────────────────────
 function startNewIntake() {
-  state.view='new-intake'; state.wizardStep=1; state.wizardData={}; state.wizardRisk=null;
-  renderSidebar(); renderWizard();
+  S.view='new-intake'; S.wizardStep=1; S.wizardData={}; S.wizardRisk=null; renderSidebar(); renderWizard();
 }
-
 function renderWizard() {
-  const steps = ['Overview','Technology','Vendors','Security & Data','Dependencies','Risk & Submit'];
-  let html = `<div class="page-title"><h2>New Architecture Request</h2></div>`;
-  html += `<div class="wizard-steps">`;
-  steps.forEach((s,i)=>{
-    const num=i+1;
-    const cls=num===state.wizardStep?'active':num<state.wizardStep?'done':'';
-    html+=`<div class="wizard-step ${cls}" onclick="gotoStep(${num})"><span class="step-num">${num}</span>${s}</div>`;
-  });
-  html+=`</div>`;
-  html+=`<div id="wizard-body">`;
-  html+=renderWizardStep(state.wizardStep);
-  html+=`</div>`;
-  setMain(html);
+  const steps=['Overview','Technology','Vendors','Security & Data','Dependencies','Risk & Submit'];
+  let h=`<div class="page-title"><h2>New Architecture Request</h2></div>`;
+  h+=`<div class="wizard-steps">${steps.map((s,i)=>{const n=i+1;const cls=n===S.wizardStep?'active':n<S.wizardStep?'done':'';return`<div class="wizard-step ${cls}" onclick="gotoStep(${n})"><span class="step-num">${n}</span>${s}</div>`;}).join('')}</div>`;
+  h+=`<div id="wizard-body">${renderWizardStep(S.wizardStep)}</div>`;
+  setMain(h);
 }
-
-function renderWizardStep(step) {
-  const d = state.wizardData;
-  let html='';
-  if(step===1) {
-    html+=`<div class="form-row">
-      <div class="form-group"><label>Request Title *</label><input class="form-control" id="w_title" value="${d.title||''}" placeholder="e.g. Azure Event Hub Integration for OT Telemetry" /></div>
-      <div class="form-group"><label>Architecture Type *</label><select class="form-control" id="w_architectureType"><option value="">Select...</option>${opts(['API & Integration','Data Platform','Infrastructure & Cloud','Security & Identity','Application Modernisation','OT / IoT','Network & Connectivity','Other'],d.architectureType)}</select></div>
-    </div>
+function renderWizardStep(step){
+  const d=S.wizardData;
+  let h='';
+  if(step===1){h+=`<div class="form-row"><div class="form-group"><label>Request Title *</label><input class="form-control" id="w_title" value="${d.title||''}" placeholder="e.g. Azure Event Hub Integration for OT Telemetry"/></div><div class="form-group"><label>Architecture Type *</label><select class="form-control" id="w_architectureType"><option value="">Select...</option>${opts(['API & Integration','Data Platform','Infrastructure & Cloud','Security & Identity','Application Modernisation','OT / IoT','Network & Connectivity','Other'],d.architectureType)}</select></div></div>
     <div class="form-group"><label>Description *</label><textarea class="form-control" id="w_description" placeholder="Describe what you are building and why...">${d.description||''}</textarea></div>
     <div class="form-group"><label>Strategic Objective</label><textarea class="form-control" id="w_strategicObjective" placeholder="How does this align to strategic priorities?">${d.strategicObjective||''}</textarea></div>
-    <div class="form-row-3">
-      <div class="form-group"><label>Requestor Name *</label><input class="form-control" id="w_requestorName" value="${d.requestorName||''}" /></div>
-      <div class="form-group"><label>Requestor Email</label><input class="form-control" id="w_requestorEmail" value="${d.requestorEmail||''}" type="email" /></div>
-      <div class="form-group"><label>Role</label><input class="form-control" id="w_requestorRole" value="${d.requestorRole||''}" placeholder="e.g. Solution Architect" /></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Business Unit *</label><input class="form-control" id="w_businessUnit" value="${d.businessUnit||''}" placeholder="e.g. Supply Chain, Manufacturing" /></div>
-      <div class="form-group"><label>Programme Domain</label><input class="form-control" id="w_programmeDomain" value="${d.programmeDomain||''}" placeholder="e.g. OT Operations / Analytics" /></div>
-    </div>
-    <div class="form-group"><label>Project Timeline</label><select class="form-control" id="w_projectTimeline"><option value="">Select...</option>${opts(['Immediate (< 4 weeks)','Short-term (1-3 months)','Medium-term (3-6 months)','Long-term (6-12 months)','Strategic (12+ months)'],d.projectTimeline)}</select></div>`;
-  }
-  else if(step===2) {
-    html+=`<div class="form-group"><label>Key Components</label><p class="text-sm text-muted" style="margin-bottom:.5rem">List the main Azure/technology components involved. Press Enter to add each.</p>
-      <div class="tag-input-wrap" id="components-wrap" onclick="document.getElementById('comp-input').focus()">
-        ${(d.components||[]).map(c=>`<span class="tag">${c}<span class="tag-remove" onclick="removeTag('components','${c}')">✕</span></span>`).join('')}
-        <input class="tag-input" id="comp-input" placeholder="e.g. Azure Event Hubs" onkeydown="addTag(event,'components','comp-input')" />
-      </div></div>
-    <div class="form-row">
-      <div class="form-group"><label>Hosting Model</label><select class="form-control" id="w_hostingModel"><option value="">Select...</option>${opts(['Public Cloud (Azure)','Public Cloud (AWS)','Public Cloud (GCP)','Private Cloud','On-Premises','Hybrid','SaaS','PaaS'],d.hostingModel)}</select></div>
-      <div class="form-group"><label>Deployment Target</label><select class="form-control" id="w_deploymentTarget"><option value="">Select...</option>${opts(['Production','Non-Production','Both','Disaster Recovery'],d.deploymentTarget)}</select></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Estimated Integration Points</label><input class="form-control" id="w_integrationPoints" type="number" min="0" value="${d.integrationPoints||0}" /></div>
-      <div class="form-group"><label>Public-Facing Endpoint?</label><select class="form-control" id="w_isPublicFacing"><option value="">Select...</option><option value="true" ${d.isPublicFacing?'selected':''}>Yes</option><option value="false" ${d.isPublicFacing===false?'selected':''}>No</option></select></div>
-    </div>
-    <div class="form-group"><label>Technology Stack Notes</label><textarea class="form-control" id="w_techStackNotes" placeholder="Any additional notes about the tech stack...">${d.techStackNotes||''}</textarea></div>`;
-  }
-  else if(step===3) {
-    html+=`<div class="form-group"><label>Select from Vendor Registry</label><p class="text-sm text-muted" style="margin-bottom:.6rem">Check all vendors involved in this solution.</p>
-      <div class="checkbox-grid" id="vendor-grid">`;
-    state.vendors.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{
-      const checked=(d.vendorIds||[]).includes(v.id);
-      html+=`<label class="checkbox-item"><input type="checkbox" value="${v.id}" ${checked?'checked':''} onchange="toggleVendor(${v.id})" />${v.vendorCompany} — <span class="text-muted text-sm">${v.productService}</span> ${critBadge(v.criticality)}</label>`;
-    });
-    html+=`</div></div>
-    <div class="form-group"><label>New / Unvetted Vendors</label><p class="text-sm text-muted" style="margin-bottom:.5rem">Add vendors not in the registry. Each will be flagged for security assessment.</p>
-      <div class="tag-input-wrap" id="newvendors-wrap" onclick="document.getElementById('nv-input').focus()">
-        ${(d.newVendors||[]).map(v=>`<span class="tag badge-review">${v}<span class="tag-remove" onclick="removeTag('newVendors','${encodeURIComponent(v)}')">✕</span></span>`).join('')}
-        <input class="tag-input" id="nv-input" placeholder="e.g. Confluent Cloud" onkeydown="addTag(event,'newVendors','nv-input')" />
-      </div></div>`;
-  }
-  else if(step===4) {
-    html+=`<div class="form-row">
-      <div class="form-group"><label>Data Classification *</label><select class="form-control" id="w_dataClassification"><option value="">Select...</option>${opts(['Public','Internal','Confidential','Restricted'],d.dataClassification)}</select></div>
-      <div class="form-group"><label>External Data Sharing?</label><select class="form-control" id="w_externalDataSharing"><option value="">Select...</option><option value="true" ${d.externalDataSharing?'selected':''}>Yes</option><option value="false" ${d.externalDataSharing===false?'selected':''}>No</option></select></div>
-    </div>
-    <div class="form-group"><label>Data Types in Scope</label>
-      <div class="checkbox-grid">${['PII','PHI','Financial','OT/SCADA Data','Credentials/Secrets','Operational Metrics','Configuration Data','Log Data','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.dataTypes||[]).includes(t)?'checked':''} onchange="toggleCheck('dataTypes','${t}')" />${t}</label>`).join('')}</div>
-    </div>
-    <div class="form-group"><label>Data Sharing Details</label><input class="form-control" id="w_dataSharingDetails" value="${d.dataSharingDetails||''}" placeholder="Describe what data is shared and with whom" /></div>
-    <div class="form-group"><label>Authentication Methods</label>
-      <div class="checkbox-grid">${['OAuth2/OIDC','SAML','API Key','Certificate/mTLS','Windows Integrated (Kerberos)','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.authMethods||[]).includes(t)?'checked':''} onchange="toggleCheck('authMethods','${t}')" />${t}</label>`).join('')}</div>
-    </div>
-    <div class="form-group"><label>Security Controls</label>
-      <div class="checkbox-grid">
-        <label class="checkbox-item"><input type="checkbox" id="w_encryptionAtRest" ${d.encryptionAtRest?'checked':''} onchange="state.wizardData.encryptionAtRest=this.checked" />Encryption at Rest</label>
-        <label class="checkbox-item"><input type="checkbox" id="w_encryptionInTransit" ${d.encryptionInTransit?'checked':''} onchange="state.wizardData.encryptionInTransit=this.checked" />Encryption in Transit</label>
-        <label class="checkbox-item"><input type="checkbox" id="w_hasMfa" ${d.hasMfa?'checked':''} onchange="state.wizardData.hasMfa=this.checked" />Multi-Factor Authentication</label>
-        <label class="checkbox-item"><input type="checkbox" id="w_hasWaf" ${d.hasWaf?'checked':''} onchange="state.wizardData.hasWaf=this.checked" />WAF Protection</label>
-        <label class="checkbox-item"><input type="checkbox" id="w_hasMonitoring" ${d.hasMonitoring?'checked':''} onchange="state.wizardData.hasMonitoring=this.checked" />Monitoring & Alerting</label>
-        <label class="checkbox-item"><input type="checkbox" id="w_isZeroTrustAligned" ${d.isZeroTrustAligned?'checked':''} onchange="state.wizardData.isZeroTrustAligned=this.checked" />Zero Trust Aligned</label>
-      </div>
-    </div>
-    <div class="form-group"><label>Compliance Requirements</label>
-      <div class="checkbox-grid">${['GDPR','SOX','ISO 27001','IEC 62443','HIPAA','PCI-DSS','NIST CSF','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.complianceRequirements||[]).includes(t)?'checked':''} onchange="toggleCheck('complianceRequirements','${t}')" />${t}</label>`).join('')}</div>
-    </div>`;
-  }
-  else if(step===5) {
-    html+=`<div class="form-group"><label>Related Architecture Patterns</label><p class="text-sm text-muted" style="margin-bottom:.6rem">Select all patterns this solution references or should align to.</p>
-      <div class="checkbox-grid">`;
-    state.patterns.forEach(p=>{
-      const checked=(d.relatedPatternIds||[]).includes(p.patternId);
-      html+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" ${checked?'checked':''} onchange="toggleCheck('relatedPatternIds','${p.patternId}')" />${p.patternId} <span class="text-muted text-sm">— ${p.name}</span> ${p.status==='Endorsed'?'<span class="badge badge-endorsed text-sm">Endorsed</span>':''}</label>`;
-    });
-    html+=`</div></div>
-    <div class="form-group"><label>Deviates from Established Patterns?</label><select class="form-control" id="w_deviatesFromPatterns"><option value="">Select...</option><option value="true" ${d.deviatesFromPatterns?'selected':''}>Yes — exception required</option><option value="false" ${d.deviatesFromPatterns===false?'selected':''}>No</option></select></div>
-    <div class="form-group"><label>Deviation Justification</label><textarea class="form-control" id="w_deviationJustification" placeholder="Provide technical rationale for any pattern deviation...">${d.deviationJustification||''}</textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label>Legacy System Dependencies?</label><select class="form-control" id="w_hasLegacyDependencies"><option value="">Select...</option><option value="true" ${d.hasLegacyDependencies?'selected':''}>Yes</option><option value="false" ${d.hasLegacyDependencies===false?'selected':''}>No</option></select></div>
-      <div class="form-group"><label>Legacy Systems</label><input class="form-control" id="w_legacySystems" value="${d.legacySystems||''}" placeholder="e.g. SAP ECC, FactoryTalk SE" /></div>
-    </div>
-    <div class="form-group"><label>External Dependencies</label><textarea class="form-control" id="w_externalDependencies" placeholder="Other external systems, services, or teams this depends on...">${d.externalDependencies||''}</textarea></div>`;
-  }
-  else if(step===6) {
-    if(!state.wizardRisk) {
-      html+=`<div class="alert alert-info">Calculating risk assessment...</div>`;
-      setTimeout(()=>calculateAndShowRisk(),100);
-    } else {
-      const risk=state.wizardRisk;
-      html+=`<div class="two-col" style="gap:1.2rem">
-      <div>
+    <div class="form-row-3"><div class="form-group"><label>Requestor Name *</label><input class="form-control" id="w_requestorName" value="${d.requestorName||''}"/></div><div class="form-group"><label>Requestor Email</label><input class="form-control" id="w_requestorEmail" value="${d.requestorEmail||''}" type="email"/></div><div class="form-group"><label>Role</label><input class="form-control" id="w_requestorRole" value="${d.requestorRole||''}" placeholder="e.g. Solution Architect"/></div></div>
+    <div class="form-row"><div class="form-group"><label>Business Unit *</label><input class="form-control" id="w_businessUnit" value="${d.businessUnit||''}" placeholder="e.g. Supply Chain"/></div><div class="form-group"><label>Programme Domain</label><input class="form-control" id="w_programmeDomain" value="${d.programmeDomain||''}" placeholder="e.g. OT Operations / Analytics"/></div></div>
+    <div class="form-group"><label>Project Timeline</label><select class="form-control" id="w_projectTimeline"><option value="">Select...</option>${opts(['Immediate (< 4 weeks)','Short-term (1-3 months)','Medium-term (3-6 months)','Long-term (6-12 months)','Strategic (12+ months)'],d.projectTimeline)}</select></div>`;}
+  else if(step===2){h+=`<div class="form-group"><label>Key Components</label><p class="text-xs text-muted" style="margin-bottom:.4rem">Press Enter to add each component.</p><div class="tag-input-wrap" id="components-wrap" onclick="document.getElementById('comp-input').focus()">${(d.components||[]).map(c=>`<span class="tag">${c}<span class="tag-remove" onclick="removeTag('components','${encodeURIComponent(c)}')">✕</span></span>`).join('')}<input class="tag-input" id="comp-input" placeholder="e.g. Azure Event Hubs" onkeydown="addTag(event,'components','comp-input')"/></div></div>
+    <div class="form-row"><div class="form-group"><label>Hosting Model</label><select class="form-control" id="w_hostingModel"><option value="">Select...</option>${opts(['Public Cloud (Azure)','Public Cloud (AWS)','Private Cloud','On-Premises','Hybrid','SaaS','PaaS'],d.hostingModel)}</select></div><div class="form-group"><label>Deployment Target</label><select class="form-control" id="w_deploymentTarget"><option value="">Select...</option>${opts(['Production','Non-Production','Both','DR'],d.deploymentTarget)}</select></div></div>
+    <div class="form-row"><div class="form-group"><label>Integration Points</label><input class="form-control" id="w_integrationPoints" type="number" min="0" value="${d.integrationPoints||0}"/></div><div class="form-group"><label>Public-Facing Endpoint?</label><select class="form-control" id="w_isPublicFacing"><option value="">Select...</option><option value="true" ${d.isPublicFacing?'selected':''}>Yes</option><option value="false" ${d.isPublicFacing===false?'selected':''}>No</option></select></div></div>
+    <div class="form-group"><label>Technology Stack Notes</label><textarea class="form-control" id="w_techStackNotes" placeholder="Any additional notes...">${d.techStackNotes||''}</textarea></div>`;}
+  else if(step===3){h+=`<div class="form-group"><label>Select from Vendor Registry</label><div class="checkbox-grid">`;
+    S.vendors.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<label class="checkbox-item"><input type="checkbox" value="${v.id}" ${(d.vendorIds||[]).includes(v.id)?'checked':''} onchange="toggleVendor(${v.id})"/>${v.vendorCompany} — <span class="text-muted text-xs">${v.productService}</span> ${critBadge(v.criticality)}</label>`;});
+    h+=`</div></div><div class="form-group"><label>New / Unvetted Vendors</label><div class="tag-input-wrap" id="newvendors-wrap" onclick="document.getElementById('nv-input').focus()">${(d.newVendors||[]).map(v=>`<span class="tag">${v}<span class="tag-remove" onclick="removeTag('newVendors','${encodeURIComponent(v)}')">✕</span></span>`).join('')}<input class="tag-input" id="nv-input" placeholder="e.g. Confluent Cloud" onkeydown="addTag(event,'newVendors','nv-input')"/></div></div>`;}
+  else if(step===4){h+=`<div class="form-row"><div class="form-group"><label>Data Classification *</label><select class="form-control" id="w_dataClassification"><option value="">Select...</option>${opts(['Public','Internal','Confidential','Restricted'],d.dataClassification)}</select></div><div class="form-group"><label>External Data Sharing?</label><select class="form-control" id="w_externalDataSharing"><option value="">Select...</option><option value="true" ${d.externalDataSharing?'selected':''}>Yes</option><option value="false" ${d.externalDataSharing===false?'selected':''}>No</option></select></div></div>
+    <div class="form-group"><label>Data Types in Scope</label><div class="checkbox-grid">${['PII','PHI','Financial','OT/SCADA Data','Credentials/Secrets','Operational Metrics','Configuration Data','Log Data','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.dataTypes||[]).includes(t)?'checked':''} onchange="toggleCheck('dataTypes','${t}')"/>${t}</label>`).join('')}</div></div>
+    <div class="form-group"><label>Authentication Methods</label><div class="checkbox-grid">${['OAuth2/OIDC','SAML','API Key','Certificate/mTLS','Windows Integrated (Kerberos)','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.authMethods||[]).includes(t)?'checked':''} onchange="toggleCheck('authMethods','${t}')"/>${t}</label>`).join('')}</div></div>
+    <div class="form-group"><label>Security Controls</label><div class="checkbox-grid">
+      ${[['encryptionAtRest','Encryption at Rest'],['encryptionInTransit','Encryption in Transit'],['hasMfa','Multi-Factor Authentication'],['hasWaf','WAF Protection'],['hasMonitoring','Monitoring & Alerting'],['isZeroTrustAligned','Zero Trust Aligned']].map(([k,l])=>`<label class="checkbox-item"><input type="checkbox" ${d[k]?'checked':''} onchange="S.wizardData['${k}']=this.checked"/>${l}</label>`).join('')}
+    </div></div>
+    <div class="form-group"><label>Compliance Requirements</label><div class="checkbox-grid">${['GDPR','SOX','ISO 27001','IEC 62443','HIPAA','PCI-DSS','NIST CSF','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.complianceRequirements||[]).includes(t)?'checked':''} onchange="toggleCheck('complianceRequirements','${t}')"/>${t}</label>`).join('')}</div></div>`;}
+  else if(step===5){h+=`<div class="form-group"><label>Related Architecture Patterns</label><div class="checkbox-grid">`;
+    S.patterns.forEach(p=>{h+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" ${(d.relatedPatternIds||[]).includes(p.patternId)?'checked':''} onchange="toggleCheck('relatedPatternIds','${p.patternId}')"/><span class="font-mono text-xs" style="color:var(--muted)">${p.patternId}</span> ${p.name} ${p.status==='Endorsed'?'<span class="badge badge-endorsed text-xs" style="margin-left:auto">✓</span>':''}</label>`;});
+    h+=`</div></div>
+    <div class="form-row"><div class="form-group"><label>Deviates from Patterns?</label><select class="form-control" id="w_deviatesFromPatterns"><option value="">Select...</option><option value="true" ${d.deviatesFromPatterns?'selected':''}>Yes — exception required</option><option value="false" ${d.deviatesFromPatterns===false?'selected':''}>No</option></select></div><div class="form-group"><label>Legacy Dependencies?</label><select class="form-control" id="w_hasLegacyDependencies"><option value="">Select...</option><option value="true" ${d.hasLegacyDependencies?'selected':''}>Yes</option><option value="false" ${d.hasLegacyDependencies===false?'selected':''}>No</option></select></div></div>
+    <div class="form-group"><label>Legacy Systems</label><input class="form-control" id="w_legacySystems" value="${d.legacySystems||''}" placeholder="e.g. SAP ECC, FactoryTalk SE"/></div>
+    <div class="form-group"><label>Deviation Justification</label><textarea class="form-control" id="w_deviationJustification" placeholder="Technical rationale for any pattern deviation...">${d.deviationJustification||''}</textarea></div>
+    <div class="form-group"><label>External Dependencies</label><textarea class="form-control" id="w_externalDependencies" placeholder="Other systems, services, or teams...">${d.externalDependencies||''}</textarea></div>`;}
+  else if(step===6){
+    if(!S.wizardRisk){h+=`<div class="alert alert-info">Calculating automated risk assessment...</div>`;setTimeout(()=>calculateAndShowRisk(),80);}
+    else{
+      const risk=S.wizardRisk;
+      h+=`<div class="two-col" style="gap:1.2rem"><div>
         ${renderRiskPanel(risk.score,risk.tier,risk.breakdown,risk.flags,risk.recommendations)}
-        <div class="section-card mt-3">
-          <h3>Submission Summary</h3>
-          <div class="kv-grid">
-            <div class="kv-item"><label>Title</label><span>${state.wizardData.title||'–'}</span></div>
-            <div class="kv-item"><label>Type</label><span>${state.wizardData.architectureType||'–'}</span></div>
-            <div class="kv-item"><label>Requestor</label><span>${state.wizardData.requestorName||'–'}</span></div>
-            <div class="kv-item"><label>Business Unit</label><span>${state.wizardData.businessUnit||'–'}</span></div>
-            <div class="kv-item"><label>Data Classification</label><span>${state.wizardData.dataClassification||'–'}</span></div>
-            <div class="kv-item"><label>Integration Points</label><span>${state.wizardData.integrationPoints||0}</span></div>
-          </div>
-        </div>
-      </div>
-      <div>
-        ${risk.tier==='Critical'?`<div class="alert alert-danger">⚠ Critical risk detected. This request will require joint Architecture Board and CISO review before any implementation may proceed.</div>`:''}
-        ${risk.tier==='High'?`<div class="alert alert-warning">⚠ High risk. Architecture Board review is required for approval.</div>`:''}
-        ${risk.flags.length>0?`<div class="section-card"><h3>Risk Flags (${risk.flags.length})</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
-        ${risk.recommendations.length>0?`<div class="section-card mt-2"><h3>Recommendations (${risk.recommendations.length})</h3><ul class="recs-list">${risk.recommendations.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
+        <div class="section-card mt-2"><h3>Submission Summary</h3><div class="kv-grid">
+          <div class="kv-item"><label>Title</label><span>${S.wizardData.title||'–'}</span></div>
+          <div class="kv-item"><label>Type</label><span>${S.wizardData.architectureType||'–'}</span></div>
+          <div class="kv-item"><label>Requestor</label><span>${S.wizardData.requestorName||'–'}</span></div>
+          <div class="kv-item"><label>Business Unit</label><span>${S.wizardData.businessUnit||'–'}</span></div>
+          <div class="kv-item"><label>Data Classification</label><span>${S.wizardData.dataClassification||'–'}</span></div>
+          <div class="kv-item"><label>Integration Points</label><span>${S.wizardData.integrationPoints||0}</span></div>
+        </div></div>
+      </div><div>
+        ${risk.tier==='Critical'?`<div class="alert alert-danger">⚠ Critical risk — Architecture Board and CISO review mandatory before any implementation.</div>`:''}
+        ${risk.tier==='High'?`<div class="alert alert-warning">⚠ High risk — Architecture Board review required for approval.</div>`:''}
+        ${risk.flags.length?`<div class="section-card"><h3>Risk Flags</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
+        ${risk.recommendations.length?`<div class="section-card mt-2"><h3>Recommendations</h3><ul class="recs-list">${risk.recommendations.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
       </div></div>
-      <div class="wizard-nav">
-        <button class="btn btn-secondary" onclick="gotoStep(5)">← Back</button>
-        <div class="flex gap-2">
-          <button class="btn btn-ghost" onclick="submitIntake(true)">Save as Draft</button>
-          <button class="btn btn-primary" onclick="submitIntake(false)">Submit for Review →</button>
-        </div>
-      </div>`;
-      return html;
+      <div class="wizard-nav"><button class="btn btn-secondary" onclick="gotoStep(5)">← Back</button><div class="flex gap-2"><button class="btn btn-ghost" onclick="submitIntake(true)">Save as Draft</button><button class="btn btn-primary" onclick="submitIntake(false)">Submit for Review →</button></div></div>`;
+      return h;
     }
   }
-
-  html+=`<div class="wizard-nav">
-    ${step>1?`<button class="btn btn-secondary" onclick="gotoStep(${step-1})">← Back</button>`:'<div></div>'}
-    <button class="btn btn-primary" onclick="gotoStep(${step+1})">${step<5?'Next →':'Review & Submit →'}</button>
-  </div>`;
-  return html;
+  h+=`<div class="wizard-nav">${step>1?`<button class="btn btn-secondary" onclick="gotoStep(${step-1})">← Back</button>`:'<div></div>'}<button class="btn btn-primary" onclick="gotoStep(${step+1})">${step<5?'Next →':'Review & Submit →'}</button></div>`;
+  return h;
 }
 
-async function calculateAndShowRisk() {
-  try {
-    state.wizardRisk = await api.post('/api/intake/assess', state.wizardData);
-    document.getElementById('wizard-body').innerHTML = renderWizardStep(6);
-  } catch(e) { document.getElementById('wizard-body').innerHTML='<div class="alert alert-danger">Risk assessment failed. Please go back and check required fields.</div>'; }
-}
+async function calculateAndShowRisk(){try{S.wizardRisk=await api.post('/api/intake/assess',S.wizardData);document.getElementById('wizard-body').innerHTML=renderWizardStep(6);}catch(e){document.getElementById('wizard-body').innerHTML='<div class="alert alert-danger">Risk assessment failed. Check required fields and try again.</div>';}}
 
-function gotoStep(n) {
-  if(n<1||n>6) return;
-  saveStepData(state.wizardStep);
-  if(n>1 && !validateStep(state.wizardStep)) return;
-  if(n===6) state.wizardRisk=null;
-  state.wizardStep=n;
-  renderWizard();
-}
+function gotoStep(n){if(n<1||n>6)return;saveStepData(S.wizardStep);if(n>1&&!validateStep(S.wizardStep))return;if(n===6)S.wizardRisk=null;S.wizardStep=n;renderWizard();}
 
-function saveStepData(step) {
-  const g = id => { const el=document.getElementById(id); return el?el.value:undefined; };
-  const gb = id => { const el=document.getElementById(id); return el?el.checked:undefined; };
-  if(step===1){
-    Object.assign(state.wizardData,{title:g('w_title'),description:g('w_description'),strategicObjective:g('w_strategicObjective'),requestorName:g('w_requestorName'),requestorEmail:g('w_requestorEmail'),requestorRole:g('w_requestorRole'),businessUnit:g('w_businessUnit'),programmeDomain:g('w_programmeDomain'),projectTimeline:g('w_projectTimeline'),architectureType:g('w_architectureType')});
-  } else if(step===2){
-    Object.assign(state.wizardData,{hostingModel:g('w_hostingModel'),deploymentTarget:g('w_deploymentTarget'),integrationPoints:parseInt(g('w_integrationPoints'))||0,isPublicFacing:g('w_isPublicFacing')==='true',techStackNotes:g('w_techStackNotes')});
-  } else if(step===4){
-    Object.assign(state.wizardData,{dataClassification:g('w_dataClassification'),externalDataSharing:g('w_externalDataSharing')==='true',dataSharingDetails:g('w_dataSharingDetails')});
-  } else if(step===5){
-    Object.assign(state.wizardData,{deviatesFromPatterns:g('w_deviatesFromPatterns')==='true',deviationJustification:g('w_deviationJustification'),hasLegacyDependencies:g('w_hasLegacyDependencies')==='true',legacySystems:g('w_legacySystems'),externalDependencies:g('w_externalDependencies')});
-  }
+function saveStepData(step){
+  const g=id=>{const el=document.getElementById(id);return el?el.value:undefined;};
+  if(step===1)Object.assign(S.wizardData,{title:g('w_title'),description:g('w_description'),strategicObjective:g('w_strategicObjective'),requestorName:g('w_requestorName'),requestorEmail:g('w_requestorEmail'),requestorRole:g('w_requestorRole'),businessUnit:g('w_businessUnit'),programmeDomain:g('w_programmeDomain'),projectTimeline:g('w_projectTimeline'),architectureType:g('w_architectureType')});
+  else if(step===2)Object.assign(S.wizardData,{hostingModel:g('w_hostingModel'),deploymentTarget:g('w_deploymentTarget'),integrationPoints:parseInt(g('w_integrationPoints'))||0,isPublicFacing:g('w_isPublicFacing')==='true',techStackNotes:g('w_techStackNotes')});
+  else if(step===4)Object.assign(S.wizardData,{dataClassification:g('w_dataClassification'),externalDataSharing:g('w_externalDataSharing')==='true'});
+  else if(step===5)Object.assign(S.wizardData,{deviatesFromPatterns:g('w_deviatesFromPatterns')==='true',deviationJustification:g('w_deviationJustification'),hasLegacyDependencies:g('w_hasLegacyDependencies')==='true',legacySystems:g('w_legacySystems'),externalDependencies:g('w_externalDependencies')});
 }
-
-function validateStep(step) {
-  const d=state.wizardData;
-  if(step===1){
-    if(!d.title){alert('Please enter a request title.');return false;}
-    if(!d.description){alert('Please enter a description.');return false;}
-    if(!d.requestorName){alert('Please enter a requestor name.');return false;}
-    if(!d.businessUnit){alert('Please enter a business unit.');return false;}
-    if(!d.architectureType){alert('Please select an architecture type.');return false;}
-  }
-  if(step===4 && !d.dataClassification){alert('Please select a data classification.');return false;}
+function validateStep(s){const d=S.wizardData;
+  if(s===1){if(!d.title){alert('Please enter a request title.');return false;}if(!d.description){alert('Please enter a description.');return false;}if(!d.requestorName){alert('Please enter your name.');return false;}if(!d.businessUnit){alert('Please enter a business unit.');return false;}if(!d.architectureType){alert('Please select an architecture type.');return false;}}
+  if(s===4&&!d.dataClassification){alert('Please select a data classification.');return false;}
   return true;
 }
+function addTag(e,field,inputId){if(e.key==='Enter'||e.key===','){e.preventDefault();const val=e.target.value.trim().replace(/,$/,'');if(!val)return;if(!S.wizardData[field])S.wizardData[field]=[];if(!S.wizardData[field].includes(val))S.wizardData[field].push(val);e.target.value='';const wrap=document.getElementById(field==='components'?'components-wrap':'newvendors-wrap');const t=document.createElement('span');t.className='tag';t.innerHTML=`${val}<span class="tag-remove" onclick="removeTag('${field}','${encodeURIComponent(val)}')">✕</span>`;wrap.insertBefore(t,e.target);}}
+function removeTag(field,val){const decoded=decodeURIComponent(val);if(!S.wizardData[field])return;S.wizardData[field]=S.wizardData[field].filter(v=>v!==decoded);renderWizard();}
+function toggleVendor(id){if(!S.wizardData.vendorIds)S.wizardData.vendorIds=[];const idx=S.wizardData.vendorIds.indexOf(id);if(idx===-1)S.wizardData.vendorIds.push(id);else S.wizardData.vendorIds.splice(idx,1);}
+function toggleCheck(field,val){if(!S.wizardData[field])S.wizardData[field]=[];const idx=S.wizardData[field].indexOf(val);if(idx===-1)S.wizardData[field].push(val);else S.wizardData[field].splice(idx,1);}
+async function submitIntake(asDraft){saveStepData(6);if(!asDraft&&!validateStep(1))return;try{const r=await api.post('/api/intake',{...S.wizardData,submitAsDraft:asDraft});await loadIntakes();renderSidebar();await showIntakeDetail(r.reference_id);}catch(e){alert('Submission failed: '+(e.error||JSON.stringify(e)));}}
 
-function addTag(e,field,inputId) {
-  if(e.key==='Enter'||e.key===','){
-    e.preventDefault();
-    const val=e.target.value.trim().replace(/,$/,'');
-    if(!val) return;
-    if(!state.wizardData[field]) state.wizardData[field]=[];
-    if(!state.wizardData[field].includes(val)) state.wizardData[field].push(val);
-    e.target.value='';
-    const wrap=document.getElementById(field==='components'?'components-wrap':'newvendors-wrap');
-    const newTag=document.createElement('span');
-    newTag.className='tag';
-    newTag.innerHTML=`${val}<span class="tag-remove" onclick="removeTag('${field}','${encodeURIComponent(val)}')">✕</span>`;
-    wrap.insertBefore(newTag,e.target);
-  }
-}
-
-function removeTag(field,val) {
-  const decoded=decodeURIComponent(val);
-  if(!state.wizardData[field]) return;
-  state.wizardData[field]=state.wizardData[field].filter(v=>v!==decoded);
-  renderWizard();
-}
-
-function toggleVendor(id) {
-  if(!state.wizardData.vendorIds) state.wizardData.vendorIds=[];
-  const idx=state.wizardData.vendorIds.indexOf(id);
-  if(idx===-1) state.wizardData.vendorIds.push(id);
-  else state.wizardData.vendorIds.splice(idx,1);
-}
-
-function toggleCheck(field,val) {
-  if(!state.wizardData[field]) state.wizardData[field]=[];
-  const idx=state.wizardData[field].indexOf(val);
-  if(idx===-1) state.wizardData[field].push(val);
-  else state.wizardData[field].splice(idx,1);
-}
-
-async function submitIntake(asDraft) {
-  saveStepData(6);
-  if(!asDraft && !validateStep(1)) return;
-  try {
-    const result = await api.post('/api/intake',{...state.wizardData,submitAsDraft:asDraft});
-    await loadIntakes();
-    renderSidebar();
-    await showIntakeDetail(result.reference_id);
-  } catch(e) { alert('Submission failed: '+(e.error||JSON.stringify(e))); }
-}
-
-// ─── Review Modal ─────────────────────────────────────────────────────────────
-function openReviewModal(intakeId, action) {
-  state.reviewAction=action; state.reviewIntakeId=intakeId;
+// ─── Review modal ─────────────────────────────────────────────────────────────
+function openReviewModal(id,action){
+  S.reviewAction=action;S.reviewIntakeId=id;
   const titles={Approved:'Approve Request',Rejected:'Reject Request',Deferred:'Defer Request',Withdrawn:'Withdraw Request','Under Review':'Mark Under Review',Submitted:'Submit for Review'};
   document.getElementById('reviewModalTitle').textContent=titles[action]||action;
-  document.getElementById('reviewerName').value='';
-  document.getElementById('reviewerNotes').value='';
-  document.getElementById('approvedPatternId').value='';
+  document.getElementById('reviewerName').value='';document.getElementById('reviewerNotes').value='';document.getElementById('approvedPatternId').value='';
   document.getElementById('approvedPatternGroup').style.display=action==='Approved'?'block':'none';
   document.getElementById('reviewModal').style.display='flex';
 }
-
-async function submitReview() {
-  const name=document.getElementById('reviewerName').value;
-  const notes=document.getElementById('reviewerNotes').value;
-  const patternId=document.getElementById('approvedPatternId').value;
-  try {
-    await api.post(`/api/intake/${state.reviewIntakeId}/status`,{status:state.reviewAction,reviewerName:name,reviewerNotes:notes,approvedPatternId:patternId||undefined});
-    closeModal('reviewModal');
-    await loadIntakes();
-    renderSidebar();
-    if(state.view==='intake-detail') await showIntakeDetail(state.currentIntake.reference_id);
-    else if(state.view==='review-queue') showReviewQueue();
-    else showDashboard();
-  } catch(e) { alert(e.error||'Failed: '+JSON.stringify(e)); }
+async function submitReview(){
+  try{await api.post(`/api/intake/${S.reviewIntakeId}/status`,{status:S.reviewAction,reviewerName:document.getElementById('reviewerName').value,reviewerNotes:document.getElementById('reviewerNotes').value,approvedPatternId:document.getElementById('approvedPatternId').value||undefined});
+  closeModal('reviewModal');await loadIntakes();renderSidebar();
+  if(S.view==='intake-detail')await showIntakeDetail(S.currentIntake.reference_id);
+  else if(S.view==='review-queue')showReviewQueue();else showDashboard();}
+  catch(e){alert(e.error||'Failed: '+JSON.stringify(e));}
 }
-
-// ─── Comment Modal ────────────────────────────────────────────────────────────
-function openCommentModal(id) { state.commentIntakeId=id; document.getElementById('commentModal').style.display='flex'; }
-async function submitComment() {
-  const author=document.getElementById('commentAuthor').value||'Anonymous';
-  const role=document.getElementById('commentRole').value;
-  const comment=document.getElementById('commentText').value;
-  if(!comment){alert('Please enter a comment.');return;}
-  await api.post(`/api/intake/${state.commentIntakeId}/comments`,{author,role,comment});
-  closeModal('commentModal');
-  document.getElementById('commentText').value='';
-  if(state.view==='intake-detail') await showIntakeDetail(state.currentIntake.reference_id);
-}
-
+function openCommentModal(id){S.commentIntakeId=id;document.getElementById('commentModal').style.display='flex';}
+async function submitComment(){const comment=document.getElementById('commentText').value;if(!comment){alert('Please enter a comment.');return;}await api.post(`/api/intake/${S.commentIntakeId}/comments`,{author:document.getElementById('commentAuthor').value||'Anonymous',role:document.getElementById('commentRole').value,comment});closeModal('commentModal');document.getElementById('commentText').value='';if(S.view==='intake-detail')await showIntakeDetail(S.currentIntake.reference_id);}
 function closeModal(id){document.getElementById(id).style.display='none';}
 
 // ─── Pattern Library ──────────────────────────────────────────────────────────
-function showPattern(id) {
-  const p = state.patterns.find(x=>x.patternId===id);
-  if(!p) return;
-  state.currentPattern=p; state.view='pattern-detail'; renderSidebar();
-  const statusClass='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
-  let html=`<button class="back-btn" onclick="showPatternList()">← Back to Patterns</button>
-  <div class="two-col">
-  <div>
+function showPattern(id){
+  const p=S.patterns.find(x=>x.patternId===id);if(!p)return;
+  S.currentPattern=p;S.view='pattern-detail';renderSidebar();
+  const sClass='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
+  let h=`<button class="back-btn" onclick="showPatternList()">← Back to Patterns</button>
+  <div class="two-col"><div>
   <div class="detail-header">
-    <div class="font-mono text-sm text-muted">${p.patternId} · v${p.version||'?'} · Last reviewed ${p.lastReviewed||'–'}</div>
-    <h2>${p.name}</h2>
-    <div class="detail-meta">${p.domain}</div>
-    <div class="detail-badges mt-1">
-      <span class="badge ${statusClass}">${p.status}</span>
-      ${p.tier?`<span class="badge" style="background:var(--surface3);color:var(--text)">${p.tier}</span>`:''}
-      ${p.ccoeCertified==='Yes'?`<span class="badge badge-endorsed">CCoE Certified</span>`:''}
-      ${p.leanixRef?`<span class="badge" style="background:var(--surface3);color:var(--muted)">${p.leanixRef}</span>`:''}
-    </div>
+    <div class="font-mono text-xs text-muted">${p.patternId} · v${p.version||'?'} · Last reviewed ${p.lastReviewed||'–'}</div>
+    <h2>${p.name}</h2><div class="detail-meta">${p.domain}</div>
+    <div class="detail-badges mt-1"><span class="badge ${sClass}">${p.status}</span>${p.tier?`<span class="badge" style="background:var(--surface2);color:var(--text)">${p.tier}</span>`:''}${p.ccoeCertified==='Yes'?`<span class="badge badge-endorsed">CCoE Certified</span>`:''}${p.leanixRef?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${p.leanixRef}</span>`:''}</div>
   </div>
-  ${p.strategicIntent?`<div class="section-card"><h3>Strategic Intent</h3><p style="font-size:.86rem;line-height:1.65">${p.strategicIntent}</p></div>`:''}
-  ${p.problemStatement?`<div class="section-card"><h3>Problem Statement</h3><p style="font-size:.86rem;line-height:1.65">${p.problemStatement}</p></div>`:''}
+  ${p.strategicIntent?`<div class="section-card"><h3>Strategic Intent</h3><p class="text-sm" style="line-height:1.65">${p.strategicIntent}</p></div>`:''}
+  ${p.problemStatement?`<div class="section-card"><h3>Problem Statement</h3><p class="text-sm" style="line-height:1.65">${p.problemStatement}</p></div>`:''}
   ${p.useCases&&p.useCases.length?`<div class="section-card"><h3>Use Cases</h3><div class="use-cases-grid">${p.useCases.map(u=>`<div class="use-case-box use"><strong>Use When</strong>${u.use}</div><div class="use-case-box dont"><strong>Don't Use When</strong>${u.dontUse}</div>`).join('')}</div></div>`:''}
   ${p.components&&p.components.length?`<div class="section-card"><h3>Components</h3><ul class="arrow-list">${p.components.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
-  ${p.interactionSteps&&p.interactionSteps.length?`<div class="section-card"><h3>Interaction Flow</h3><ul class="arrow-list">${p.interactionSteps.map((s,i)=>`<li><span style="color:var(--muted);font-size:.72rem;min-width:1.5rem">${i+1}.</span>${s}</li>`).join('')}</ul></div>`:''}
+  ${p.interactionSteps&&p.interactionSteps.length?`<div class="section-card"><h3>Interaction Flow</h3><ul class="arrow-list">${p.interactionSteps.map((s,i)=>`<li><span style="color:var(--muted);font-size:.7rem;min-width:1.5rem">${i+1}.</span>${s}</li>`).join('')}</ul></div>`:''}
   ${p.securityConsiderations&&p.securityConsiderations.length?`<div class="section-card"><h3>Security Considerations</h3><ul class="arrow-list">${p.securityConsiderations.map(s=>`<li>${s}</li>`).join('')}</ul></div>`:''}
   ${p.guardrails&&p.guardrails.length?`<div class="section-card"><h3>Guardrails</h3><table class="guardrails-table"><thead><tr><th>Area</th><th>Rule</th><th>Severity</th></tr></thead><tbody>${p.guardrails.map(g=>`<tr><td>${g.area}</td><td>${g.rule}</td><td class="sev-${g.severity.toLowerCase()}">${g.severity}</td></tr>`).join('')}</tbody></table></div>`:''}
-  ${p._svgFile?`<div class="section-card"><h3>Architecture Diagram</h3><div class="svg-container"><img src="/api/patterns/${p._svgFile}" alt="Diagram" /></div></div>`:''}
-  </div>
-  <div>
+  ${p._svgFile?`<div class="section-card"><h3>Architecture Diagram</h3><div class="svg-container"><img src="/api/patterns/${p._svgFile}" alt="Diagram"/></div></div>`:''}
+  </div><div>
   ${p.owner?`<div class="section-card"><h3>Ownership</h3><div class="kv-grid"><div class="kv-item"><label>Owner</label><span>${p.owner}</span></div><div class="kv-item"><label>Approvers</label><span>${p.approvers||'–'}</span></div></div></div>`:''}
-  ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.35rem 0;border-bottom:1px solid var(--border)"><span class="font-mono" style="cursor:pointer;color:var(--accent)" onclick="showPattern('${c.patternId}')">${c.patternId}</span><span class="text-muted text-sm">${c.relationship}</span></div>`).join('')}</div>`:''}
-  ${p.implementationAssets?`<div class="section-card"><h3>Implementation Assets</h3>${Object.entries(p.implementationAssets).map(([k,v])=>`<div class="kv-item" style="margin-bottom:.5rem"><label>${k}</label><span class="font-mono text-sm">${v}</span></div>`).join('')}</div>`:''}
+  ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.38rem;background:var(--surface2);border-radius:6px;margin-bottom:.3rem;cursor:pointer" onclick="showPattern('${c.patternId}')"><span class="font-mono text-xs" style="color:var(--accent)">${c.patternId}</span><span class="text-xs text-muted">${c.relationship}</span></div>`).join('')}</div>`:''}
+  ${p.implementationAssets?`<div class="section-card"><h3>Implementation Assets</h3>${Object.entries(p.implementationAssets).map(([k,v])=>`<div class="kv-item" style="margin-bottom:.45rem"><label>${k}</label><span class="font-mono text-xs">${v}</span></div>`).join('')}</div>`:''}
   ${p.exceptionProcess?`<div class="section-card"><h3>Exception Process</h3><p class="text-sm" style="line-height:1.65">${p.exceptionProcess}</p></div>`:''}
   </div></div>`;
-  setMain(html);
+  setMain(h);
 }
 
-function showPatternList() {
-  state.view='patterns'; state.currentPattern=null; renderSidebar();
-  const endorsed=state.patterns.filter(p=>p.status==='Endorsed').length;
-  const inDev=state.patterns.filter(p=>p.status==='In Development').length;
-  const underReview=state.patterns.filter(p=>p.status==='Under Review').length;
-  let html=`<div class="page-title"><h2>Pattern Library</h2></div>
+function showPatternList(){
+  S.view='patterns';S.currentPattern=null;renderSidebar();
+  const endorsed=S.patterns.filter(p=>p.status==='Endorsed').length;
+  let h=`<div class="page-title"><h2>Pattern Library</h2><button class="btn btn-secondary btn-sm" onclick="showKanban()">⊞ Board View</button></div>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
-    <div class="stat-card"><div class="stat-val">${state.patterns.length}</div><div class="stat-label">Total Patterns</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--risk-low)">${endorsed}</div><div class="stat-label">Endorsed</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--dev)">${inDev}</div><div class="stat-label">In Development</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--review)">${underReview}</div><div class="stat-label">Under Review</div></div>
+    <div class="stat-card"><div class="stat-val">${S.patterns.length}</div><div class="stat-label">Total</div></div>
+    <div class="stat-card" style="--accent-color:var(--endorsed)"><div class="stat-val">${endorsed}</div><div class="stat-label">Endorsed</div></div>
+    <div class="stat-card" style="--accent-color:var(--dev)"><div class="stat-val">${S.patterns.filter(p=>p.status==='In Development').length}</div><div class="stat-label">In Development</div></div>
+    <div class="stat-card" style="--accent-color:var(--review)"><div class="stat-val">${S.patterns.filter(p=>p.status==='Under Review').length}</div><div class="stat-label">Under Review</div></div>
   </div>
-  <input class="search-bar" id="pattern-search" placeholder="Search patterns..." oninput="filterPatterns(this.value)" />
+  <input class="search-bar" id="pattern-search" placeholder="Search patterns..." oninput="filterPatterns(this.value)"/>
   <div class="overview-grid" id="pattern-grid">`;
-  state.patterns.forEach(p=>{
-    const cls='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
-    html+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge ${cls}" style="margin-top:.5rem">${p.status}</span></div>`;
-  });
-  html+=`</div>`;
-  setMain(html);
+  S.patterns.forEach(p=>{const cls='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');h+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge ${cls}" style="margin-top:.45rem">${p.status}</span></div>`;});
+  h+=`</div>`;setMain(h);
 }
-
-function filterPatterns(q) {
-  const grid=document.getElementById('pattern-grid');
-  if(!grid) return;
-  const cards=grid.querySelectorAll('.card');
-  const lq=q.toLowerCase();
-  cards.forEach(c=>{c.style.display=c.textContent.toLowerCase().includes(lq)?'':'none';});
-}
+function filterPatterns(q){const g=document.getElementById('pattern-grid');if(!g)return;g.querySelectorAll('.card').forEach(c=>{c.style.display=c.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
 
 // ─── Vendors ──────────────────────────────────────────────────────────────────
-function showVendors(q='') {
-  state.view='vendors'; renderSidebar();
-  const critical=state.vendors.filter(v=>v.criticality==='Critical').length;
-  const dataShared=state.vendors.filter(v=>v.dataShared).length;
-  const filtered=q?state.vendors.filter(v=>(v.vendorCompany+v.productService+v.category).toLowerCase().includes(q.toLowerCase())):state.vendors;
-  let html=`<div class="page-title"><h2>Vendor Registry</h2></div>
+function showVendors(q=''){
+  S.view='vendors';renderSidebar();
+  const filtered=q?S.vendors.filter(v=>(v.vendorCompany+v.productService+v.category).toLowerCase().includes(q.toLowerCase())):S.vendors;
+  const critical=S.vendors.filter(v=>v.criticality==='Critical').length;
+  let h=`<div class="page-title"><h2>Vendor Registry</h2></div>
   <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
-    <div class="stat-card"><div class="stat-val">${state.vendors.length}</div><div class="stat-label">Total Vendors</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--risk-critical)">${critical}</div><div class="stat-label">Critical Tier</div></div>
-    <div class="stat-card"><div class="stat-val" style="color:var(--review)">${dataShared}</div><div class="stat-label">Data Shared</div></div>
+    <div class="stat-card"><div class="stat-val">${S.vendors.length}</div><div class="stat-label">Total Vendors</div></div>
+    <div class="stat-card" style="--accent-color:var(--risk-critical)"><div class="stat-val">${critical}</div><div class="stat-label">Critical Tier</div></div>
+    <div class="stat-card" style="--accent-color:var(--review)"><div class="stat-val">${S.vendors.filter(v=>v.dataShared).length}</div><div class="stat-label">Data Shared</div></div>
   </div>
-  <input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${q}" />
+  <input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${q}"/>
   <div class="table-wrap"><table><thead><tr><th>Vendor</th><th>Product / Service</th><th>Category</th><th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Domain</th></tr></thead><tbody>`;
-  filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{
-    html+=`<tr><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-sm text-muted">${v.hostingModel||''}</td><td>${v.dataShared?'<span style="color:var(--review)">Yes</span>':'<span class="text-muted">No</span>'}</td><td class="text-sm text-muted">${v.programmeDomain||''}</td></tr>`;
-  });
-  html+=`</tbody></table></div>`;
-  setMain(html);
+  filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<tr><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-xs text-muted">${v.hostingModel||''}</td><td>${v.dataShared?`<span style="color:var(--review)">Yes</span>`:`<span class="text-muted">No</span>`}</td><td class="text-xs text-muted">${v.programmeDomain||''}</td></tr>`;});
+  h+=`</tbody></table></div>`;setMain(h);
+}
+
+// ─── Team Portal ──────────────────────────────────────────────────────────────
+function showTeamPortal(){
+  S.view='team-portal';renderSidebar();
+  const endorsed=S.patterns.filter(p=>p.status==='Endorsed');
+  let h=`<div class="portal-header">
+    <div class="portal-badge">TEAM PORTAL</div>
+    <h2 style="margin-top:.6rem">Architecture Self-Service</h2>
+    <p>Browse endorsed patterns, submit architecture requests, and track your submissions.</p>
+    <button class="btn btn-primary" style="margin-top:1rem" onclick="startNewIntake()">＋ Submit Architecture Request</button>
+  </div>
+  <div class="three-col">
+    <div class="section-card"><h3>📋 Browse Patterns</h3><p class="text-sm text-muted" style="margin-bottom:.8rem">Reference the endorsed pattern catalogue before designing your solution.</p><button class="btn btn-secondary btn-sm" onclick="showPatternList()">Open Pattern Library</button></div>
+    <div class="section-card"><h3>📥 Submit Request</h3><p class="text-sm text-muted" style="margin-bottom:.8rem">Use the intake wizard to submit a new architecture for review. Risk is automatically assessed.</p><button class="btn btn-primary btn-sm" onclick="startNewIntake()">New Request</button></div>
+    <div class="section-card"><h3>🔍 Track Submissions</h3><p class="text-sm text-muted" style="margin-bottom:.8rem">Check the status of submitted architecture requests and review feedback.</p><button class="btn btn-secondary btn-sm" onclick="showIntakeList()">View All Requests</button></div>
+  </div>
+  <div class="page-title" style="margin-top:1.5rem"><h2>Endorsed Patterns</h2><span class="text-muted text-sm">${endorsed.length} patterns ready to use</span></div>
+  <div class="overview-grid">`;
+  endorsed.forEach(p=>{h+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId} · v${p.version||'?'}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge badge-endorsed" style="margin-top:.4rem">✓ Endorsed</span></div>`;});
+  h+=`</div>`;setMain(h);
 }
 
 // ─── Risk Panel Renderer ──────────────────────────────────────────────────────
-function renderRiskPanel(score, tier, breakdown, flags, recs) {
+function renderRiskPanel(score,tier,breakdown,flags,recs){
   const tierColors={Low:'var(--risk-low)',Medium:'var(--risk-medium)',High:'var(--risk-high)',Critical:'var(--risk-critical)'};
   const color=tierColors[tier]||'var(--muted)';
-  const pct=Math.round((score/100)*100);
-  const r=55, circ=2*Math.PI*r;
-  const dash=circ*pct/100;
-  const dimColors={dataRisk:'#3498db',vendorRisk:'#9b59b6',securityRisk:'#e74c3c',complexityRisk:'#f39c12'};
-  let html=`<div class="section-card"><h3>Risk Assessment</h3>
-  <div class="risk-panel" style="flex-direction:column">
-    <div class="flex gap-3 items-center" style="width:100%">
+  const r=50,circ=2*Math.PI*r,dash=circ*(score/100);
+  const dimColors={dataRisk:'#2980b9',vendorRisk:'#7c5cbf',securityRisk:'#e74c3c',complexityRisk:'#d4830a'};
+  let h=`<div class="risk-panel-wrap"><div class="risk-panel-inner">
+    <div class="risk-gauge-wrap">
       <div class="risk-circle">
-        <svg viewBox="0 0 130 130" width="130" height="130">
-          <circle cx="65" cy="65" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="12"/>
-          <circle cx="65" cy="65" r="${r}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${dash} ${circ}" style="transition:stroke-dasharray .5s"/>
+        <svg viewBox="0 0 120 120" width="120" height="120">
+          <circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="11"/>
+          <circle cx="60" cy="60" r="${r}" fill="none" stroke="${color}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${dash} ${circ}"/>
         </svg>
         <div class="risk-circle-label"><span class="risk-score-num" style="color:${color}">${score}</span><span class="risk-score-max">/100</span></div>
       </div>
-      <div style="flex:1">
-        <div class="risk-tier-badge badge badge-${tier.toLowerCase()}" style="font-size:1rem;margin-bottom:.5rem">${tier} Risk</div>
-        <div class="risk-bars">`;
-  if(breakdown){
-    Object.entries(breakdown).forEach(([k,v])=>{
-      const pctBar=Math.round((v.score/v.max)*100);
-      html+=`<div class="risk-bar-row">
-        <div class="risk-bar-label">${v.label}</div>
-        <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${pctBar}%;background:${dimColors[k]||color}"></div></div>
-        <div class="risk-bar-val" style="color:${dimColors[k]||color}">${v.score}/${v.max}</div>
-      </div>`;
-    });
-  }
-  html+=`</div></div></div>`;
-  if(flags&&flags.length){
-    html+=`<div style="width:100%;margin-top:.75rem"><div class="text-sm text-muted" style="margin-bottom:.35rem;font-weight:700;text-transform:uppercase;font-size:.68rem">Risk Flags</div><ul class="flags-list">${flags.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
-  }
-  if(recs&&recs.length){
-    html+=`<div style="width:100%;margin-top:.75rem"><div class="text-sm text-muted" style="margin-bottom:.35rem;font-weight:700;text-transform:uppercase;font-size:.68rem">Recommendations</div><ul class="recs-list">${recs.slice(0,5).map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
-  }
-  html+=`</div></div>`;
-  return html;
+      <span class="badge badge-${tier.toLowerCase()}" style="margin-top:.6rem;font-size:.8rem">${tier} Risk</span>
+    </div>
+    <div class="risk-bars">`;
+  if(breakdown)Object.entries(breakdown).forEach(([k,v])=>{const pct=Math.round(v.score/v.max*100);h+=`<div class="risk-bar-row"><div class="risk-bar-label">${v.label}</div><div class="risk-bar-track"><div class="risk-bar-fill" style="width:${pct}%;background:${dimColors[k]||color}"></div></div><div class="risk-bar-val" style="color:${dimColors[k]||color}">${v.score}/${v.max}</div></div>`;});
+  h+=`</div></div>`;
+  if(flags&&flags.length)h+=`<div style="margin-top:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">Risk Flags</div><ul class="flags-list">${flags.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+  if(recs&&recs.length)h+=`<div style="margin-top:.7rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">Recommendations</div><ul class="recs-list">${recs.slice(0,5).map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
+  return h+`</div>`;
 }
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
-function opts(arr, selected) { return arr.map(o=>`<option value="${o}" ${o===selected?'selected':''}>${o}</option>`).join(''); }
-function fmtDate(d) { if(!d) return '–'; try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;} }
-function statusBadge(s) {
-  const map={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};
-  return `<span class="badge badge-${map[s]||'draft'}">${s}</span>`;
-}
-function tierBadge(tier, score) {
-  return `<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;
-}
-function critBadge(c) {
-  const map={Critical:'badge-critical',High:'badge-high',Medium:'badge-review',Low:'badge-endorsed'};
-  return `<span class="badge ${map[c]||''}">${c||'–'}</span>`;
-}
+// ─── Utils ────────────────────────────────────────────────────────────────────
+function opts(arr,sel){return arr.map(o=>`<option value="${o}" ${o===sel?'selected':''}>${o}</option>`).join('');}
+function fmtDate(d){if(!d)return'–';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
+function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
+function tierBadge(tier,score){return`<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;}
+function critBadge(c){const m={Critical:'badge-critical',High:'badge-high',Medium:'badge-medium',Low:'badge-low'};return`<span class="badge ${m[c]||''}">${c||'–'}</span>`;}
 
-// ─── Kick off ─────────────────────────────────────────────────────────────────
 init();
 </script>
 </body>

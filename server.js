@@ -40,8 +40,8 @@ app.get('/api/vendors', (req, res) => {
   res.json(data);
 });
 
-const intakeRouter = require('./routes/intake');
-app.use('/api/intake', intakeRouter);
+app.use('/api/intake', require('./routes/intake'));
+app.use('/api/solutions', require('./routes/solutions'));
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`EA Platform running on http://0.0.0.0:${PORT}`);
