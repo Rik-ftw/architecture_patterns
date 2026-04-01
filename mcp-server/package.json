@@ -1,0 +1,24 @@
+{
+  "name": "@mccain/architecture-governance-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI-enabled architecture pattern governance, vendor registry, and intake workflow",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "architecture-mcp": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "keywords": [
+    "mcp",
+    "architecture",
+    "governance",
+    "patterns"
+  ],
+  "license": "ISC"
+}
