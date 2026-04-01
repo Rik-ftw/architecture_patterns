@@ -230,9 +230,10 @@ router.post('/sync-solutions', async (req, res) => {
 
 router.post('/push-iac', async (req, res) => {
   try {
-    const { pathPrefix, files, label } = req.body;
-    if (!pathPrefix || !files || typeof files !== 'object') {
-      return res.status(400).json({ error: 'pathPrefix and files are required' });
+    const { path: pathAlias, pathPrefix, files, label } = req.body;
+    const prefix = pathAlias || pathPrefix;
+    if (!prefix || !files || typeof files !== 'object') {
+      return res.status(400).json({ error: 'path (or pathPrefix) and files are required' });
     }
 
     await ensureBranchExists();
@@ -242,9 +243,9 @@ router.post('/push-iac', async (req, res) => {
 
     for (const [filename, content] of Object.entries(files)) {
       if (!content) continue;
-      const repoPath = `${pathPrefix}/${filename}`;
+      const repoPath = `${prefix}/${filename}`;
       try {
-        await upsertFile(repoPath, content, `feat(iac): add ${filename} for ${label || pathPrefix}`);
+        await upsertFile(repoPath, content, `feat(iac): add ${filename} for ${label || prefix}`);
         results.push({ file: repoPath, status: 'pushed' });
       } catch (e) {
         errors.push({ file: repoPath, error: e.message });
@@ -255,7 +256,7 @@ router.post('/push-iac', async (req, res) => {
       success: errors.length === 0,
       repo: REPO,
       branch: BRANCH,
-      pathPrefix,
+      path: prefix,
       pushed: results.length,
       errors: errors.length,
       results,

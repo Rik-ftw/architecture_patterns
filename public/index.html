@@ -2975,7 +2975,7 @@ function renderIaCPanel(iac, context, entityId, refId) {
   const activeFile = fileKeys[0];
   const tabsHtml = fileKeys.map(k => `<button class="iac-file-tab${k===activeFile?' active':''}" id="iac-tab-${k.replace('.','_')}" onclick="iacSwitchTab(this,'${k.replace('.','_')}','iac-code-${k.replace('.','_')}')">${k}</button>`).join('');
   const codesHtml = fileKeys.map(k => `<div id="iac-code-${k.replace('.','_')}" style="display:${k===activeFile?'block':'none'}"><div class="iac-code-wrap"><button class="iac-copy-btn" onclick="iacCopyFile('${k.replace('.','_')}')">Copy</button><code class="iac-code">${escHtml(files[k])}</code></div></div>`).join('');
-  const pushLabel = context === 'pattern' ? `iac/patterns/${refId}` : context === 'intake' ? `iac/intake/${refId}` : `iac/solutions/${refId}`;
+  const pushLabel = context === 'pattern' ? `iac/${refId}` : context === 'intake' ? `iac/intake/${refId}` : `iac/solutions/${refId}`;
   const genFn = context === 'pattern' ? `generatePatternIaC('${refId}')` : context === 'intake' ? `generateIntakeIaC(${entityId},'${refId}')` : `generateSolutionIaC(${entityId},'${refId}')`;
   return `<div class="iac-panel" id="iac-panel-card">
     <h3>⬡ Terraform IaC <span style="font-size:.6rem;font-weight:400;opacity:.55;margin-left:.35rem">${refId}</span></h3>
@@ -3059,7 +3059,8 @@ async function generatePatternIaC(patternId) {
   if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for pattern ${patternId}… this takes 20–30 seconds</div></div>`;
   try {
     const r = await api.post(`/api/iac/pattern/${patternId}`, {});
-    if (panel) panel.innerHTML = renderIaCPanel(r, 'pattern', patternId, patternId);
+    const iac = r.iac || r;
+    if (panel) panel.innerHTML = renderIaCPanel(iac, 'pattern', patternId, patternId);
   } catch(e) {
     if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
   }
@@ -3072,9 +3073,10 @@ async function generateIntakeIaC(intakeId, refId) {
   if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
   try {
     const r = await api.post(`/api/iac/intake/${intakeId}`, {});
-    if (panel) panel.innerHTML = renderIaCPanel(r, 'intake', intakeId, refId);
+    const iac = r.iac || r;
+    if (panel) panel.innerHTML = renderIaCPanel(iac, 'intake', intakeId, refId);
     const ir = S.intakes.find(i => i.id === intakeId);
-    if (ir) ir.iacCode = r;
+    if (ir) ir.iacCode = iac;
     if (btn) { btn.textContent = '⬡ Regenerate IaC'; btn.disabled = false; }
   } catch(e) {
     if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
@@ -3087,8 +3089,9 @@ async function generateSolutionIaC(solutionId, refId) {
   if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
   try {
     const r = await api.post(`/api/iac/solution/${solutionId}`, {});
-    if (panel) panel.innerHTML = renderIaCPanel(r, 'solution', solutionId, refId);
-    if (S.currentSolution && S.currentSolution.id === solutionId) S.currentSolution.iacCode = r;
+    const iac = r.iac || r;
+    if (panel) panel.innerHTML = renderIaCPanel(iac, 'solution', solutionId, refId);
+    if (S.currentSolution && S.currentSolution.id === solutionId) S.currentSolution.iacCode = iac;
   } catch(e) {
     if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
   }
