@@ -5,6 +5,7 @@ const path = require('path');
 const app = express();
 const PORT = 5000;
 
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/api/patterns', (req, res) => {
@@ -16,18 +17,14 @@ app.get('/api/patterns', (req, res) => {
       const svgFile = f.replace('.json', '.svg');
       const hasSvg = fs.existsSync(path.join(patternsDir, svgFile));
       return { ...data, _svgFile: hasSvg ? svgFile : null };
-    } catch (e) {
-      return null;
-    }
+    } catch { return null; }
   }).filter(Boolean);
   res.json(patterns);
 });
 
 app.get('/api/patterns/:file', (req, res) => {
   const filePath = path.join(__dirname, 'patterns', req.params.file);
-  if (!filePath.startsWith(path.join(__dirname, 'patterns'))) {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
+  if (!filePath.startsWith(path.join(__dirname, 'patterns'))) return res.status(403).json({ error: 'Forbidden' });
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'Not found' });
   const ext = path.extname(filePath);
   if (ext === '.svg') {
@@ -43,6 +40,9 @@ app.get('/api/vendors', (req, res) => {
   res.json(data);
 });
 
+const intakeRouter = require('./routes/intake');
+app.use('/api/intake', intakeRouter);
+
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Architecture Pattern Library running on http://0.0.0.0:${PORT}`);
+  console.log(`EA Platform running on http://0.0.0.0:${PORT}`);
 });

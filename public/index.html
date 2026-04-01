@@ -1,315 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Architecture Pattern Library</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #222536;
-      --border: #2e3245;
-      --accent: #4f8ef7;
-      --accent2: #7c5cbf;
-      --text: #e2e4f0;
-      --muted: #8b90ab;
-      --endorsed: #2ecc71;
-      --review: #f39c12;
-      --dev: #3498db;
-      --critical: #e74c3c;
-      --high: #e67e22;
-      --medium: #f1c40f;
-      --low: #2ecc71;
-    }
-    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
-    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
-    header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
-    header span { color: var(--muted); font-size: 0.85rem; }
-    .layout { display: flex; height: calc(100vh - 57px); }
-    nav { width: 260px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 1rem 0; flex-shrink: 0; }
-    nav h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0.75rem 1.25rem 0.35rem; }
-    nav button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); padding: 0.5rem 1.25rem; cursor: pointer; font-size: 0.85rem; transition: background 0.15s; border-left: 3px solid transparent; }
-    nav button:hover { background: var(--surface2); }
-    nav button.active { background: var(--surface2); border-left-color: var(--accent); color: var(--accent); }
-    nav .nav-id { font-size: 0.7rem; color: var(--muted); font-family: monospace; display: block; }
-    main { flex: 1; overflow-y: auto; padding: 2rem; }
-    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
-    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
-    .card-id { font-size: 0.7rem; font-family: monospace; color: var(--muted); }
-    .card-name { font-size: 1rem; font-weight: 600; margin: 0.4rem 0 0.5rem; }
-    .card-domain { font-size: 0.78rem; color: var(--muted); }
-    .card-status { display: inline-block; font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 999px; font-weight: 600; margin-top: 0.6rem; }
-    .status-endorsed { background: #1a3d2b; color: var(--endorsed); }
-    .status-under-review, .status-under_review { background: #3d2f0d; color: var(--review); }
-    .status-in-development, .status-in_development { background: #0d2540; color: var(--dev); }
-    .detail { max-width: 900px; }
-    .detail-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
-    .detail-header h2 { font-size: 1.6rem; font-weight: 700; }
-    .detail-header .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
-    .detail-header .badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
-    .badge { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); }
-    .section { margin-bottom: 1.5rem; }
-    .section h3 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 0.75rem; }
-    .section p { color: var(--text); line-height: 1.65; font-size: 0.9rem; }
-    ul.items { list-style: none; }
-    ul.items li { padding: 0.4rem 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; }
-    ul.items li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
-    .use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-    .use-case-box { background: var(--surface2); border-radius: 8px; padding: 0.85rem; font-size: 0.83rem; }
-    .use-case-box.use { border-left: 3px solid var(--endorsed); }
-    .use-case-box.dont { border-left: 3px solid var(--critical); }
-    .use-case-box strong { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.3rem; color: var(--muted); }
-    .guardrails-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
-    .guardrails-table th { text-align: left; padding: 0.5rem 0.75rem; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
-    .guardrails-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
-    .sev-required { color: var(--critical); font-weight: 600; }
-    .sev-recommended { color: var(--review); font-weight: 600; }
-    .sev-optional { color: var(--dev); }
-    .svg-container { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow: auto; max-height: 480px; }
-    .svg-container img { max-width: 100%; }
-    .tab-bar { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
-    .tab { padding: 0.5rem 1rem; cursor: pointer; font-size: 0.85rem; border: none; background: none; color: var(--muted); border-bottom: 2px solid transparent; transition: color 0.15s; }
-    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
-    .vendor-table-wrap { overflow-x: auto; }
-    .vendor-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
-    .vendor-table th { text-align: left; padding: 0.55rem 0.85rem; background: var(--surface2); color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; position: sticky; top: 0; }
-    .vendor-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); }
-    .vendor-table tr:hover td { background: var(--surface2); }
-    .crit-critical { color: var(--critical); font-weight: 600; }
-    .crit-high { color: var(--high); font-weight: 600; }
-    .crit-medium { color: var(--medium); }
-    .crit-low { color: var(--low); }
-    .data-yes { color: var(--review); }
-    .data-no { color: var(--muted); }
-    .loading { color: var(--muted); font-size: 0.9rem; }
-    .search-bar { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 0.5rem 0.9rem; color: var(--text); font-size: 0.88rem; margin-bottom: 1.2rem; }
-    .search-bar:focus { outline: none; border-color: var(--accent); }
-    .back-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.3rem; }
-    .back-btn:hover { text-decoration: underline; }
-    .stats-bar { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1.25rem; }
-    .stat-val { font-size: 1.6rem; font-weight: 700; }
-    .stat-label { font-size: 0.75rem; color: var(--muted); }
-    @media (max-width: 700px) {
-      nav { display: none; }
-      .use-cases { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>EA Platform</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#222536;--surface3:#2a2e42;
+  --border:#2e3245;--accent:#4f8ef7;--accent2:#7c5cbf;--text:#e2e4f0;--muted:#8b90ab;
+  --endorsed:#2ecc71;--review:#f39c12;--dev:#3498db;
+  --risk-low:#2ecc71;--risk-medium:#f39c12;--risk-high:#e67e22;--risk-critical:#e74c3c;
+  --status-draft:#8b90ab;--status-submitted:#3498db;--status-under-review:#f39c12;
+  --status-approved:#2ecc71;--status-rejected:#e74c3c;--status-deferred:#9b59b6;--status-withdrawn:#555;
+}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
+header{background:var(--surface);border-bottom:1px solid var(--border);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+header h1{font-size:1.15rem;font-weight:700;letter-spacing:-.02em}
+header .tagline{color:var(--muted);font-size:.8rem}
+.layout{display:flex;height:calc(100vh - 53px)}
+nav{width:230px;min-width:200px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;padding:.75rem 0;flex-shrink:0;display:flex;flex-direction:column}
+.nav-section{font-size:.65rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:.8rem 1.1rem .3rem;font-weight:700}
+nav button{display:block;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.42rem 1.1rem;cursor:pointer;font-size:.82rem;transition:background .12s,color .12s;border-left:3px solid transparent;display:flex;align-items:center;gap:.5rem}
+nav button:hover{background:var(--surface2);color:var(--text)}
+nav button.active{background:var(--surface2);border-left-color:var(--accent);color:var(--accent)}
+nav button .ni{font-size:.68rem;color:var(--muted);font-family:monospace;opacity:.8}
+nav .divider{height:1px;background:var(--border);margin:.5rem 1.1rem}
+main{flex:1;overflow-y:auto;padding:1.75rem 2rem}
+
+/* cards & stats */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:.9rem;margin-bottom:1.5rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.2rem}
+.stat-val{font-size:1.8rem;font-weight:700;line-height:1}
+.stat-label{font-size:.72rem;color:var(--muted);margin-top:.3rem;text-transform:uppercase;letter-spacing:.05em}
+.overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.25rem;cursor:pointer;transition:border-color .18s,transform .13s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card-id{font-size:.68rem;font-family:monospace;color:var(--muted)}
+.card-name{font-size:.95rem;font-weight:600;margin:.35rem 0 .4rem}
+.card-sub{font-size:.77rem;color:var(--muted)}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;padding:.18rem .55rem;border-radius:999px;font-weight:600;white-space:nowrap}
+.badge-endorsed,.badge-approved{background:#1a3d2b;color:var(--endorsed)}
+.badge-review,.badge-under-review{background:#3d2f0d;color:var(--review)}
+.badge-dev,.badge-submitted,.badge-in-development{background:#0d2540;color:var(--dev)}
+.badge-draft,.badge-withdrawn{background:#2a2a2a;color:var(--muted)}
+.badge-rejected{background:#3d1212;color:var(--risk-critical)}
+.badge-deferred{background:#2d1b3d;color:#9b59b6}
+.badge-low{background:#1a3d2b;color:var(--risk-low)}
+.badge-medium{background:#3d2f0d;color:var(--risk-medium)}
+.badge-high{background:#3d2005;color:var(--risk-high)}
+.badge-critical{background:#3d1212;color:var(--risk-critical)}
+
+/* tables */
+.table-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:.82rem}
+th{text-align:left;padding:.55rem .9rem;background:var(--surface2);color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+td{padding:.55rem .9rem;border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+tbody tr{cursor:pointer}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:7px;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:opacity .15s,transform .1s}
+.btn:hover{opacity:.88;transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-secondary{background:var(--surface3);color:var(--text);border:1px solid var(--border)}
+.btn-success{background:#1a6b3d;color:#fff}
+.btn-danger{background:#6b1a1a;color:#fff}
+.btn-warning{background:#6b4a0d;color:#fff}
+.btn-sm{padding:.3rem .7rem;font-size:.76rem}
+.btn-ghost{background:none;border:1px solid var(--border);color:var(--muted)}
+.btn-ghost:hover{color:var(--text);border-color:var(--accent)}
+
+/* forms */
+.form-group{margin-bottom:1.1rem}
+.form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--muted);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.04em}
+.form-control{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.55rem .85rem;color:var(--text);font-size:.875rem;transition:border-color .15s}
+.form-control:focus{outline:none;border-color:var(--accent)}
+textarea.form-control{resize:vertical;min-height:90px}
+select.form-control{cursor:pointer}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.4rem}
+.checkbox-item{display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;cursor:pointer;border:1px solid var(--border);font-size:.82rem;transition:border-color .15s}
+.checkbox-item:hover{border-color:var(--accent)}
+.checkbox-item input{accent-color:var(--accent);cursor:pointer}
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:.4rem;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.4rem .6rem;min-height:42px;cursor:text}
+.tag-input-wrap:focus-within{border-color:var(--accent)}
+.tag{display:inline-flex;align-items:center;gap:.3rem;background:var(--surface3);border:1px solid var(--border);border-radius:5px;padding:.15rem .5rem;font-size:.78rem}
+.tag-remove{cursor:pointer;color:var(--muted);font-size:.85rem;line-height:1}
+.tag-remove:hover{color:var(--risk-critical)}
+.tag-input{background:none;border:none;color:var(--text);font-size:.82rem;min-width:120px;outline:none;flex:1}
+
+/* wizard */
+.wizard-steps{display:flex;gap:0;margin-bottom:2rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)}
+.wizard-step{flex:1;padding:.55rem .5rem;text-align:center;font-size:.72rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;position:relative}
+.wizard-step:last-child{border-right:none}
+.wizard-step.active{background:var(--accent);color:#fff;font-weight:700}
+.wizard-step.done{background:var(--surface3);color:var(--endorsed)}
+.wizard-step .step-num{display:block;font-size:.65rem;margin-bottom:.1rem;opacity:.7}
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid var(--border)}
+
+/* risk score */
+.risk-gauge{display:flex;flex-direction:column;align-items:center;padding:1.5rem;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
+.risk-circle{position:relative;width:130px;height:130px}
+.risk-circle svg{transform:rotate(-90deg)}
+.risk-circle-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.risk-score-num{font-size:2rem;font-weight:800;line-height:1}
+.risk-score-max{font-size:.7rem;color:var(--muted)}
+.risk-tier-badge{font-size:.95rem;font-weight:700;margin-top:.6rem;padding:.3rem .9rem;border-radius:999px}
+.risk-bars{display:flex;flex-direction:column;gap:.6rem;flex:1}
+.risk-bar-row{display:flex;align-items:center;gap:.7rem}
+.risk-bar-label{font-size:.75rem;color:var(--muted);width:140px;flex-shrink:0}
+.risk-bar-track{flex:1;height:8px;background:var(--surface3);border-radius:999px;overflow:hidden}
+.risk-bar-fill{height:100%;border-radius:999px;transition:width .5s}
+.risk-bar-val{font-size:.72rem;font-weight:700;width:40px;text-align:right;flex-shrink:0}
+.risk-panel{display:flex;gap:1.5rem;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.flags-list,.recs-list{list-style:none;display:flex;flex-direction:column;gap:.5rem;margin-top:.6rem}
+.flags-list li{display:flex;gap:.5rem;font-size:.8rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--risk-high)}
+.recs-list li{display:flex;gap:.5rem;font-size:.8rem;padding:.4rem .6rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--accent)}
+.flags-list li::before{content:'⚠';flex-shrink:0}
+.recs-list li::before{content:'→';flex-shrink:0;color:var(--accent)}
+
+/* detail */
+.detail-header{margin-bottom:1.5rem}
+.detail-header h2{font-size:1.5rem;font-weight:700;margin:.3rem 0}
+.detail-meta{color:var(--muted);font-size:.82rem}
+.detail-badges{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+.section-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.section-card h3{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:.85rem}
+.kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.kv-item label{font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block}
+.kv-item span{font-size:.86rem}
+.history-list{display:flex;flex-direction:column;gap:.6rem}
+.history-item{display:flex;gap:.75rem;align-items:flex-start;padding:.5rem;border-radius:7px;background:var(--surface2)}
+.history-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:.35rem}
+.history-text{font-size:.8rem}
+.history-time{font-size:.7rem;color:var(--muted)}
+.comment-box{background:var(--surface2);border-radius:8px;padding:.85rem;margin-bottom:.6rem;font-size:.83rem}
+.comment-author{font-weight:700;font-size:.8rem}
+.comment-role{color:var(--muted);font-size:.72rem}
+.comment-time{color:var(--muted);font-size:.7rem}
+
+/* modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto}
+.modal-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer}
+.modal-close:hover{color:var(--text)}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.6rem;justify-content:flex-end}
+
+/* alert */
+.alert{padding:.75rem 1rem;border-radius:8px;font-size:.83rem;margin-bottom:1rem;display:flex;gap:.5rem;align-items:flex-start}
+.alert-warning{background:#3d2f0d;border:1px solid #6b4a0d;color:var(--review)}
+.alert-info{background:#0d2540;border:1px solid #1a4a7a;color:var(--dev)}
+.alert-success{background:#1a3d2b;border:1px solid #2e6b45;color:var(--endorsed)}
+.alert-danger{background:#3d1212;border:1px solid #6b2020;color:var(--risk-critical)}
+
+/* misc */
+.page-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.3rem}
+.page-title h2{font-size:1.2rem;font-weight:700}
+.search-bar{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.5rem .85rem;color:var(--text);font-size:.85rem;width:100%;margin-bottom:1rem}
+.search-bar:focus{outline:none;border-color:var(--accent)}
+.tabs{display:flex;gap:.2rem;margin-bottom:1rem;border-bottom:1px solid var(--border)}
+.tab{padding:.45rem 1rem;cursor:pointer;font-size:.82rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.empty{text-align:center;padding:3rem;color:var(--muted);font-size:.9rem}
+.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.83rem;margin-bottom:1rem;display:flex;align-items:center;gap:.3rem;padding:0}
+.back-btn:hover{text-decoration:underline}
+.flex{display:flex}.gap-2{gap:.5rem}.gap-3{gap:.75rem}.mt-1{margin-top:.4rem}.mt-2{margin-top:.8rem}.mt-3{margin-top:1.2rem}
+.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-1{flex:1}
+.text-muted{color:var(--muted)}.text-sm{font-size:.8rem}.font-mono{font-family:monospace}
+.tag-list{display:flex;flex-wrap:wrap;gap:.3rem}
+.svg-container{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;overflow:auto;max-height:480px}
+.svg-container img{max-width:100%}
+ul.arrow-list{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+ul.arrow-list li{padding:.35rem 0;font-size:.84rem;border-bottom:1px solid var(--border);display:flex;gap:.5rem}
+ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
+.guardrails-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.guardrails-table th{text-align:left;padding:.45rem .7rem;background:var(--surface2);color:var(--muted);font-size:.72rem;text-transform:uppercase}
+.guardrails-table td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.sev-required{color:var(--risk-critical);font-weight:700}
+.sev-recommended{color:var(--review);font-weight:600}
+.sev-optional{color:var(--dev)}
+.use-cases-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.use-case-box{background:var(--surface2);border-radius:8px;padding:.8rem;font-size:.82rem}
+.use-case-box.use{border-left:3px solid var(--endorsed)}
+.use-case-box.dont{border-left:3px solid var(--risk-critical)}
+.use-case-box strong{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.25rem;color:var(--muted)}
+.two-col{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;align-items:start}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}.form-row,.form-row-3{grid-template-columns:1fr}}
+@media(max-width:700px){nav{display:none}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>Architecture Pattern Library</h1>
-    <span>Enterprise Architecture Reference</span>
-  </header>
-  <div class="layout">
-    <nav id="sidebar"></nav>
-    <main id="main"></main>
+<header>
+  <h1>EA Platform</h1>
+  <span class="tagline">Enterprise Architecture Pattern & Intake System</span>
+</header>
+<div class="layout">
+  <nav id="sidebar"></nav>
+  <main id="main"></main>
+</div>
+
+<!-- Review Modal -->
+<div id="reviewModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="reviewModalTitle">Review Action</h3>
+      <button class="modal-close" onclick="closeModal('reviewModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Reviewer Name</label>
+        <input class="form-control" id="reviewerName" placeholder="Your name" />
+      </div>
+      <div class="form-group">
+        <label>Review Notes</label>
+        <textarea class="form-control" id="reviewerNotes" placeholder="Provide rationale, conditions, or required remediations..." style="min-height:100px"></textarea>
+      </div>
+      <div id="approvedPatternGroup" class="form-group" style="display:none">
+        <label>Linked Pattern ID (optional)</label>
+        <input class="form-control" id="approvedPatternId" placeholder="e.g. AP-001" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('reviewModal')">Cancel</button>
+      <button class="btn btn-primary" id="reviewSubmitBtn" onclick="submitReview()">Submit</button>
+    </div>
   </div>
+</div>
 
-  <script>
-    let patterns = [];
-    let vendors = [];
-    let currentView = 'patterns';
-    let currentPattern = null;
+<!-- Comment Modal -->
+<div id="commentModal" class="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add Comment</h3>
+      <button class="modal-close" onclick="closeModal('commentModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Your Name</label>
+        <input class="form-control" id="commentAuthor" placeholder="Name" />
+      </div>
+      <div class="form-group">
+        <label>Role</label>
+        <input class="form-control" id="commentRole" placeholder="e.g. Architecture Reviewer" />
+      </div>
+      <div class="form-group">
+        <label>Comment</label>
+        <textarea class="form-control" id="commentText" placeholder="Your comment..." style="min-height:100px"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('commentModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitComment()">Post Comment</button>
+    </div>
+  </div>
+</div>
 
-    async function init() {
-      document.getElementById('main').innerHTML = '<p class="loading">Loading...</p>';
-      [patterns, vendors] = await Promise.all([
-        fetch('/api/patterns').then(r => r.json()),
-        fetch('/api/vendors').then(r => r.json())
-      ]);
-      patterns.sort((a, b) => (a.patternId || '').localeCompare(b.patternId || ''));
-      renderSidebar();
-      showPatternList();
-    }
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+let state = {
+  view: 'dashboard',
+  patterns: [], vendors: [], intakes: [], intakeStats: null,
+  currentIntake: null, currentPattern: null,
+  wizardStep: 1, wizardData: {}, wizardRisk: null,
+  reviewAction: null, reviewIntakeId: null,
+  commentIntakeId: null,
+  tabFilter: 'All',
+  searchQ: '',
+};
 
-    function renderSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const domains = [...new Set(patterns.map(p => p.domain))].sort();
+// ─── API helpers ──────────────────────────────────────────────────────────────
+const api = {
+  async get(url) { const r = await fetch(url); if (!r.ok) throw await r.json(); return r.json(); },
+  async post(url, body) { const r = await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if (!r.ok) throw await r.json(); return r.json(); },
+  async patch(url, body) { const r = await fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}); if (!r.ok) throw await r.json(); return r.json(); },
+  async del(url) { const r = await fetch(url,{method:'DELETE'}); if (!r.ok) throw await r.json(); return r.json(); },
+};
 
-      let html = `<button class="${currentView === 'patterns' && !currentPattern ? 'active' : ''}" onclick="showPatternList()">All Patterns</button>`;
-      html += `<button class="${currentView === 'vendors' ? 'active' : ''}" onclick="showVendors()">Vendor Registry</button>`;
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+async function init() {
+  setMain('<p class="text-muted">Loading...</p>');
+  [state.patterns, state.vendors] = await Promise.all([api.get('/api/patterns'), api.get('/api/vendors')]);
+  state.patterns.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
+  await loadIntakes();
+  renderSidebar();
+  showDashboard();
+}
 
-      domains.forEach(domain => {
-        html += `<h2>${domain}</h2>`;
-        patterns.filter(p => p.domain === domain).forEach(p => {
-          const isActive = currentPattern && currentPattern.patternId === p.patternId;
-          html += `<button class="${isActive ? 'active' : ''}" onclick="showPattern('${p.patternId}')">
-            <span class="nav-id">${p.patternId}</span>
-            ${p.name}
-          </button>`;
-        });
-      });
+async function loadIntakes() {
+  try {
+    [state.intakes, state.intakeStats] = await Promise.all([api.get('/api/intake'), api.get('/api/intake/stats')]);
+  } catch(e) { state.intakes=[]; state.intakeStats=null; }
+}
 
-      sidebar.innerHTML = html;
-    }
+function setMain(html) { document.getElementById('main').innerHTML = html; }
 
-    function showPatternList(filter = '') {
-      currentView = 'patterns';
-      currentPattern = null;
-      renderSidebar();
-      const filtered = filter ? patterns.filter(p =>
-        (p.name || '').toLowerCase().includes(filter.toLowerCase()) ||
-        (p.domain || '').toLowerCase().includes(filter.toLowerCase()) ||
-        (p.patternId || '').toLowerCase().includes(filter.toLowerCase())
-      ) : patterns;
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+function renderSidebar() {
+  const v = state.view;
+  const domains = [...new Set(state.patterns.map(p=>p.domain))].sort();
+  let html = `
+    <button class="${v==='dashboard'?'active':''}" onclick="showDashboard()">◈ Dashboard</button>
+    <div class="nav-section">Intake</div>
+    <button class="${v==='new-intake'?'active':''}" onclick="startNewIntake()">＋ New Request</button>
+    <button class="${v==='intake-list'?'active':''}" onclick="showIntakeList()">≡ All Requests <span class="ni">${state.intakes.length}</span></button>
+    <button class="${v==='review-queue'?'active':''}" onclick="showReviewQueue()">⊙ Review Queue <span class="ni">${state.intakes.filter(i=>['Submitted','Under Review'].includes(i.status)).length}</span></button>
+    <div class="divider"></div>
+    <div class="nav-section">Pattern Library</div>`;
+  domains.forEach(d=>{
+    html+=`<div class="nav-section" style="font-size:.6rem;padding:.5rem 1.1rem .2rem;opacity:.7">${d}</div>`;
+    state.patterns.filter(p=>p.domain===d).forEach(p=>{
+      const isActive = v==='pattern-detail' && state.currentPattern && state.currentPattern.patternId===p.patternId;
+      html+=`<button class="${isActive?'active':''}" onclick="showPattern('${p.patternId}')"><span class="ni">${p.patternId}</span>${p.name}</button>`;
+    });
+  });
+  html+=`<div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${state.vendors.length}</span></button>`;
+  document.getElementById('sidebar').innerHTML = html;
+}
 
-      const endorsed = patterns.filter(p => p.status === 'Endorsed').length;
-      const inDev = patterns.filter(p => p.status === 'In Development').length;
-      const underReview = patterns.filter(p => p.status === 'Under Review').length;
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+async function showDashboard() {
+  state.view='dashboard'; renderSidebar();
+  await loadIntakes();
+  const s = state.intakeStats || {};
+  const byStat = {};
+  (s.byStatus||[]).forEach(r=>byStat[r.status]=r.n);
+  const byTier = {};
+  (s.byTier||[]).forEach(r=>byTier[r.risk_tier]=r.n);
+  const pendingReview = (byStat['Submitted']||0) + (byStat['Under Review']||0);
 
-      let html = `<div class="stats-bar">
-        <div class="stat"><div class="stat-val">${patterns.length}</div><div class="stat-label">Total Patterns</div></div>
-        <div class="stat"><div class="stat-val" style="color:var(--endorsed)">${endorsed}</div><div class="stat-label">Endorsed</div></div>
-        <div class="stat"><div class="stat-val" style="color:var(--dev)">${inDev}</div><div class="stat-label">In Development</div></div>
-        <div class="stat"><div class="stat-val" style="color:var(--review)">${underReview}</div><div class="stat-label">Under Review</div></div>
-        <div class="stat"><div class="stat-val">${vendors.length}</div><div class="stat-label">Vendors</div></div>
-      </div>`;
+  let html = `<div class="page-title"><h2>Dashboard</h2><button class="btn btn-primary" onclick="startNewIntake()">＋ New Architecture Request</button></div>`;
 
-      html += `<input class="search-bar" placeholder="Search patterns..." oninput="showPatternList(this.value)" value="${filter}" />`;
-      html += `<div class="overview-grid">`;
-      filtered.forEach(p => {
-        const statusClass = 'status-' + (p.status || '').toLowerCase().replace(/\s+/g, '-');
-        html += `<div class="card" onclick="showPattern('${p.patternId}')">
-          <div class="card-id">${p.patternId}</div>
-          <div class="card-name">${p.name}</div>
-          <div class="card-domain">${p.domain}</div>
-          <span class="card-status ${statusClass}">${p.status}</span>
-        </div>`;
-      });
-      html += `</div>`;
-      document.getElementById('main').innerHTML = html;
-    }
+  html += `<div class="stats-grid">
+    <div class="stat-card"><div class="stat-val">${s.total||0}</div><div class="stat-label">Total Requests</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--status-submitted)">${pendingReview}</div><div class="stat-label">Pending Review</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--status-approved)">${byStat['Approved']||0}</div><div class="stat-label">Approved</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--risk-critical)">${byTier['Critical']||0}</div><div class="stat-label">Critical Risk</div></div>
+    <div class="stat-card"><div class="stat-val">${state.patterns.length}</div><div class="stat-label">Patterns</div></div>
+    <div class="stat-card"><div class="stat-val">${state.vendors.length}</div><div class="stat-label">Vendors</div></div>
+  </div>`;
 
-    function showPattern(id) {
-      const p = patterns.find(x => x.patternId === id);
-      if (!p) return;
-      currentPattern = p;
-      currentView = 'patterns';
-      renderSidebar();
+  const tiers = ['Critical','High','Medium','Low'];
+  const tierColors = {Critical:'var(--risk-critical)',High:'var(--risk-high)',Medium:'var(--risk-medium)',Low:'var(--risk-low)'};
+  if (Object.keys(byTier).length) {
+    html += `<div class="section-card" style="margin-bottom:1rem"><h3>Risk Distribution</h3><div class="flex gap-2" style="flex-wrap:wrap">`;
+    tiers.forEach(t=>{if(byTier[t]) html+=`<div class="stat-card" style="flex:1;min-width:100px"><div class="stat-val" style="color:${tierColors[t]}">${byTier[t]}</div><div class="stat-label">${t} Risk</div></div>`;});
+    html += `</div></div>`;
+  }
 
-      const statusClass = 'status-' + (p.status || '').toLowerCase().replace(/\s+/g, '-');
-      let html = `<div class="detail">
-        <button class="back-btn" onclick="showPatternList()">← Back to All Patterns</button>
-        <div class="detail-header">
-          <div>
-            <div style="font-family:monospace;font-size:0.8rem;color:var(--muted);margin-bottom:0.3rem">${p.patternId} · v${p.version || '?'}</div>
-            <h2>${p.name}</h2>
-            <div class="meta">${p.domain} · Owner: ${p.owner || 'N/A'}</div>
-            <div class="badges">
-              <span class="card-status ${statusClass}">${p.status}</span>
-              ${p.tier ? `<span class="badge">${p.tier}</span>` : ''}
-              ${p.ccoeCertified === 'Yes' ? `<span class="badge" style="color:var(--endorsed)">CCoE Certified</span>` : ''}
-              ${p.leanixRef ? `<span class="badge">${p.leanixRef}</span>` : ''}
-            </div>
+  const recent = s.recent||[];
+  html += `<div class="section-card"><h3>Recent Requests</h3>`;
+  if (!recent.length) html += `<p class="text-muted text-sm">No requests yet. <button class="btn btn-sm btn-primary" onclick="startNewIntake()">Create first request</button></p>`;
+  else {
+    html += `<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Status</th><th>Risk</th><th>Submitted</th></tr></thead><tbody>`;
+    recent.forEach(r=>{
+      html+=`<tr onclick="showIntakeDetail('${r.reference_id}')">
+        <td class="font-mono text-sm">${r.reference_id}</td>
+        <td>${r.title}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
+        <td class="text-muted text-sm">${fmtDate(r.created_at)}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  html += `</div>`;
+  setMain(html);
+}
+
+// ─── Intake List ──────────────────────────────────────────────────────────────
+async function showIntakeList(tab) {
+  state.view='intake-list'; if(tab) state.tabFilter=tab; renderSidebar();
+  await loadIntakes();
+  const statuses = ['All','Draft','Submitted','Under Review','Approved','Rejected','Deferred','Withdrawn'];
+  let filtered = state.intakes;
+  if (state.tabFilter !== 'All') filtered = filtered.filter(i=>i.status===state.tabFilter);
+  if (state.searchQ) {
+    const q = state.searchQ.toLowerCase();
+    filtered = filtered.filter(i=>(i.title||'').toLowerCase().includes(q)||(i.reference_id||'').toLowerCase().includes(q)||(i.requestor_name||'').toLowerCase().includes(q)||(i.business_unit||'').toLowerCase().includes(q));
+  }
+  let html = `<div class="page-title"><h2>All Requests</h2><button class="btn btn-primary" onclick="startNewIntake()">＋ New Request</button></div>`;
+  html += `<input class="search-bar" placeholder="Search by title, reference, requestor, business unit..." value="${state.searchQ||''}" oninput="state.searchQ=this.value;showIntakeList()">`;
+  html += `<div class="tabs">${statuses.map(s=>`<button class="tab ${state.tabFilter===s?'active':''}" onclick="showIntakeList('${s}')">${s}</button>`).join('')}</div>`;
+  if (!filtered.length) {
+    html += `<div class="empty">No requests found. <button class="btn btn-sm btn-primary" onclick="startNewIntake()">Create one</button></div>`;
+  } else {
+    html += `<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Title</th><th>Domain</th><th>Requestor</th><th>Status</th><th>Risk Score</th><th>Created</th></tr></thead><tbody>`;
+    filtered.forEach(r=>{
+      html+=`<tr onclick="showIntakeDetail('${r.reference_id}')">
+        <td class="font-mono text-sm">${r.reference_id}</td>
+        <td><strong>${r.title}</strong></td>
+        <td class="text-muted text-sm">${r.programme_domain||r.architecture_type||'–'}</td>
+        <td class="text-sm">${r.requestor_name||'–'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
+        <td class="text-muted text-sm">${fmtDate(r.created_at)}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+  setMain(html);
+}
+
+// ─── Review Queue ─────────────────────────────────────────────────────────────
+async function showReviewQueue() {
+  state.view='review-queue'; renderSidebar();
+  await loadIntakes();
+  const queue = state.intakes.filter(i=>['Submitted','Under Review'].includes(i.status));
+  queue.sort((a,b)=>(b.risk_score||0)-(a.risk_score||0));
+  let html = `<div class="page-title"><h2>Review Queue</h2><span class="text-muted text-sm">${queue.length} item(s) pending</span></div>`;
+  if (!queue.length) {
+    html+=`<div class="empty">Review queue is empty — all submissions have been actioned.</div>`;
+  } else {
+    html+=`<div class="alert alert-info">Items are sorted by risk score (highest first). Critical and High risk items require Architecture Board review before approval.</div>`;
+    html+=`<div class="table-wrap"><table><thead><tr><th>Risk</th><th>Reference</th><th>Title</th><th>Domain</th><th>Requestor</th><th>Status</th><th>Submitted</th><th>Actions</th></tr></thead><tbody>`;
+    queue.forEach(r=>{
+      html+=`<tr>
+        <td>${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):'-'}</td>
+        <td class="font-mono text-sm" style="cursor:pointer" onclick="showIntakeDetail('${r.reference_id}')">${r.reference_id}</td>
+        <td style="cursor:pointer" onclick="showIntakeDetail('${r.reference_id}')"><strong>${r.title}</strong></td>
+        <td class="text-sm text-muted">${r.programme_domain||'–'}</td>
+        <td class="text-sm">${r.requestor_name||'–'}</td>
+        <td>${statusBadge(r.status)}</td>
+        <td class="text-sm text-muted">${fmtDate(r.submitted_at||r.created_at)}</td>
+        <td>
+          <div class="flex gap-2">
+            ${r.status==='Submitted'?`<button class="btn btn-sm btn-secondary" onclick="openReviewModal('${r.id}','Under Review')">Review</button>`:''}
+            <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.id}','Approved')">Approve</button>
+            <button class="btn btn-sm btn-warning" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>
+            <button class="btn btn-sm btn-danger" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>
           </div>
-        </div>`;
+        </td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  }
+  setMain(html);
+}
 
-      if (p.strategicIntent) {
-        html += `<div class="section"><h3>Strategic Intent</h3><p>${p.strategicIntent}</p></div>`;
-      }
-      if (p.problemStatement) {
-        html += `<div class="section"><h3>Problem Statement</h3><p>${p.problemStatement}</p></div>`;
-      }
+// ─── Intake Detail ────────────────────────────────────────────────────────────
+async function showIntakeDetail(id) {
+  state.view='intake-detail'; renderSidebar();
+  setMain('<p class="text-muted">Loading...</p>');
+  const r = await api.get(`/api/intake/${id}`);
+  state.currentIntake = r;
 
-      if (p.useCases && p.useCases.length) {
-        html += `<div class="section"><h3>Use Cases</h3><div class="use-cases">`;
-        p.useCases.forEach(uc => {
-          html += `<div class="use-case-box use"><strong>Use When</strong>${uc.use}</div>
-                   <div class="use-case-box dont"><strong>Don't Use When</strong>${uc.dontUse}</div>`;
-        });
-        html += `</div></div>`;
-      }
+  const canReview = ['Submitted','Under Review'].includes(r.status);
+  const canSubmit = r.status === 'Draft';
+  const canWithdraw = ['Submitted','Under Review'].includes(r.status);
 
-      if (p.components && p.components.length) {
-        html += `<div class="section"><h3>Components</h3><ul class="items">`;
-        p.components.forEach(c => { html += `<li>${c}</li>`; });
-        html += `</ul></div>`;
-      }
+  let html = `<button class="back-btn" onclick="showIntakeList()">← Back to All Requests</button>`;
 
-      if (p.interactionSteps && p.interactionSteps.length) {
-        html += `<div class="section"><h3>Interaction Flow</h3><ul class="items">`;
-        p.interactionSteps.forEach((s, i) => { html += `<li><span style="color:var(--muted);font-size:0.75rem;min-width:1.5rem">${i+1}.</span>${s}</li>`; });
-        html += `</ul></div>`;
-      }
+  html += `<div class="two-col">
+  <div>
+  <div class="detail-header">
+    <div class="font-mono text-sm text-muted">${r.reference_id}</div>
+    <h2>${r.title}</h2>
+    <div class="detail-meta">${r.architecture_type||''} · ${r.programme_domain||''} · Requestor: <strong>${r.requestor_name||'–'}</strong></div>
+    <div class="detail-badges">
+      ${statusBadge(r.status)}
+      ${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):''}
+      ${r.business_unit?`<span class="badge" style="background:var(--surface3);color:var(--text)">${r.business_unit}</span>`:''}
+      ${r.project_timeline?`<span class="badge" style="background:var(--surface3);color:var(--muted)">${r.project_timeline}</span>`:''}
+    </div>
+    <div class="flex gap-2 mt-2">`;
 
-      if (p.securityConsiderations && p.securityConsiderations.length) {
-        html += `<div class="section"><h3>Security Considerations</h3><ul class="items">`;
-        p.securityConsiderations.forEach(s => { html += `<li>${s}</li>`; });
-        html += `</ul></div>`;
-      }
+  if (canSubmit) html+=`<button class="btn btn-primary btn-sm" onclick="openReviewModal('${r.id}','Submitted','submit')">Submit for Review</button>`;
+  if (canReview) {
+    html+=`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button>`;
+    html+=`<button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>`;
+    html+=`<button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`;
+    if(r.status==='Submitted') html+=`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`;
+  }
+  if (canWithdraw) html+=`<button class="btn btn-ghost btn-sm" onclick="openReviewModal('${r.id}','Withdrawn')">Withdraw</button>`;
+  html+=`<button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">+ Comment</button>
+    </div>
+  </div>`;
 
-      if (p.guardrails && p.guardrails.length) {
-        html += `<div class="section"><h3>Guardrails</h3>
-          <table class="guardrails-table">
-            <thead><tr><th>Area</th><th>Rule</th><th>Severity</th></tr></thead><tbody>`;
-        p.guardrails.forEach(g => {
-          const sevClass = 'sev-' + (g.severity || '').toLowerCase();
-          html += `<tr><td>${g.area}</td><td>${g.rule}</td><td class="${sevClass}">${g.severity}</td></tr>`;
-        });
-        html += `</tbody></table></div>`;
-      }
+  if (r.description) html+=`<div class="section-card"><h3>Description</h3><p style="font-size:.86rem;line-height:1.65">${r.description}</p></div>`;
+  if (r.strategic_objective) html+=`<div class="section-card"><h3>Strategic Objective</h3><p style="font-size:.86rem;line-height:1.65">${r.strategic_objective}</p></div>`;
 
-      if (p._svgFile) {
-        html += `<div class="section"><h3>Architecture Diagram</h3>
-          <div class="svg-container">
-            <img src="/api/patterns/${p._svgFile}" alt="Architecture diagram for ${p.name}" />
-          </div></div>`;
-      }
+  html+=`<div class="section-card"><h3>Technology Profile</h3><div class="kv-grid">
+    <div class="kv-item"><label>Architecture Type</label><span>${r.architecture_type||'–'}</span></div>
+    <div class="kv-item"><label>Hosting Model</label><span>${r.hosting_model||'–'}</span></div>
+    <div class="kv-item"><label>Deployment Target</label><span>${r.deployment_target||'–'}</span></div>
+    <div class="kv-item"><label>Integration Points</label><span>${r.integration_points||0}</span></div>
+    <div class="kv-item"><label>Public Facing</label><span>${r.is_public_facing?'Yes':'No'}</span></div>
+    <div class="kv-item"><label>Legacy Dependencies</label><span>${r.has_legacy_dependencies?'Yes':'No'}</span></div>
+  </div>
+  ${r.components&&r.components.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Components</label><div class="tag-list mt-1">${r.components.map(c=>`<span class="badge" style="background:var(--surface3);color:var(--text)">${c}</span>`).join('')}</div></div>`:''}
+  ${r.tech_stack_notes?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Notes</label><p class="text-sm mt-1">${r.tech_stack_notes}</p></div>`:''}
+  </div>`;
 
-      html += `</div>`;
-      document.getElementById('main').innerHTML = html;
-      document.getElementById('main').scrollTop = 0;
-    }
+  html+=`<div class="section-card"><h3>Security & Data</h3><div class="kv-grid">
+    <div class="kv-item"><label>Data Classification</label><span>${r.data_classification||'–'}</span></div>
+    <div class="kv-item"><label>External Data Sharing</label><span>${r.external_data_sharing?'Yes':'No'}</span></div>
+    <div class="kv-item"><label>Encryption at Rest</label><span>${r.encryption_at_rest?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Encryption in Transit</label><span>${r.encryption_in_transit?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>MFA</label><span>${r.has_mfa?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>WAF</label><span>${r.has_waf?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Monitoring</label><span>${r.has_monitoring?'✓ Yes':'✗ Not confirmed'}</span></div>
+    <div class="kv-item"><label>Zero Trust Aligned</label><span>${r.is_zero_trust_aligned?'✓ Yes':'✗ Not declared'}</span></div>
+  </div>
+  ${r.dataTypes&&r.dataTypes.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Data Types</label><div class="tag-list mt-1">${r.dataTypes.map(t=>`<span class="badge badge-review">${t}</span>`).join('')}</div></div>`:''}
+  ${r.authMethods&&r.authMethods.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Auth Methods</label><div class="tag-list mt-1">${r.authMethods.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
+  ${r.complianceRequirements&&r.complianceRequirements.length?`<div class="mt-2"><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">Compliance</label><div class="tag-list mt-1">${r.complianceRequirements.map(t=>`<span class="badge badge-dev">${t}</span>`).join('')}</div></div>`:''}
+  </div>`;
 
-    function showVendors(filter = '') {
-      currentView = 'vendors';
-      currentPattern = null;
-      renderSidebar();
+  if (r.vendorIds&&r.vendorIds.length || r.newVendors&&r.newVendors.length) {
+    const known = state.vendors.filter(v=>r.vendorIds.includes(v.id));
+    html+=`<div class="section-card"><h3>Vendors</h3>`;
+    if(known.length){html+=`<div class="table-wrap" style="margin-bottom:.7rem"><table><thead><tr><th>Vendor</th><th>Product</th><th>Criticality</th><th>Hosting</th></tr></thead><tbody>`;
+      known.forEach(v=>html+=`<tr><td>${v.vendorCompany}</td><td>${v.productService}</td><td>${critBadge(v.criticality)}</td><td class="text-sm text-muted">${v.hostingModel||''}</td></tr>`);
+      html+=`</tbody></table></div>`;}
+    if(r.newVendors&&r.newVendors.length) html+=`<div><label style="font-size:.7rem;color:var(--muted);text-transform:uppercase">New Vendors (Unvetted)</label><div class="tag-list mt-1">${r.newVendors.map(n=>`<span class="badge badge-review">⚠ ${n}</span>`).join('')}</div></div>`;
+    html+=`</div>`;
+  }
 
-      const filtered = filter ? vendors.filter(v =>
-        (v.vendorCompany || '').toLowerCase().includes(filter.toLowerCase()) ||
-        (v.productService || '').toLowerCase().includes(filter.toLowerCase()) ||
-        (v.category || '').toLowerCase().includes(filter.toLowerCase())
-      ) : vendors;
+  if (r.relatedPatternIds&&r.relatedPatternIds.length) {
+    const related = state.patterns.filter(p=>r.relatedPatternIds.includes(p.patternId));
+    html+=`<div class="section-card"><h3>Related Patterns</h3><div class="tag-list">${related.map(p=>`<span class="badge ${p.status==='Endorsed'?'badge-endorsed':'badge-dev'}" style="cursor:pointer" onclick="showPattern('${p.patternId}')">${p.patternId} — ${p.name}</span>`).join('')}</div></div>`;
+  }
 
-      const critical = vendors.filter(v => v.criticality === 'Critical').length;
-      const dataShared = vendors.filter(v => v.dataShared).length;
+  if (r.has_legacy_dependencies && r.legacy_systems) html+=`<div class="section-card"><h3>Legacy Systems</h3><p class="text-sm">${r.legacy_systems}</p></div>`;
+  if (r.deviates_from_patterns) html+=`<div class="section-card"><h3>Pattern Deviation</h3><div class="alert alert-warning" style="margin-bottom:0">⚠ This request deviates from established patterns. ${r.deviation_justification?`<br><strong>Justification:</strong> ${r.deviation_justification}`:''}</div></div>`;
+  if (r.reviewer_notes) html+=`<div class="section-card"><h3>Reviewer Notes</h3><p class="text-sm">${r.reviewer_notes}</p><p class="text-sm text-muted mt-1">— ${r.reviewer_name||'Reviewer'} at ${fmtDate(r.reviewed_at)}</p></div>`;
 
-      let html = `<div class="stats-bar">
-        <div class="stat"><div class="stat-val">${vendors.length}</div><div class="stat-label">Total Vendors</div></div>
-        <div class="stat"><div class="stat-val" style="color:var(--critical)">${critical}</div><div class="stat-label">Critical</div></div>
-        <div class="stat"><div class="stat-val" style="color:var(--review)">${dataShared}</div><div class="stat-label">Data Shared</div></div>
+  // Comments
+  if (r.comments&&r.comments.length) {
+    html+=`<div class="section-card"><h3>Comments (${r.comments.length})</h3>`;
+    r.comments.forEach(c=>{
+      html+=`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`;
+    });
+    html+=`</div>`;
+  }
+
+  html+=`</div><!-- end left col -->`;
+
+  // Right column: risk panel
+  html+=`<div>`;
+  if (r.risk_tier && r.riskBreakdown) {
+    html+=renderRiskPanel(r.risk_score, r.risk_tier, r.riskBreakdown, r.riskFlags||[], r.riskRecommendations||[]);
+  }
+
+  // History
+  if (r.history&&r.history.length) {
+    html+=`<div class="section-card mt-3"><h3>Audit History</h3><div class="history-list">`;
+    r.history.forEach(h=>{
+      html+=`<div class="history-item"><div class="history-dot"></div><div><div class="history-text"><strong>${h.action}</strong>${h.actor?` by ${h.actor}`:''}</div>${h.notes?`<div class="text-sm text-muted">${h.notes}</div>`:''}<div class="history-time">${fmtDate(h.created_at)}</div></div></div>`;
+    });
+    html+=`</div></div>`;
+  }
+  html+=`</div></div>`;
+
+  setMain(html);
+}
+
+// ─── New Intake Wizard ────────────────────────────────────────────────────────
+function startNewIntake() {
+  state.view='new-intake'; state.wizardStep=1; state.wizardData={}; state.wizardRisk=null;
+  renderSidebar(); renderWizard();
+}
+
+function renderWizard() {
+  const steps = ['Overview','Technology','Vendors','Security & Data','Dependencies','Risk & Submit'];
+  let html = `<div class="page-title"><h2>New Architecture Request</h2></div>`;
+  html += `<div class="wizard-steps">`;
+  steps.forEach((s,i)=>{
+    const num=i+1;
+    const cls=num===state.wizardStep?'active':num<state.wizardStep?'done':'';
+    html+=`<div class="wizard-step ${cls}" onclick="gotoStep(${num})"><span class="step-num">${num}</span>${s}</div>`;
+  });
+  html+=`</div>`;
+  html+=`<div id="wizard-body">`;
+  html+=renderWizardStep(state.wizardStep);
+  html+=`</div>`;
+  setMain(html);
+}
+
+function renderWizardStep(step) {
+  const d = state.wizardData;
+  let html='';
+  if(step===1) {
+    html+=`<div class="form-row">
+      <div class="form-group"><label>Request Title *</label><input class="form-control" id="w_title" value="${d.title||''}" placeholder="e.g. Azure Event Hub Integration for OT Telemetry" /></div>
+      <div class="form-group"><label>Architecture Type *</label><select class="form-control" id="w_architectureType"><option value="">Select...</option>${opts(['API & Integration','Data Platform','Infrastructure & Cloud','Security & Identity','Application Modernisation','OT / IoT','Network & Connectivity','Other'],d.architectureType)}</select></div>
+    </div>
+    <div class="form-group"><label>Description *</label><textarea class="form-control" id="w_description" placeholder="Describe what you are building and why...">${d.description||''}</textarea></div>
+    <div class="form-group"><label>Strategic Objective</label><textarea class="form-control" id="w_strategicObjective" placeholder="How does this align to strategic priorities?">${d.strategicObjective||''}</textarea></div>
+    <div class="form-row-3">
+      <div class="form-group"><label>Requestor Name *</label><input class="form-control" id="w_requestorName" value="${d.requestorName||''}" /></div>
+      <div class="form-group"><label>Requestor Email</label><input class="form-control" id="w_requestorEmail" value="${d.requestorEmail||''}" type="email" /></div>
+      <div class="form-group"><label>Role</label><input class="form-control" id="w_requestorRole" value="${d.requestorRole||''}" placeholder="e.g. Solution Architect" /></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Business Unit *</label><input class="form-control" id="w_businessUnit" value="${d.businessUnit||''}" placeholder="e.g. Supply Chain, Manufacturing" /></div>
+      <div class="form-group"><label>Programme Domain</label><input class="form-control" id="w_programmeDomain" value="${d.programmeDomain||''}" placeholder="e.g. OT Operations / Analytics" /></div>
+    </div>
+    <div class="form-group"><label>Project Timeline</label><select class="form-control" id="w_projectTimeline"><option value="">Select...</option>${opts(['Immediate (< 4 weeks)','Short-term (1-3 months)','Medium-term (3-6 months)','Long-term (6-12 months)','Strategic (12+ months)'],d.projectTimeline)}</select></div>`;
+  }
+  else if(step===2) {
+    html+=`<div class="form-group"><label>Key Components</label><p class="text-sm text-muted" style="margin-bottom:.5rem">List the main Azure/technology components involved. Press Enter to add each.</p>
+      <div class="tag-input-wrap" id="components-wrap" onclick="document.getElementById('comp-input').focus()">
+        ${(d.components||[]).map(c=>`<span class="tag">${c}<span class="tag-remove" onclick="removeTag('components','${c}')">✕</span></span>`).join('')}
+        <input class="tag-input" id="comp-input" placeholder="e.g. Azure Event Hubs" onkeydown="addTag(event,'components','comp-input')" />
+      </div></div>
+    <div class="form-row">
+      <div class="form-group"><label>Hosting Model</label><select class="form-control" id="w_hostingModel"><option value="">Select...</option>${opts(['Public Cloud (Azure)','Public Cloud (AWS)','Public Cloud (GCP)','Private Cloud','On-Premises','Hybrid','SaaS','PaaS'],d.hostingModel)}</select></div>
+      <div class="form-group"><label>Deployment Target</label><select class="form-control" id="w_deploymentTarget"><option value="">Select...</option>${opts(['Production','Non-Production','Both','Disaster Recovery'],d.deploymentTarget)}</select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Estimated Integration Points</label><input class="form-control" id="w_integrationPoints" type="number" min="0" value="${d.integrationPoints||0}" /></div>
+      <div class="form-group"><label>Public-Facing Endpoint?</label><select class="form-control" id="w_isPublicFacing"><option value="">Select...</option><option value="true" ${d.isPublicFacing?'selected':''}>Yes</option><option value="false" ${d.isPublicFacing===false?'selected':''}>No</option></select></div>
+    </div>
+    <div class="form-group"><label>Technology Stack Notes</label><textarea class="form-control" id="w_techStackNotes" placeholder="Any additional notes about the tech stack...">${d.techStackNotes||''}</textarea></div>`;
+  }
+  else if(step===3) {
+    html+=`<div class="form-group"><label>Select from Vendor Registry</label><p class="text-sm text-muted" style="margin-bottom:.6rem">Check all vendors involved in this solution.</p>
+      <div class="checkbox-grid" id="vendor-grid">`;
+    state.vendors.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{
+      const checked=(d.vendorIds||[]).includes(v.id);
+      html+=`<label class="checkbox-item"><input type="checkbox" value="${v.id}" ${checked?'checked':''} onchange="toggleVendor(${v.id})" />${v.vendorCompany} — <span class="text-muted text-sm">${v.productService}</span> ${critBadge(v.criticality)}</label>`;
+    });
+    html+=`</div></div>
+    <div class="form-group"><label>New / Unvetted Vendors</label><p class="text-sm text-muted" style="margin-bottom:.5rem">Add vendors not in the registry. Each will be flagged for security assessment.</p>
+      <div class="tag-input-wrap" id="newvendors-wrap" onclick="document.getElementById('nv-input').focus()">
+        ${(d.newVendors||[]).map(v=>`<span class="tag badge-review">${v}<span class="tag-remove" onclick="removeTag('newVendors','${encodeURIComponent(v)}')">✕</span></span>`).join('')}
+        <input class="tag-input" id="nv-input" placeholder="e.g. Confluent Cloud" onkeydown="addTag(event,'newVendors','nv-input')" />
+      </div></div>`;
+  }
+  else if(step===4) {
+    html+=`<div class="form-row">
+      <div class="form-group"><label>Data Classification *</label><select class="form-control" id="w_dataClassification"><option value="">Select...</option>${opts(['Public','Internal','Confidential','Restricted'],d.dataClassification)}</select></div>
+      <div class="form-group"><label>External Data Sharing?</label><select class="form-control" id="w_externalDataSharing"><option value="">Select...</option><option value="true" ${d.externalDataSharing?'selected':''}>Yes</option><option value="false" ${d.externalDataSharing===false?'selected':''}>No</option></select></div>
+    </div>
+    <div class="form-group"><label>Data Types in Scope</label>
+      <div class="checkbox-grid">${['PII','PHI','Financial','OT/SCADA Data','Credentials/Secrets','Operational Metrics','Configuration Data','Log Data','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.dataTypes||[]).includes(t)?'checked':''} onchange="toggleCheck('dataTypes','${t}')" />${t}</label>`).join('')}</div>
+    </div>
+    <div class="form-group"><label>Data Sharing Details</label><input class="form-control" id="w_dataSharingDetails" value="${d.dataSharingDetails||''}" placeholder="Describe what data is shared and with whom" /></div>
+    <div class="form-group"><label>Authentication Methods</label>
+      <div class="checkbox-grid">${['OAuth2/OIDC','SAML','API Key','Certificate/mTLS','Windows Integrated (Kerberos)','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.authMethods||[]).includes(t)?'checked':''} onchange="toggleCheck('authMethods','${t}')" />${t}</label>`).join('')}</div>
+    </div>
+    <div class="form-group"><label>Security Controls</label>
+      <div class="checkbox-grid">
+        <label class="checkbox-item"><input type="checkbox" id="w_encryptionAtRest" ${d.encryptionAtRest?'checked':''} onchange="state.wizardData.encryptionAtRest=this.checked" />Encryption at Rest</label>
+        <label class="checkbox-item"><input type="checkbox" id="w_encryptionInTransit" ${d.encryptionInTransit?'checked':''} onchange="state.wizardData.encryptionInTransit=this.checked" />Encryption in Transit</label>
+        <label class="checkbox-item"><input type="checkbox" id="w_hasMfa" ${d.hasMfa?'checked':''} onchange="state.wizardData.hasMfa=this.checked" />Multi-Factor Authentication</label>
+        <label class="checkbox-item"><input type="checkbox" id="w_hasWaf" ${d.hasWaf?'checked':''} onchange="state.wizardData.hasWaf=this.checked" />WAF Protection</label>
+        <label class="checkbox-item"><input type="checkbox" id="w_hasMonitoring" ${d.hasMonitoring?'checked':''} onchange="state.wizardData.hasMonitoring=this.checked" />Monitoring & Alerting</label>
+        <label class="checkbox-item"><input type="checkbox" id="w_isZeroTrustAligned" ${d.isZeroTrustAligned?'checked':''} onchange="state.wizardData.isZeroTrustAligned=this.checked" />Zero Trust Aligned</label>
+      </div>
+    </div>
+    <div class="form-group"><label>Compliance Requirements</label>
+      <div class="checkbox-grid">${['GDPR','SOX','ISO 27001','IEC 62443','HIPAA','PCI-DSS','NIST CSF','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.complianceRequirements||[]).includes(t)?'checked':''} onchange="toggleCheck('complianceRequirements','${t}')" />${t}</label>`).join('')}</div>
+    </div>`;
+  }
+  else if(step===5) {
+    html+=`<div class="form-group"><label>Related Architecture Patterns</label><p class="text-sm text-muted" style="margin-bottom:.6rem">Select all patterns this solution references or should align to.</p>
+      <div class="checkbox-grid">`;
+    state.patterns.forEach(p=>{
+      const checked=(d.relatedPatternIds||[]).includes(p.patternId);
+      html+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" ${checked?'checked':''} onchange="toggleCheck('relatedPatternIds','${p.patternId}')" />${p.patternId} <span class="text-muted text-sm">— ${p.name}</span> ${p.status==='Endorsed'?'<span class="badge badge-endorsed text-sm">Endorsed</span>':''}</label>`;
+    });
+    html+=`</div></div>
+    <div class="form-group"><label>Deviates from Established Patterns?</label><select class="form-control" id="w_deviatesFromPatterns"><option value="">Select...</option><option value="true" ${d.deviatesFromPatterns?'selected':''}>Yes — exception required</option><option value="false" ${d.deviatesFromPatterns===false?'selected':''}>No</option></select></div>
+    <div class="form-group"><label>Deviation Justification</label><textarea class="form-control" id="w_deviationJustification" placeholder="Provide technical rationale for any pattern deviation...">${d.deviationJustification||''}</textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Legacy System Dependencies?</label><select class="form-control" id="w_hasLegacyDependencies"><option value="">Select...</option><option value="true" ${d.hasLegacyDependencies?'selected':''}>Yes</option><option value="false" ${d.hasLegacyDependencies===false?'selected':''}>No</option></select></div>
+      <div class="form-group"><label>Legacy Systems</label><input class="form-control" id="w_legacySystems" value="${d.legacySystems||''}" placeholder="e.g. SAP ECC, FactoryTalk SE" /></div>
+    </div>
+    <div class="form-group"><label>External Dependencies</label><textarea class="form-control" id="w_externalDependencies" placeholder="Other external systems, services, or teams this depends on...">${d.externalDependencies||''}</textarea></div>`;
+  }
+  else if(step===6) {
+    if(!state.wizardRisk) {
+      html+=`<div class="alert alert-info">Calculating risk assessment...</div>`;
+      setTimeout(()=>calculateAndShowRisk(),100);
+    } else {
+      const risk=state.wizardRisk;
+      html+=`<div class="two-col" style="gap:1.2rem">
+      <div>
+        ${renderRiskPanel(risk.score,risk.tier,risk.breakdown,risk.flags,risk.recommendations)}
+        <div class="section-card mt-3">
+          <h3>Submission Summary</h3>
+          <div class="kv-grid">
+            <div class="kv-item"><label>Title</label><span>${state.wizardData.title||'–'}</span></div>
+            <div class="kv-item"><label>Type</label><span>${state.wizardData.architectureType||'–'}</span></div>
+            <div class="kv-item"><label>Requestor</label><span>${state.wizardData.requestorName||'–'}</span></div>
+            <div class="kv-item"><label>Business Unit</label><span>${state.wizardData.businessUnit||'–'}</span></div>
+            <div class="kv-item"><label>Data Classification</label><span>${state.wizardData.dataClassification||'–'}</span></div>
+            <div class="kv-item"><label>Integration Points</label><span>${state.wizardData.integrationPoints||0}</span></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        ${risk.tier==='Critical'?`<div class="alert alert-danger">⚠ Critical risk detected. This request will require joint Architecture Board and CISO review before any implementation may proceed.</div>`:''}
+        ${risk.tier==='High'?`<div class="alert alert-warning">⚠ High risk. Architecture Board review is required for approval.</div>`:''}
+        ${risk.flags.length>0?`<div class="section-card"><h3>Risk Flags (${risk.flags.length})</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
+        ${risk.recommendations.length>0?`<div class="section-card mt-2"><h3>Recommendations (${risk.recommendations.length})</h3><ul class="recs-list">${risk.recommendations.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
+      </div></div>
+      <div class="wizard-nav">
+        <button class="btn btn-secondary" onclick="gotoStep(5)">← Back</button>
+        <div class="flex gap-2">
+          <button class="btn btn-ghost" onclick="submitIntake(true)">Save as Draft</button>
+          <button class="btn btn-primary" onclick="submitIntake(false)">Submit for Review →</button>
+        </div>
       </div>`;
-
-      html += `<input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${filter}" />`;
-      html += `<div class="vendor-table-wrap"><table class="vendor-table">
-        <thead><tr>
-          <th>Vendor</th><th>Product / Service</th><th>Category</th>
-          <th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Programme Domain</th>
-        </tr></thead><tbody>`;
-
-      filtered.sort((a,b) => (a.vendorCompany||'').localeCompare(b.vendorCompany||'')).forEach(v => {
-        const critClass = 'crit-' + (v.criticality || '').toLowerCase();
-        html += `<tr>
-          <td><strong>${v.vendorCompany}</strong></td>
-          <td>${v.productService}</td>
-          <td>${v.category}</td>
-          <td class="${critClass}">${v.criticality}</td>
-          <td>${v.hostingModel || ''}</td>
-          <td class="${v.dataShared ? 'data-yes' : 'data-no'}">${v.dataShared ? 'Yes' : 'No'}</td>
-          <td>${v.programmeDomain || ''}</td>
-        </tr>`;
-      });
-
-      html += `</tbody></table></div>`;
-      document.getElementById('main').innerHTML = html;
+      return html;
     }
+  }
 
-    init();
-  </script>
+  html+=`<div class="wizard-nav">
+    ${step>1?`<button class="btn btn-secondary" onclick="gotoStep(${step-1})">← Back</button>`:'<div></div>'}
+    <button class="btn btn-primary" onclick="gotoStep(${step+1})">${step<5?'Next →':'Review & Submit →'}</button>
+  </div>`;
+  return html;
+}
+
+async function calculateAndShowRisk() {
+  try {
+    state.wizardRisk = await api.post('/api/intake/assess', state.wizardData);
+    document.getElementById('wizard-body').innerHTML = renderWizardStep(6);
+  } catch(e) { document.getElementById('wizard-body').innerHTML='<div class="alert alert-danger">Risk assessment failed. Please go back and check required fields.</div>'; }
+}
+
+function gotoStep(n) {
+  if(n<1||n>6) return;
+  saveStepData(state.wizardStep);
+  if(n>1 && !validateStep(state.wizardStep)) return;
+  if(n===6) state.wizardRisk=null;
+  state.wizardStep=n;
+  renderWizard();
+}
+
+function saveStepData(step) {
+  const g = id => { const el=document.getElementById(id); return el?el.value:undefined; };
+  const gb = id => { const el=document.getElementById(id); return el?el.checked:undefined; };
+  if(step===1){
+    Object.assign(state.wizardData,{title:g('w_title'),description:g('w_description'),strategicObjective:g('w_strategicObjective'),requestorName:g('w_requestorName'),requestorEmail:g('w_requestorEmail'),requestorRole:g('w_requestorRole'),businessUnit:g('w_businessUnit'),programmeDomain:g('w_programmeDomain'),projectTimeline:g('w_projectTimeline'),architectureType:g('w_architectureType')});
+  } else if(step===2){
+    Object.assign(state.wizardData,{hostingModel:g('w_hostingModel'),deploymentTarget:g('w_deploymentTarget'),integrationPoints:parseInt(g('w_integrationPoints'))||0,isPublicFacing:g('w_isPublicFacing')==='true',techStackNotes:g('w_techStackNotes')});
+  } else if(step===4){
+    Object.assign(state.wizardData,{dataClassification:g('w_dataClassification'),externalDataSharing:g('w_externalDataSharing')==='true',dataSharingDetails:g('w_dataSharingDetails')});
+  } else if(step===5){
+    Object.assign(state.wizardData,{deviatesFromPatterns:g('w_deviatesFromPatterns')==='true',deviationJustification:g('w_deviationJustification'),hasLegacyDependencies:g('w_hasLegacyDependencies')==='true',legacySystems:g('w_legacySystems'),externalDependencies:g('w_externalDependencies')});
+  }
+}
+
+function validateStep(step) {
+  const d=state.wizardData;
+  if(step===1){
+    if(!d.title){alert('Please enter a request title.');return false;}
+    if(!d.description){alert('Please enter a description.');return false;}
+    if(!d.requestorName){alert('Please enter a requestor name.');return false;}
+    if(!d.businessUnit){alert('Please enter a business unit.');return false;}
+    if(!d.architectureType){alert('Please select an architecture type.');return false;}
+  }
+  if(step===4 && !d.dataClassification){alert('Please select a data classification.');return false;}
+  return true;
+}
+
+function addTag(e,field,inputId) {
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const val=e.target.value.trim().replace(/,$/,'');
+    if(!val) return;
+    if(!state.wizardData[field]) state.wizardData[field]=[];
+    if(!state.wizardData[field].includes(val)) state.wizardData[field].push(val);
+    e.target.value='';
+    const wrap=document.getElementById(field==='components'?'components-wrap':'newvendors-wrap');
+    const newTag=document.createElement('span');
+    newTag.className='tag';
+    newTag.innerHTML=`${val}<span class="tag-remove" onclick="removeTag('${field}','${encodeURIComponent(val)}')">✕</span>`;
+    wrap.insertBefore(newTag,e.target);
+  }
+}
+
+function removeTag(field,val) {
+  const decoded=decodeURIComponent(val);
+  if(!state.wizardData[field]) return;
+  state.wizardData[field]=state.wizardData[field].filter(v=>v!==decoded);
+  renderWizard();
+}
+
+function toggleVendor(id) {
+  if(!state.wizardData.vendorIds) state.wizardData.vendorIds=[];
+  const idx=state.wizardData.vendorIds.indexOf(id);
+  if(idx===-1) state.wizardData.vendorIds.push(id);
+  else state.wizardData.vendorIds.splice(idx,1);
+}
+
+function toggleCheck(field,val) {
+  if(!state.wizardData[field]) state.wizardData[field]=[];
+  const idx=state.wizardData[field].indexOf(val);
+  if(idx===-1) state.wizardData[field].push(val);
+  else state.wizardData[field].splice(idx,1);
+}
+
+async function submitIntake(asDraft) {
+  saveStepData(6);
+  if(!asDraft && !validateStep(1)) return;
+  try {
+    const result = await api.post('/api/intake',{...state.wizardData,submitAsDraft:asDraft});
+    await loadIntakes();
+    renderSidebar();
+    await showIntakeDetail(result.reference_id);
+  } catch(e) { alert('Submission failed: '+(e.error||JSON.stringify(e))); }
+}
+
+// ─── Review Modal ─────────────────────────────────────────────────────────────
+function openReviewModal(intakeId, action) {
+  state.reviewAction=action; state.reviewIntakeId=intakeId;
+  const titles={Approved:'Approve Request',Rejected:'Reject Request',Deferred:'Defer Request',Withdrawn:'Withdraw Request','Under Review':'Mark Under Review',Submitted:'Submit for Review'};
+  document.getElementById('reviewModalTitle').textContent=titles[action]||action;
+  document.getElementById('reviewerName').value='';
+  document.getElementById('reviewerNotes').value='';
+  document.getElementById('approvedPatternId').value='';
+  document.getElementById('approvedPatternGroup').style.display=action==='Approved'?'block':'none';
+  document.getElementById('reviewModal').style.display='flex';
+}
+
+async function submitReview() {
+  const name=document.getElementById('reviewerName').value;
+  const notes=document.getElementById('reviewerNotes').value;
+  const patternId=document.getElementById('approvedPatternId').value;
+  try {
+    await api.post(`/api/intake/${state.reviewIntakeId}/status`,{status:state.reviewAction,reviewerName:name,reviewerNotes:notes,approvedPatternId:patternId||undefined});
+    closeModal('reviewModal');
+    await loadIntakes();
+    renderSidebar();
+    if(state.view==='intake-detail') await showIntakeDetail(state.currentIntake.reference_id);
+    else if(state.view==='review-queue') showReviewQueue();
+    else showDashboard();
+  } catch(e) { alert(e.error||'Failed: '+JSON.stringify(e)); }
+}
+
+// ─── Comment Modal ────────────────────────────────────────────────────────────
+function openCommentModal(id) { state.commentIntakeId=id; document.getElementById('commentModal').style.display='flex'; }
+async function submitComment() {
+  const author=document.getElementById('commentAuthor').value||'Anonymous';
+  const role=document.getElementById('commentRole').value;
+  const comment=document.getElementById('commentText').value;
+  if(!comment){alert('Please enter a comment.');return;}
+  await api.post(`/api/intake/${state.commentIntakeId}/comments`,{author,role,comment});
+  closeModal('commentModal');
+  document.getElementById('commentText').value='';
+  if(state.view==='intake-detail') await showIntakeDetail(state.currentIntake.reference_id);
+}
+
+function closeModal(id){document.getElementById(id).style.display='none';}
+
+// ─── Pattern Library ──────────────────────────────────────────────────────────
+function showPattern(id) {
+  const p = state.patterns.find(x=>x.patternId===id);
+  if(!p) return;
+  state.currentPattern=p; state.view='pattern-detail'; renderSidebar();
+  const statusClass='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
+  let html=`<button class="back-btn" onclick="showPatternList()">← Back to Patterns</button>
+  <div class="two-col">
+  <div>
+  <div class="detail-header">
+    <div class="font-mono text-sm text-muted">${p.patternId} · v${p.version||'?'} · Last reviewed ${p.lastReviewed||'–'}</div>
+    <h2>${p.name}</h2>
+    <div class="detail-meta">${p.domain}</div>
+    <div class="detail-badges mt-1">
+      <span class="badge ${statusClass}">${p.status}</span>
+      ${p.tier?`<span class="badge" style="background:var(--surface3);color:var(--text)">${p.tier}</span>`:''}
+      ${p.ccoeCertified==='Yes'?`<span class="badge badge-endorsed">CCoE Certified</span>`:''}
+      ${p.leanixRef?`<span class="badge" style="background:var(--surface3);color:var(--muted)">${p.leanixRef}</span>`:''}
+    </div>
+  </div>
+  ${p.strategicIntent?`<div class="section-card"><h3>Strategic Intent</h3><p style="font-size:.86rem;line-height:1.65">${p.strategicIntent}</p></div>`:''}
+  ${p.problemStatement?`<div class="section-card"><h3>Problem Statement</h3><p style="font-size:.86rem;line-height:1.65">${p.problemStatement}</p></div>`:''}
+  ${p.useCases&&p.useCases.length?`<div class="section-card"><h3>Use Cases</h3><div class="use-cases-grid">${p.useCases.map(u=>`<div class="use-case-box use"><strong>Use When</strong>${u.use}</div><div class="use-case-box dont"><strong>Don't Use When</strong>${u.dontUse}</div>`).join('')}</div></div>`:''}
+  ${p.components&&p.components.length?`<div class="section-card"><h3>Components</h3><ul class="arrow-list">${p.components.map(c=>`<li>${c}</li>`).join('')}</ul></div>`:''}
+  ${p.interactionSteps&&p.interactionSteps.length?`<div class="section-card"><h3>Interaction Flow</h3><ul class="arrow-list">${p.interactionSteps.map((s,i)=>`<li><span style="color:var(--muted);font-size:.72rem;min-width:1.5rem">${i+1}.</span>${s}</li>`).join('')}</ul></div>`:''}
+  ${p.securityConsiderations&&p.securityConsiderations.length?`<div class="section-card"><h3>Security Considerations</h3><ul class="arrow-list">${p.securityConsiderations.map(s=>`<li>${s}</li>`).join('')}</ul></div>`:''}
+  ${p.guardrails&&p.guardrails.length?`<div class="section-card"><h3>Guardrails</h3><table class="guardrails-table"><thead><tr><th>Area</th><th>Rule</th><th>Severity</th></tr></thead><tbody>${p.guardrails.map(g=>`<tr><td>${g.area}</td><td>${g.rule}</td><td class="sev-${g.severity.toLowerCase()}">${g.severity}</td></tr>`).join('')}</tbody></table></div>`:''}
+  ${p._svgFile?`<div class="section-card"><h3>Architecture Diagram</h3><div class="svg-container"><img src="/api/patterns/${p._svgFile}" alt="Diagram" /></div></div>`:''}
+  </div>
+  <div>
+  ${p.owner?`<div class="section-card"><h3>Ownership</h3><div class="kv-grid"><div class="kv-item"><label>Owner</label><span>${p.owner}</span></div><div class="kv-item"><label>Approvers</label><span>${p.approvers||'–'}</span></div></div></div>`:''}
+  ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.35rem 0;border-bottom:1px solid var(--border)"><span class="font-mono" style="cursor:pointer;color:var(--accent)" onclick="showPattern('${c.patternId}')">${c.patternId}</span><span class="text-muted text-sm">${c.relationship}</span></div>`).join('')}</div>`:''}
+  ${p.implementationAssets?`<div class="section-card"><h3>Implementation Assets</h3>${Object.entries(p.implementationAssets).map(([k,v])=>`<div class="kv-item" style="margin-bottom:.5rem"><label>${k}</label><span class="font-mono text-sm">${v}</span></div>`).join('')}</div>`:''}
+  ${p.exceptionProcess?`<div class="section-card"><h3>Exception Process</h3><p class="text-sm" style="line-height:1.65">${p.exceptionProcess}</p></div>`:''}
+  </div></div>`;
+  setMain(html);
+}
+
+function showPatternList() {
+  state.view='patterns'; state.currentPattern=null; renderSidebar();
+  const endorsed=state.patterns.filter(p=>p.status==='Endorsed').length;
+  const inDev=state.patterns.filter(p=>p.status==='In Development').length;
+  const underReview=state.patterns.filter(p=>p.status==='Under Review').length;
+  let html=`<div class="page-title"><h2>Pattern Library</h2></div>
+  <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat-card"><div class="stat-val">${state.patterns.length}</div><div class="stat-label">Total Patterns</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--risk-low)">${endorsed}</div><div class="stat-label">Endorsed</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--dev)">${inDev}</div><div class="stat-label">In Development</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--review)">${underReview}</div><div class="stat-label">Under Review</div></div>
+  </div>
+  <input class="search-bar" id="pattern-search" placeholder="Search patterns..." oninput="filterPatterns(this.value)" />
+  <div class="overview-grid" id="pattern-grid">`;
+  state.patterns.forEach(p=>{
+    const cls='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
+    html+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge ${cls}" style="margin-top:.5rem">${p.status}</span></div>`;
+  });
+  html+=`</div>`;
+  setMain(html);
+}
+
+function filterPatterns(q) {
+  const grid=document.getElementById('pattern-grid');
+  if(!grid) return;
+  const cards=grid.querySelectorAll('.card');
+  const lq=q.toLowerCase();
+  cards.forEach(c=>{c.style.display=c.textContent.toLowerCase().includes(lq)?'':'none';});
+}
+
+// ─── Vendors ──────────────────────────────────────────────────────────────────
+function showVendors(q='') {
+  state.view='vendors'; renderSidebar();
+  const critical=state.vendors.filter(v=>v.criticality==='Critical').length;
+  const dataShared=state.vendors.filter(v=>v.dataShared).length;
+  const filtered=q?state.vendors.filter(v=>(v.vendorCompany+v.productService+v.category).toLowerCase().includes(q.toLowerCase())):state.vendors;
+  let html=`<div class="page-title"><h2>Vendor Registry</h2></div>
+  <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+    <div class="stat-card"><div class="stat-val">${state.vendors.length}</div><div class="stat-label">Total Vendors</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--risk-critical)">${critical}</div><div class="stat-label">Critical Tier</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--review)">${dataShared}</div><div class="stat-label">Data Shared</div></div>
+  </div>
+  <input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${q}" />
+  <div class="table-wrap"><table><thead><tr><th>Vendor</th><th>Product / Service</th><th>Category</th><th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Domain</th></tr></thead><tbody>`;
+  filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{
+    html+=`<tr><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-sm text-muted">${v.hostingModel||''}</td><td>${v.dataShared?'<span style="color:var(--review)">Yes</span>':'<span class="text-muted">No</span>'}</td><td class="text-sm text-muted">${v.programmeDomain||''}</td></tr>`;
+  });
+  html+=`</tbody></table></div>`;
+  setMain(html);
+}
+
+// ─── Risk Panel Renderer ──────────────────────────────────────────────────────
+function renderRiskPanel(score, tier, breakdown, flags, recs) {
+  const tierColors={Low:'var(--risk-low)',Medium:'var(--risk-medium)',High:'var(--risk-high)',Critical:'var(--risk-critical)'};
+  const color=tierColors[tier]||'var(--muted)';
+  const pct=Math.round((score/100)*100);
+  const r=55, circ=2*Math.PI*r;
+  const dash=circ*pct/100;
+  const dimColors={dataRisk:'#3498db',vendorRisk:'#9b59b6',securityRisk:'#e74c3c',complexityRisk:'#f39c12'};
+  let html=`<div class="section-card"><h3>Risk Assessment</h3>
+  <div class="risk-panel" style="flex-direction:column">
+    <div class="flex gap-3 items-center" style="width:100%">
+      <div class="risk-circle">
+        <svg viewBox="0 0 130 130" width="130" height="130">
+          <circle cx="65" cy="65" r="${r}" fill="none" stroke="var(--surface3)" stroke-width="12"/>
+          <circle cx="65" cy="65" r="${r}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${dash} ${circ}" style="transition:stroke-dasharray .5s"/>
+        </svg>
+        <div class="risk-circle-label"><span class="risk-score-num" style="color:${color}">${score}</span><span class="risk-score-max">/100</span></div>
+      </div>
+      <div style="flex:1">
+        <div class="risk-tier-badge badge badge-${tier.toLowerCase()}" style="font-size:1rem;margin-bottom:.5rem">${tier} Risk</div>
+        <div class="risk-bars">`;
+  if(breakdown){
+    Object.entries(breakdown).forEach(([k,v])=>{
+      const pctBar=Math.round((v.score/v.max)*100);
+      html+=`<div class="risk-bar-row">
+        <div class="risk-bar-label">${v.label}</div>
+        <div class="risk-bar-track"><div class="risk-bar-fill" style="width:${pctBar}%;background:${dimColors[k]||color}"></div></div>
+        <div class="risk-bar-val" style="color:${dimColors[k]||color}">${v.score}/${v.max}</div>
+      </div>`;
+    });
+  }
+  html+=`</div></div></div>`;
+  if(flags&&flags.length){
+    html+=`<div style="width:100%;margin-top:.75rem"><div class="text-sm text-muted" style="margin-bottom:.35rem;font-weight:700;text-transform:uppercase;font-size:.68rem">Risk Flags</div><ul class="flags-list">${flags.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
+  }
+  if(recs&&recs.length){
+    html+=`<div style="width:100%;margin-top:.75rem"><div class="text-sm text-muted" style="margin-bottom:.35rem;font-weight:700;text-transform:uppercase;font-size:.68rem">Recommendations</div><ul class="recs-list">${recs.slice(0,5).map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
+  }
+  html+=`</div></div>`;
+  return html;
+}
+
+// ─── Utilities ────────────────────────────────────────────────────────────────
+function opts(arr, selected) { return arr.map(o=>`<option value="${o}" ${o===selected?'selected':''}>${o}</option>`).join(''); }
+function fmtDate(d) { if(!d) return '–'; try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;} }
+function statusBadge(s) {
+  const map={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};
+  return `<span class="badge badge-${map[s]||'draft'}">${s}</span>`;
+}
+function tierBadge(tier, score) {
+  return `<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;
+}
+function critBadge(c) {
+  const map={Critical:'badge-critical',High:'badge-high',Medium:'badge-review',Low:'badge-endorsed'};
+  return `<span class="badge ${map[c]||''}">${c||'–'}</span>`;
+}
+
+// ─── Kick off ─────────────────────────────────────────────────────────────────
+init();
+</script>
 </body>
 </html>
