@@ -64,6 +64,7 @@ function serializeIntake(row) {
     riskRecommendations: parseJson(row.risk_recommendations, []),
     aiReview: parseJson(row.ai_review, null),
     aiDiagram: parseJson(row.ai_diagram, null),
+    iacCode: parseJson(row.iac_code, null),
     is_public_facing: row.is_public_facing === 1 || row.is_public_facing === true,
     external_data_sharing: row.external_data_sharing === 1 || row.external_data_sharing === true,
     encryption_at_rest: row.encryption_at_rest === 1 || row.encryption_at_rest === true,

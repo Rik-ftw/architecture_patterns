@@ -204,8 +204,10 @@ async function initDb() {
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS jira_epics TEXT`,
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS intake_id INTEGER`,
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS intake_reference TEXT`,
+    `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS iac_code TEXT`,
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS ai_review TEXT`,
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS ai_diagram TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS iac_code TEXT`,
     `ALTER TABLE operational_support ADD COLUMN IF NOT EXISTS solution_id INTEGER`,
     `ALTER TABLE operational_support ADD COLUMN IF NOT EXISTS solution_reference TEXT`,
   ];

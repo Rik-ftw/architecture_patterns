@@ -228,6 +228,46 @@ router.post('/sync-solutions', async (req, res) => {
   }
 });
 
+router.post('/push-iac', async (req, res) => {
+  try {
+    const { pathPrefix, files, label } = req.body;
+    if (!pathPrefix || !files || typeof files !== 'object') {
+      return res.status(400).json({ error: 'pathPrefix and files are required' });
+    }
+
+    await ensureBranchExists();
+
+    const results = [];
+    const errors = [];
+
+    for (const [filename, content] of Object.entries(files)) {
+      if (!content) continue;
+      const repoPath = `${pathPrefix}/${filename}`;
+      try {
+        await upsertFile(repoPath, content, `feat(iac): add ${filename} for ${label || pathPrefix}`);
+        results.push({ file: repoPath, status: 'pushed' });
+      } catch (e) {
+        errors.push({ file: repoPath, error: e.message });
+      }
+    }
+
+    res.json({
+      success: errors.length === 0,
+      repo: REPO,
+      branch: BRANCH,
+      pathPrefix,
+      pushed: results.length,
+      errors: errors.length,
+      results,
+      errors,
+      pushedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('GitHub IaC push error:', err);
+    res.status(500).json({ error: err.message || 'GitHub IaC push failed' });
+  }
+});
+
 router.get('/sync-status', async (req, res) => {
   try {
     const repoInfo = await ghFetch(`${GITHUB_API}/repos/${REPO}`);

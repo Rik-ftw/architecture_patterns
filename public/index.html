@@ -473,8 +473,26 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .vi-tech-list{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.45rem}
 .vi-tech-chip{background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:.1rem .4rem;font-size:.7rem;font-family:monospace}
 .vi-cached-notice{font-size:.67rem;color:var(--muted);margin-top:.3rem;text-align:right}
+
+/* IaC Panel */
+.iac-panel{background:var(--surface);border:1px solid rgba(74,222,128,.3);border-radius:12px;padding:1.1rem;margin-bottom:.9rem;position:relative;overflow:hidden}
+.iac-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#166534,#4ade80,#22c55e)}
+.iac-panel h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#4ade80;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.iac-file-tabs{display:flex;gap:.2rem;flex-wrap:wrap;margin-bottom:.6rem;border-bottom:1px solid rgba(74,222,128,.2);padding-bottom:.4rem}
+.iac-file-tab{padding:.25rem .6rem;font-size:.71rem;font-family:monospace;border:1px solid var(--border);border-radius:4px;background:var(--surface2);color:var(--muted);cursor:pointer;transition:all .15s}
+.iac-file-tab.active{background:rgba(74,222,128,.15);color:#4ade80;border-color:rgba(74,222,128,.4)}
+.iac-code-wrap{position:relative;background:#0d1117;border:1px solid rgba(74,222,128,.15);border-radius:8px;overflow:hidden}
+.iac-code{display:block;padding:.85rem .9rem;font-family:'Consolas','Courier New',monospace;font-size:.73rem;line-height:1.55;color:#e6edf3;overflow-x:auto;overflow-y:auto;max-height:380px;white-space:pre}
+.iac-copy-btn{position:absolute;top:.45rem;right:.45rem;background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:#4ade80;border-radius:5px;padding:.18rem .5rem;font-size:.7rem;cursor:pointer;font-family:inherit;transition:all .15s}
+.iac-copy-btn:hover{background:rgba(74,222,128,.25)}
+.iac-actions{display:flex;gap:.45rem;margin-top:.65rem;flex-wrap:wrap}
+.iac-meta{font-size:.66rem;color:var(--muted);margin-top:.55rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center}
+.iac-stat{background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.2);border-radius:4px;padding:.1rem .4rem;font-size:.67rem;font-family:monospace}
+.iac-spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(74,222,128,.3);border-top-color:#4ade80;border-radius:50%;animation:spin .7s linear infinite}
+.iac-generating{display:flex;align-items:center;gap:.6rem;color:#4ade80;font-size:.82rem;padding:1rem;background:var(--surface2);border-radius:8px}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 </head>
 <body>
 <header>
@@ -876,6 +894,7 @@ async function showSolutionDetail(id) {
       ${canReview?`<button class="btn btn-primary btn-sm" onclick="openSolutionReviewPanel(${s.id})">✓ Submit Review — ${currentStage}</button>`:''}
       ${isApproved?`<button class="btn btn-success btn-sm" onclick="syncSolutionToGitHub(${s.id},'${s.reference_id}')">⇅ Sync to GitHub</button>`:''}
       ${isApproved?`<button class="btn btn-sm jira-epic-btn" onclick="generateJiraEpics(${s.id})">⬡ ${s.jiraEpics?'Regenerate':'Generate'} Jira Epics</button>`:''}
+      <button class="btn btn-sm" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateSolutionIaC(${s.id},'${s.reference_id}')">⬡ ${s.iacCode?'Regenerate':'Generate'} IaC</button>
       <button class="btn btn-danger btn-sm" onclick="confirmDeleteSolution(${s.id},'${s.reference_id}')">Delete</button>
     </div>
   </div>
@@ -915,6 +934,7 @@ async function showSolutionDetail(id) {
     ${canReview?`<div class="mt-2" id="inline-review-btn"><button class="btn btn-primary btn-sm" style="width:100%" onclick="openSolutionReviewPanel(${s.id})">✓ Submit ${currentStage} Review</button></div>`:''}
     ${isApproved?`<div class="mt-2"><button class="btn btn-success btn-sm" style="width:100%" onclick="syncSolutionToGitHub(${s.id},'${s.reference_id}')">⇅ Sync to GitHub</button></div>`:''}
   </div>
+  <div id="solution-iac-panel">${s.iacCode?renderIaCPanel(s.iacCode,'solution',s.id,s.reference_id):`<div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate a multi-module Terraform root configuration for this solution with per-pattern module stubs, providers, variables, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateSolutionIaC(${s.id},'${s.reference_id}')">⬡ Generate IaC</button></div>`}</div>
   </div>`;
   setMain(h);
 }
@@ -1314,6 +1334,7 @@ async function showIntakeDetail(id) {
       <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
       <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
       <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
+      <button class="btn btn-sm" id="iac-btn" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ ${r.iacCode?'Regenerate':'Generate'} IaC</button>
       ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
   </div>
@@ -1353,6 +1374,7 @@ async function showIntakeDetail(id) {
   </div>
   <div>
     <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
+    <div id="iac-panel">${r.iacCode?renderIaCPanel(r.iacCode,'intake',r.id,r.reference_id):`<div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate production-grade Terraform code for this architecture — providers, resources, variables, outputs, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ Generate IaC</button></div>`}</div>
     ${r.risk_tier&&r.riskBreakdown?renderRiskDeepDive(r):''}
     ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
   </div></div>`;
@@ -1625,6 +1647,7 @@ function showPattern(id){
   ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.38rem;background:var(--surface2);border-radius:6px;margin-bottom:.3rem;cursor:pointer" onclick="showPattern('${c.patternId}')"><span class="font-mono text-xs" style="color:var(--accent)">${c.patternId}</span><span class="text-xs text-muted">${c.relationship}</span></div>`).join('')}</div>`:''}
   ${p.implementationAssets?`<div class="section-card"><h3>Implementation Assets</h3>${Object.entries(p.implementationAssets).map(([k,v])=>`<div class="kv-item" style="margin-bottom:.45rem"><label>${k}</label><span class="font-mono text-xs">${v}</span></div>`).join('')}</div>`:''}
   ${p.exceptionProcess?`<div class="section-card"><h3>Exception Process</h3><p class="text-sm" style="line-height:1.65">${p.exceptionProcess}</p></div>`:''}
+  <div id="pattern-iac-panel"><div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate Terraform code for this pattern — Azure resource definitions, variables, outputs, provider config, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generatePatternIaC('${p.patternId}')">⬡ Generate IaC</button></div></div>
   </div></div>`;
   setMain(h);
 }
@@ -2935,6 +2958,139 @@ async function generateDiagram(intakeId, refId) {
   } catch(e) {
     if (panel) panel.innerHTML = `<div class="diagram-panel"><div class="alert alert-danger" style="margin:0">Diagram generation failed: ${e.error||e.message||'Unknown error'}. Check that your ANTHROPIC_API_KEY is valid.</div></div>`;
     if (btn) { btn.textContent = '⬡ Generate Diagram'; btn.disabled = false; }
+  }
+}
+
+// ─── IaC ──────────────────────────────────────────────────────────────────────
+let _iacFilesCache = {};
+let _iacFilesCacheId = 0;
+
+function renderIaCPanel(iac, context, entityId, refId) {
+  if (!iac || !iac.files) return '';
+  const files = iac.files;
+  const fileKeys = Object.keys(files).filter(k => files[k]);
+  if (!fileKeys.length) return '';
+  const cacheKey = 'iac_' + (++_iacFilesCacheId);
+  _iacFilesCache[cacheKey] = files;
+  const activeFile = fileKeys[0];
+  const tabsHtml = fileKeys.map(k => `<button class="iac-file-tab${k===activeFile?' active':''}" id="iac-tab-${k.replace('.','_')}" onclick="iacSwitchTab(this,'${k.replace('.','_')}','iac-code-${k.replace('.','_')}')">${k}</button>`).join('');
+  const codesHtml = fileKeys.map(k => `<div id="iac-code-${k.replace('.','_')}" style="display:${k===activeFile?'block':'none'}"><div class="iac-code-wrap"><button class="iac-copy-btn" onclick="iacCopyFile('${k.replace('.','_')}')">Copy</button><code class="iac-code">${escHtml(files[k])}</code></div></div>`).join('');
+  const pushLabel = context === 'pattern' ? `iac/patterns/${refId}` : context === 'intake' ? `iac/intake/${refId}` : `iac/solutions/${refId}`;
+  const genFn = context === 'pattern' ? `generatePatternIaC('${refId}')` : context === 'intake' ? `generateIntakeIaC(${entityId},'${refId}')` : `generateSolutionIaC(${entityId},'${refId}')`;
+  return `<div class="iac-panel" id="iac-panel-card">
+    <h3>⬡ Terraform IaC <span style="font-size:.6rem;font-weight:400;opacity:.55;margin-left:.35rem">${refId}</span></h3>
+    <div class="iac-file-tabs">${tabsHtml}</div>
+    ${codesHtml}
+    <div class="iac-actions">
+      <button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="${genFn}">⟳ Regenerate</button>
+      <button class="btn btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="iacDownloadZip('${cacheKey}')">↓ Download ZIP</button>
+      <button class="btn btn-sm" style="background:rgba(74,222,128,.08);color:#86efac;border:1px solid rgba(74,222,128,.2)" onclick="iacPushToGitHub('${pushLabel}','${cacheKey}','${refId}')">⇅ Push to GitHub</button>
+    </div>
+    <div class="iac-meta">
+      ${iac.resourceCount!==undefined?`<span class="iac-stat">${iac.resourceCount} resources</span>`:''}
+      ${iac.estimatedMonthlyCost?`<span class="iac-stat">${iac.estimatedMonthlyCost}/mo est.</span>`:''}
+      ${iac.guardrailsEnforced?`<span class="iac-stat">${iac.guardrailsEnforced} guardrails</span>`:''}
+      <span style="margin-left:auto;font-size:.63rem;opacity:.55">${iac.generatedAt?new Date(iac.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${iac.model||''}</span>
+    </div>
+  </div>`;
+}
+
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function iacSwitchTab(btn, fileKey, codeId) {
+  const panel = btn.closest('.iac-panel');
+  if (!panel) return;
+  panel.querySelectorAll('.iac-file-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  panel.querySelectorAll('[id^="iac-code-"]').forEach(d => d.style.display = 'none');
+  const el = document.getElementById(codeId);
+  if (el) el.style.display = 'block';
+}
+
+function iacCopyFile(fileKey) {
+  const el = document.getElementById(`iac-code-${fileKey}`);
+  if (!el) return;
+  const code = el.querySelector('.iac-code');
+  if (!code) return;
+  navigator.clipboard.writeText(code.textContent).then(() => {
+    const btn = el.closest('.iac-code-wrap').querySelector('.iac-copy-btn');
+    if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => btn.textContent = orig, 1500); }
+  });
+}
+
+async function iacDownloadZip(cacheKey) {
+  const filesObj = _iacFilesCache[cacheKey];
+  if (!filesObj) { alert('IaC files not found in cache'); return; }
+  if (typeof JSZip === 'undefined') { alert('JSZip not loaded'); return; }
+  const zip = new JSZip();
+  for (const [name, content] of Object.entries(filesObj)) {
+    if (content) zip.file(name, content);
+  }
+  const blob = await zip.generateAsync({ type: 'blob' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'terraform.zip'; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function iacPushToGitHub(pathPrefix, cacheKey, label) {
+  const filesObj = _iacFilesCache[cacheKey];
+  if (!filesObj) { alert('IaC files not found in cache'); return; }
+  const btn = event.currentTarget;
+  const orig = btn.textContent;
+  btn.disabled = true; btn.textContent = '⟳ Pushing…';
+  try {
+    const r = await api.post('/api/github/push-iac', { pathPrefix, files: filesObj, label });
+    btn.textContent = `✓ Pushed ${r.pushed} files`;
+    btn.style.color = '#4ade80';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.color = ''; }, 3500);
+  } catch(e) {
+    btn.textContent = 'Push failed';
+    btn.style.color = '#f87171';
+    setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.color = ''; }, 3000);
+  }
+}
+
+async function generatePatternIaC(patternId) {
+  const panel = document.getElementById('pattern-iac-panel');
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for pattern ${patternId}… this takes 20–30 seconds</div></div>`;
+  try {
+    const r = await api.post(`/api/iac/pattern/${patternId}`, {});
+    if (panel) panel.innerHTML = renderIaCPanel(r, 'pattern', patternId, patternId);
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
+  }
+}
+
+async function generateIntakeIaC(intakeId, refId) {
+  const btn = document.getElementById('iac-btn');
+  const panel = document.getElementById('iac-panel');
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
+  try {
+    const r = await api.post(`/api/iac/intake/${intakeId}`, {});
+    if (panel) panel.innerHTML = renderIaCPanel(r, 'intake', intakeId, refId);
+    const ir = S.intakes.find(i => i.id === intakeId);
+    if (ir) ir.iacCode = r;
+    if (btn) { btn.textContent = '⬡ Regenerate IaC'; btn.disabled = false; }
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
+    if (btn) { btn.textContent = '⬡ Generate IaC'; btn.disabled = false; }
+  }
+}
+
+async function generateSolutionIaC(solutionId, refId) {
+  const panel = document.getElementById('solution-iac-panel');
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
+  try {
+    const r = await api.post(`/api/iac/solution/${solutionId}`, {});
+    if (panel) panel.innerHTML = renderIaCPanel(r, 'solution', solutionId, refId);
+    if (S.currentSolution && S.currentSolution.id === solutionId) S.currentSolution.iacCode = r;
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="iac-panel"><div class="alert alert-danger" style="margin:0">IaC generation failed: ${e.error||e.message||'Unknown error'}</div></div>`;
   }
 }
 
