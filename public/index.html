@@ -962,7 +962,7 @@ function confirmDeleteSolution(id,ref) {
 async function showIntakeList(tab) {
   S.view='intake-list'; if(tab) S.tabFilter=tab; renderSidebar();
   await loadIntakes();
-  const statuses=['All','Draft','Submitted','Under Review','Approved','Rejected','Deferred','Withdrawn'];
+  const statuses=['All','Draft','Submitted','Under Review','Approved','Approved with Conditions','Rejected','Deferred','Withdrawn'];
   let filtered=S.intakes;
   if(S.tabFilter!=='All') filtered=filtered.filter(i=>i.status===S.tabFilter);
   if(S.searchQ){const q=S.searchQ.toLowerCase();filtered=filtered.filter(i=>(i.title+i.reference_id+(i.requestor_name||'')+(i.business_unit||'')).toLowerCase().includes(q));}
@@ -998,6 +998,7 @@ async function showReviewQueue() {
         <td><div class="flex gap-1">
           ${r.status==='Submitted'?`<button class="btn btn-sm btn-secondary" onclick="openReviewModal('${r.id}','Under Review')">Review</button>`:''}
           <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.id}','Approved')">Approve</button>
+          <button class="btn btn-sm btn-success" onclick="openReviewModal('${r.id}','Approved with Conditions')" style="opacity:.85">Approve with Conditions</button>
           <button class="btn btn-sm btn-warning" onclick="openReviewModal('${r.id}','Deferred')">Defer</button>
           <button class="btn btn-sm btn-danger" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>
         </div></td></tr>`;
@@ -1018,10 +1019,10 @@ async function showIntakeDetail(id) {
 
   const opsRecord = S.opSupport.find(o=>o.intake_reference===r.reference_id);
   const lifecycleStages=[
-    {key:'Draft',label:'Draft',done:['Draft','Submitted','Under Review','Approved'].includes(r.status)},
-    {key:'Submitted',label:'Submitted',done:['Submitted','Under Review','Approved'].includes(r.status)},
-    {key:'Under Review',label:'Under Review',done:['Under Review','Approved'].includes(r.status)},
-    {key:'Approved',label:'Approved',done:r.status==='Approved'},
+    {key:'Draft',label:'Draft',done:['Draft','Submitted','Under Review','Approved','Approved with Conditions'].includes(r.status)},
+    {key:'Submitted',label:'Submitted',done:['Submitted','Under Review','Approved','Approved with Conditions'].includes(r.status)},
+    {key:'Under Review',label:'Under Review',done:['Under Review','Approved','Approved with Conditions'].includes(r.status)},
+    {key:'Approved',label:'Approved',done:['Approved','Approved with Conditions'].includes(r.status)},
     {key:'Live',label:'Live',done:!!opsRecord},
   ];
   let h=`<button class="back-btn" onclick="showIntakeList()">← Back to All Requests</button>
@@ -1047,12 +1048,12 @@ async function showIntakeDetail(id) {
     </div>
     <div class="flex gap-2 mt-2" style="flex-wrap:wrap">
       ${canSubmit?`<button class="btn btn-primary btn-sm" onclick="openReviewModal('${r.id}','Submitted','submit')">Submit for Review</button>`:''}
-      ${canReview?`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button><button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button><button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`:''}
+      ${canReview?`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button><button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved with Conditions')" style="opacity:.85">Approve with Conditions</button><button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button><button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`:''}
       ${canReview&&r.status==='Submitted'?`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
       <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
       <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
-      ${r.status==='Approved'?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
+      ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
   </div>
   ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
@@ -1321,10 +1322,10 @@ async function submitIntake(asDraft){saveStepData(6);if(!asDraft&&!validateStep(
 // ─── Review modal ─────────────────────────────────────────────────────────────
 function openReviewModal(id,action){
   S.reviewAction=action;S.reviewIntakeId=id;
-  const titles={Approved:'Approve Request',Rejected:'Reject Request',Deferred:'Defer Request',Withdrawn:'Withdraw Request','Under Review':'Mark Under Review',Submitted:'Submit for Review'};
+  const titles={Approved:'Approve Request','Approved with Conditions':'Approve with Conditions',Rejected:'Reject Request',Deferred:'Defer Request',Withdrawn:'Withdraw Request','Under Review':'Mark Under Review',Submitted:'Submit for Review'};
   document.getElementById('reviewModalTitle').textContent=titles[action]||action;
   document.getElementById('reviewerName').value='';document.getElementById('reviewerNotes').value='';document.getElementById('approvedPatternId').value='';
-  document.getElementById('approvedPatternGroup').style.display=action==='Approved'?'block':'none';
+  document.getElementById('approvedPatternGroup').style.display=['Approved','Approved with Conditions'].includes(action)?'block':'none';
   document.getElementById('reviewModal').style.display='flex';
 }
 async function submitReview(){
@@ -1662,7 +1663,7 @@ async function startEditOpSupport(id) {
 function renderOpSupportForm(prefill) {
   const d = prefill || {};
   const isEdit = !!S._opsEditId;
-  const approvedIntakes = S.intakes.filter(i => i.status === 'Approved');
+  const approvedIntakes = S.intakes.filter(i => ['Approved','Approved with Conditions'].includes(i.status));
 
   let h = `<div class="page-title"><h2>${isEdit?'Edit':'New'} Operational Support Record</h2></div>
   <div class="two-col">
@@ -2407,7 +2408,7 @@ async function generateDiagram(intakeId, refId) {
 // ─── Utils ────────────────────────────────────────────────────────────────────
 function opts(arr,sel){return arr.map(o=>`<option value="${o}" ${o===sel?'selected':''}>${o}</option>`).join('');}
 function fmtDate(d){if(!d)return'–';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
-function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
+function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved','Approved with Conditions':'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
 function tierBadge(tier,score){return`<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;}
 function critBadge(c){const m={Critical:'badge-critical',High:'badge-high',Medium:'badge-medium',Low:'badge-low'};return`<span class="badge ${m[c]||''}">${c||'–'}</span>`;}
 

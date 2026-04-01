@@ -274,9 +274,10 @@ router.post('/:id/status', async (req, res) => {
     const validTransitions = {
       Draft: ['Submitted'],
       Submitted: ['Under Review', 'Withdrawn'],
-      'Under Review': ['Approved', 'Rejected', 'Deferred', 'Submitted'],
+      'Under Review': ['Approved', 'Approved with Conditions', 'Rejected', 'Deferred', 'Submitted'],
       Deferred: ['Under Review', 'Withdrawn'],
       Approved: ['Superseded'],
+      'Approved with Conditions': ['Superseded'],
       Rejected: ['Submitted'],
     };
 
