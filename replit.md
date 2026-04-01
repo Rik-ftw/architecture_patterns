@@ -10,7 +10,8 @@ The `Architecture-Pattern-Hub/` folder contains the original design specificatio
 - **Solution Designs** — compose multiple patterns into a unified deployment
 - **Team Portal** — self-service pattern browsing and intake submission
 - **Executive KPI Dashboard** with pattern health, domain breakdown, and risk distribution
-- **Future features** (from spec): Anthropic AI drafting, DOCX export, GitHub sourcing, security advisory scanning, Cloudflare vendor risk
+- **Implemented:** Anthropic Claude AI architecture reviews (full review + wizard quick scan)
+- **Future features** (from spec): DOCX export, GitHub sourcing, security advisory scanning, Cloudflare vendor risk
 
 ## Tech Stack
 - **Runtime:** Node.js 20
@@ -26,6 +27,7 @@ db.js                  — SQLite schema (solution_designs, intake_requests, com
 riskEngine.js          — Automated multi-dimensional risk scoring engine
 routes/intake.js       — REST API for intake CRUD, status transitions, comments
 routes/solutions.js    — REST API for solution design CRUD
+routes/aiReview.js     — Anthropic Claude review endpoints (full review + quick assess)
 public/index.html      — Full SPA frontend (all features in one file)
 patterns/              — Architecture pattern JSON + SVG files (17 patterns)
 vendors/               — Vendor registry JSON (31 vendors)
@@ -83,6 +85,19 @@ Four-dimensional scoring (0-100):
 
 Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critical** (76-100)
 
+### Claude AI Architecture Reviews
+- **Full Review** — generated on demand from any intake detail page; stored in database as JSON; regeneratable
+  - Overall rating (Endorsed / Approved with Conditions / Requires Rework / Not Recommended)
+  - Executive summary with confidence level
+  - Three scored dimensions: Pattern Alignment, Security Posture, Architecture Quality (each 0-10 with RAG status)
+  - Risk commentary, key risks table, prioritised recommendations (Must / Should / Consider)
+  - Architecture notes for reviewers
+- **Quick Scan** — Claude Haiku 4.5 scan available at wizard Step 6 before submission
+  - Instant rating, headline observation, and single most critical action item
+- Models: `claude-sonnet-4-5` for full reviews (4096 tokens), `claude-haiku-4-5` for quick wizard scans
+- Visual identity: purple/indigo accent panel (`#a78bfa` / `#7c5cbf`) to distinguish from teal rule-based risk panel
+- `ai_review` TEXT column on `intake_requests` (added via safe ALTER TABLE migration)
+
 ### Team Portal
 - Self-service landing page for non-EA team members
 - Browse endorsed patterns catalogue
@@ -106,6 +121,9 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - `POST /api/solutions` — Create solution design
 - `PATCH /api/solutions/:id` — Update solution design
 - `DELETE /api/solutions/:id` — Delete solution design
+- `POST /api/ai/review/:id` — Generate + store full Claude Sonnet review for an intake request
+- `GET /api/ai/review/:id` — Fetch stored AI review for an intake request
+- `POST /api/ai/quick-assess` — Run Claude Haiku quick scan (wizard step 6; not persisted)
 
 ## Running
 ```bash

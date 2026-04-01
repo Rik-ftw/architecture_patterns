@@ -85,6 +85,7 @@ db.exec(`
     reviewed_at TEXT,
     approved_pattern_id TEXT,
     submitted_at TEXT,
+    ai_review TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
@@ -109,6 +110,10 @@ db.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 `);
+
+try {
+  db.exec(`ALTER TABLE intake_requests ADD COLUMN ai_review TEXT`);
+} catch {}
 
 function generateRefId() {
   const prefix = 'EAR';

@@ -255,6 +255,42 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .use-case-box strong{font-size:.65rem;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.22rem;color:var(--muted)}
 @media(max-width:1000px){.kanban-board{grid-template-columns:1fr 1fr}.two-col{grid-template-columns:1fr}.three-col{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){nav{display:none}.form-row,.form-row-3{grid-template-columns:1fr}}
+
+/* AI Review Panel */
+.ai-panel{background:var(--surface);border:1px solid rgba(124,92,191,.4);border-radius:12px;padding:1.1rem;margin-bottom:.9rem;position:relative;overflow:hidden}
+.ai-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#7c5cbf,#a78bfa,#6366f1)}
+.ai-panel h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#a78bfa;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.ai-badge{display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;font-weight:700;padding:.25rem .7rem;border-radius:6px;border:1px solid}
+.ai-badge-approved{background:rgba(46,204,113,.12);color:#2ecc71;border-color:rgba(46,204,113,.3)}
+.ai-badge-conditions{background:rgba(212,131,10,.12);color:#f0a830;border-color:rgba(212,131,10,.3)}
+.ai-badge-rework{background:rgba(230,126,34,.12);color:#e67e22;border-color:rgba(230,126,34,.3)}
+.ai-badge-major{background:rgba(231,76,60,.12);color:#e74c3c;border-color:rgba(231,76,60,.3)}
+.ai-score-row{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.ai-score-label{font-size:.72rem;color:var(--muted);width:130px;flex-shrink:0}
+.ai-score-track{flex:1;height:6px;background:var(--surface2);border-radius:999px;overflow:hidden}
+.ai-score-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#7c5cbf,#a78bfa)}
+.ai-score-val{font-size:.7rem;font-weight:700;color:#a78bfa;width:32px;text-align:right;flex-shrink:0}
+.ai-risk-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.48rem .6rem;background:var(--surface2);border-radius:6px;margin-bottom:.35rem;gap:.5rem}
+.ai-risk-title{font-size:.8rem;font-weight:600;flex:1}
+.ai-risk-detail{font-size:.74rem;color:var(--muted);margin-top:.15rem;line-height:1.45}
+.ai-risk-mit{font-size:.72rem;color:var(--accent-light);margin-top:.2rem}
+.ai-rec-row{display:flex;gap:.55rem;align-items:flex-start;padding:.42rem .55rem;background:var(--surface2);border-radius:6px;margin-bottom:.35rem}
+.ai-rec-priority{font-size:.62rem;font-weight:900;padding:.1rem .42rem;border-radius:4px;flex-shrink:0;white-space:nowrap;margin-top:.08rem}
+.ai-priority-must{background:rgba(231,76,60,.2);color:#e74c3c}
+.ai-priority-should{background:rgba(212,131,10,.2);color:#f0a830}
+.ai-priority-consider{background:rgba(41,128,185,.2);color:#5dade2}
+.ai-rec-text{font-size:.8rem;line-height:1.45}
+.ai-spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(167,139,250,.3);border-top-color:#a78bfa;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-generating{display:flex;align-items:center;gap:.6rem;color:#a78bfa;font-size:.82rem;padding:1rem;background:var(--surface2);border-radius:8px}
+.ai-sev-Critical{color:var(--risk-critical)}
+.ai-sev-High{color:var(--risk-high)}
+.ai-sev-Medium{color:var(--review)}
+.ai-sev-Low{color:var(--risk-low)}
+.quick-ai-box{background:rgba(124,92,191,.08);border:1px solid rgba(124,92,191,.25);border-radius:10px;padding:.9rem 1rem;margin-bottom:1rem}
+.quick-ai-box .qa-rating{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a78bfa;margin-bottom:.4rem}
+.quick-ai-box .qa-headline{font-size:.9rem;font-weight:600;margin-bottom:.5rem}
+.quick-ai-box .qa-fix{font-size:.78rem;color:var(--accent-light);padding:.4rem .6rem;background:rgba(16,153,119,.08);border-radius:6px;border-left:2px solid var(--accent)}
 </style>
 </head>
 <body>
@@ -720,6 +756,7 @@ async function showIntakeDetail(id) {
       ${canReview?`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button><button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button><button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`:''}
       ${canReview&&r.status==='Submitted'?`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
+      <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
     </div>
   </div>
   ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
@@ -756,6 +793,7 @@ async function showIntakeDetail(id) {
   ${r.comments&&r.comments.length?`<div class="section-card"><h3>Comments (${r.comments.length})</h3>${r.comments.map(c=>`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`).join('')}</div>`:''}
   </div>
   <div>
+    <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
     ${r.risk_tier&&r.riskBreakdown?renderRiskPanel(r.risk_score,r.risk_tier,r.riskBreakdown,r.riskFlags||[],r.riskRecommendations||[]):''}
     ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
   </div></div>`;
@@ -830,7 +868,8 @@ function renderWizardStep(step){
       </div><div>
         ${risk.tier==='Critical'?`<div class="alert alert-danger">⚠ Critical risk — Architecture Board and CISO review mandatory before any implementation.</div>`:''}
         ${risk.tier==='High'?`<div class="alert alert-warning">⚠ High risk — Architecture Board review required for approval.</div>`:''}
-        ${risk.flags.length?`<div class="section-card"><h3>Risk Flags</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
+        <div id="quick-ai-box"><div class="ai-panel" style="text-align:center;padding:1.2rem .9rem"><div style="font-size:1.2rem;margin-bottom:.35rem">✦</div><div style="font-size:.8rem;font-weight:700;color:#a78bfa;margin-bottom:.25rem">Claude Quick Scan</div><p class="text-xs text-muted" style="margin-bottom:.7rem">Get an instant AI perspective on your architecture before submitting.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="runQuickAIAssess(S.wizardData)">✦ Run Quick Scan</button></div></div>
+        ${risk.flags.length?`<div class="section-card mt-2"><h3>Risk Flags</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
         ${risk.recommendations.length?`<div class="section-card mt-2"><h3>Recommendations</h3><ul class="recs-list">${risk.recommendations.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
       </div></div>
       <div class="wizard-nav"><button class="btn btn-secondary" onclick="gotoStep(5)">← Back</button><div class="flex gap-2"><button class="btn btn-ghost" onclick="submitIntake(true)">Save as Draft</button><button class="btn btn-primary" onclick="submitIntake(false)">Submit for Review →</button></div></div>`;
@@ -990,6 +1029,162 @@ function renderRiskPanel(score,tier,breakdown,flags,recs){
   if(flags&&flags.length)h+=`<div style="margin-top:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">Risk Flags</div><ul class="flags-list">${flags.slice(0,6).map(f=>`<li>${f}</li>`).join('')}</ul></div>`;
   if(recs&&recs.length)h+=`<div style="margin-top:.7rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.07em;margin-bottom:.3rem">Recommendations</div><ul class="recs-list">${recs.slice(0,5).map(r=>`<li>${r}</li>`).join('')}</ul></div>`;
   return h+`</div>`;
+}
+
+// ─── AI Architecture Review ───────────────────────────────────────────────────
+async function generateAIReview(intakeId, refId) {
+  const panel = document.getElementById('ai-review-panel');
+  const btn = document.getElementById('ai-review-btn');
+  if (panel) panel.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> Claude is reviewing the architecture request… this takes 15–30 seconds</div>`;
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
+  try {
+    const r = await api.post(`/api/ai/review/${intakeId}`, {});
+    if (panel) panel.innerHTML = renderAIPanel(r.review);
+    if (btn) { btn.textContent = '↺ Regenerate AI Review'; btn.disabled = false; }
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="alert alert-danger">AI review failed: ${e.error || e.message || 'Unknown error'}. Check that your ANTHROPIC_API_KEY is valid.</div>`;
+    if (btn) { btn.textContent = '⊕ Generate AI Review'; btn.disabled = false; }
+  }
+}
+
+function renderAIPanel(review) {
+  if (!review) return '';
+  const ratingClass = {
+    'Approved': 'ai-badge-approved',
+    'Approved with Conditions': 'ai-badge-conditions',
+    'Needs Rework': 'ai-badge-rework',
+    'Major Concerns': 'ai-badge-major'
+  }[review.overallRating] || 'ai-badge-conditions';
+
+  const ratingIcon = {
+    'Approved': '✓',
+    'Approved with Conditions': '◈',
+    'Needs Rework': '⚠',
+    'Major Concerns': '✗'
+  }[review.overallRating] || '◈';
+
+  const sevOrder = ['Critical','High','Medium','Low'];
+  const risks = (review.keyRisks || []).sort((a,b) => sevOrder.indexOf(a.severity) - sevOrder.indexOf(b.severity));
+
+  let h = `<div class="ai-panel">
+    <h3>✦ Claude AI Architecture Review <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">claude-sonnet-4-5 · ${review.generatedAt ? new Date(review.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</span></h3>
+    <div class="flex gap-2 items-center" style="margin-bottom:.9rem;flex-wrap:wrap">
+      <span class="ai-badge ${ratingClass}">${ratingIcon} ${review.overallRating}</span>
+      ${review.reviewComplexity ? `<span class="badge" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.3)">${review.reviewComplexity} Review</span>` : ''}
+      ${review.estimatedReviewEffort ? `<span class="text-xs text-muted">Est. effort: ${review.estimatedReviewEffort}</span>` : ''}
+      ${review.confidenceLevel ? `<span class="text-xs text-muted">Confidence: ${review.confidenceLevel}</span>` : ''}
+    </div>`;
+
+  if (review.executiveSummary) {
+    h += `<div style="background:rgba(124,92,191,.07);border-radius:8px;padding:.8rem;margin-bottom:.9rem;font-size:.85rem;line-height:1.65;border-left:3px solid #7c5cbf">${review.executiveSummary}</div>`;
+  }
+
+  // Score bars
+  const scores = [
+    { label: 'Pattern Alignment', val: review.patternAlignment?.score },
+    { label: 'Security Posture', val: review.securityPosture?.score },
+    { label: 'Architecture Quality', val: review.architectureQuality?.score },
+  ].filter(s => s.val != null);
+
+  if (scores.length) {
+    h += `<div style="margin-bottom:.9rem">${scores.map(s => `
+      <div class="ai-score-row">
+        <div class="ai-score-label">${s.label}</div>
+        <div class="ai-score-track"><div class="ai-score-fill" style="width:${s.val}%"></div></div>
+        <div class="ai-score-val">${s.val}</div>
+      </div>`).join('')}</div>`;
+  }
+
+  // Pattern alignment detail
+  if (review.patternAlignment) {
+    const pa = review.patternAlignment;
+    h += `<div style="margin-bottom:.75rem">`;
+    h += `<div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Pattern Alignment</div>`;
+    h += `<p class="text-sm" style="line-height:1.55;margin-bottom:.4rem">${pa.assessment || ''}</p>`;
+    if (pa.recommendedPatterns?.length) h += `<div class="tag-list">${pa.recommendedPatterns.map(p => `<span class="badge" style="background:rgba(16,153,119,.12);color:var(--endorsed);border:1px solid rgba(16,153,119,.25)">${p}</span>`).join('')}</div>`;
+    if (pa.gaps?.length) h += `<ul style="margin-top:.4rem">${pa.gaps.map(g => `<li class="text-xs text-muted" style="padding:.12rem 0 .12rem .5rem;border-left:2px solid var(--border)">${g}</li>`).join('')}</ul>`;
+    h += `</div>`;
+  }
+
+  // Security detail
+  if (review.securityPosture) {
+    const sp = review.securityPosture;
+    h += `<div style="margin-bottom:.75rem">`;
+    h += `<div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Security Posture</div>`;
+    h += `<p class="text-sm" style="line-height:1.55;margin-bottom:.4rem">${sp.assessment || ''}</p>`;
+    if (sp.positives?.length) h += `<div class="tag-list" style="margin-bottom:.3rem">${sp.positives.map(p => `<span class="badge badge-endorsed" style="font-size:.67rem">✓ ${p}</span>`).join('')}</div>`;
+    if (sp.gaps?.length) h += `<div class="tag-list">${sp.gaps.map(g => `<span class="badge badge-review" style="font-size:.67rem">⚠ ${g}</span>`).join('')}</div>`;
+    h += `</div>`;
+  }
+
+  // Risk commentary
+  if (review.riskCommentary) {
+    h += `<div style="margin-bottom:.85rem;padding:.65rem .8rem;background:rgba(124,92,191,.06);border-radius:7px;border-left:2px solid #7c5cbf">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.25rem">AI Risk Commentary</div>
+      <p class="text-sm" style="line-height:1.6">${review.riskCommentary}</p>
+    </div>`;
+  }
+
+  // Key Risks
+  if (risks.length) {
+    h += `<div style="margin-bottom:.85rem">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Key Risks (${risks.length})</div>`;
+    risks.forEach(r => {
+      h += `<div class="ai-risk-row">
+        <div style="flex:1">
+          <div class="ai-risk-title"><span class="ai-sev-${r.severity}" style="font-size:.68rem;font-weight:900;margin-right:.35rem">[${r.severity}]</span>${r.risk}</div>
+          ${r.detail ? `<div class="ai-risk-detail">${r.detail}</div>` : ''}
+          ${r.mitigation ? `<div class="ai-risk-mit">→ ${r.mitigation}</div>` : ''}
+        </div>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Recommendations
+  if (review.recommendations?.length) {
+    h += `<div style="margin-bottom:.85rem">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Recommendations</div>`;
+    review.recommendations.forEach(rec => {
+      const pc = { Must: 'must', Should: 'should', Consider: 'consider' }[rec.priority] || 'consider';
+      h += `<div class="ai-rec-row">
+        <span class="ai-rec-priority ai-priority-${pc}">${rec.priority}</span>
+        <span class="ai-rec-text">${rec.action}</span>
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  // Architecture notes
+  if (review.architectureNotes) {
+    h += `<div style="padding:.7rem .85rem;background:rgba(124,92,191,.06);border-radius:8px;border-left:2px solid rgba(124,92,191,.4)">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Architecture Notes</div>
+      <p class="text-sm" style="line-height:1.65">${review.architectureNotes}</p>
+    </div>`;
+  }
+
+  h += `</div>`;
+  return h;
+}
+
+async function runQuickAIAssess(wizardData) {
+  const box = document.getElementById('quick-ai-box');
+  if (!box) return;
+  box.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> Claude is scanning for quick insights…</div>`;
+  try {
+    const r = await api.post('/api/ai/quick-assess', wizardData);
+    const ratingColors = { 'Low Concern': '#2ecc71', 'Review Needed': '#f39c12', 'Significant Gaps': '#e67e22', 'Major Issues': '#e74c3c' };
+    const col = ratingColors[r.quickRating] || '#a78bfa';
+    box.innerHTML = `<div class="quick-ai-box">
+      <div class="qa-rating" style="color:${col}">✦ Claude Quick Scan — ${r.quickRating}</div>
+      <div class="qa-headline">${r.headline || ''}</div>
+      ${r.topConcerns?.length ? `<div class="tag-list" style="margin-bottom:.5rem">${r.topConcerns.map(c => `<span class="badge badge-review" style="font-size:.7rem">⚠ ${c}</span>`).join('')}</div>` : ''}
+      ${r.suggestedPatterns?.length ? `<div class="tag-list" style="margin-bottom:.5rem">${r.suggestedPatterns.map(p => `<span class="badge badge-endorsed" style="font-size:.7rem">→ ${p}</span>`).join('')}</div>` : ''}
+      ${r.oneThingToFix ? `<div class="qa-fix">Priority fix: ${r.oneThingToFix}</div>` : ''}
+    </div>`;
+  } catch(e) {
+    box.innerHTML = '';
+  }
 }
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
