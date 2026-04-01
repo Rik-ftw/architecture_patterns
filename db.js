@@ -114,6 +114,9 @@ db.exec(`
 try {
   db.exec(`ALTER TABLE intake_requests ADD COLUMN ai_review TEXT`);
 } catch {}
+try {
+  db.exec(`ALTER TABLE intake_requests ADD COLUMN ai_diagram TEXT`);
+} catch {}
 
 function generateRefId() {
   const prefix = 'EAR';

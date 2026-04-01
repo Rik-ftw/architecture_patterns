@@ -291,7 +291,17 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .quick-ai-box .qa-rating{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#a78bfa;margin-bottom:.4rem}
 .quick-ai-box .qa-headline{font-size:.9rem;font-weight:600;margin-bottom:.5rem}
 .quick-ai-box .qa-fix{font-size:.78rem;color:var(--accent-light);padding:.4rem .6rem;background:rgba(16,153,119,.08);border-radius:6px;border-left:2px solid var(--accent)}
+/* ─── Architecture Diagram Panel ─── */
+.diagram-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.1rem 1rem;margin-bottom:.9rem}
+.diagram-panel h3{font-size:.78rem;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem}
+.diagram-canvas{background:#0d1b2a;border-radius:8px;padding:.8rem;overflow-x:auto;min-height:80px;display:flex;align-items:center;justify-content:center}
+.diagram-canvas svg{max-width:100%;height:auto;display:block;margin:auto}
+.diagram-legend{font-size:.75rem;color:var(--muted);margin-top:.6rem;line-height:1.55;padding:.45rem .6rem;background:rgba(96,165,250,.06);border-radius:6px;border-left:2px solid rgba(96,165,250,.35)}
+.diagram-generating{display:flex;align-items:center;gap:.7rem;color:var(--muted);font-size:.82rem;padding:.8rem;justify-content:center}
+.diagram-spin{width:18px;height:18px;border:2px solid rgba(96,165,250,.3);border-top-color:#60a5fa;border-radius:50%;animation:spin .9s linear infinite;flex-shrink:0}
+.diagram-meta{font-size:.68rem;color:var(--muted);margin-top:.45rem;text-align:right;opacity:.7}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
 <body>
 <header>
@@ -757,6 +767,7 @@ async function showIntakeDetail(id) {
       ${canReview&&r.status==='Submitted'?`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
       <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
+      <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
     </div>
   </div>
   ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
@@ -791,6 +802,7 @@ async function showIntakeDetail(id) {
   ${r.deviates_from_patterns?`<div class="section-card"><h3>Pattern Deviation</h3><div class="alert alert-warning" style="margin-bottom:0">⚠ Deviates from established patterns.${r.deviation_justification?' Justification: '+r.deviation_justification:''}</div></div>`:''}
   ${r.reviewer_notes?`<div class="section-card"><h3>Reviewer Notes</h3><p class="text-sm">${r.reviewer_notes}</p><p class="text-xs text-muted mt-1">— ${r.reviewer_name||'Reviewer'}, ${fmtDate(r.reviewed_at)}</p></div>`:''}
   ${r.comments&&r.comments.length?`<div class="section-card"><h3>Comments (${r.comments.length})</h3>${r.comments.map(c=>`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`).join('')}</div>`:''}
+  <div id="diagram-panel">${r.aiDiagram?`<div class="diagram-panel" id="diagram-card"><h3>⬡ Architecture Diagram <span style="font-size:.6rem;opacity:.55;margin-left:.3rem;font-weight:400">${r.aiDiagram.title||''}</span></h3><div class="diagram-canvas" id="diagram-canvas">Rendering…</div>${r.aiDiagram.legend?`<div class="diagram-legend">${r.aiDiagram.legend}</div>`:''}<div class="diagram-meta">Generated ${r.aiDiagram.generatedAt?new Date(r.aiDiagram.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${r.aiDiagram.model||''}</div></div>`:`<div class="diagram-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#60a5fa;margin-bottom:.25rem">Architecture Diagram</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Claude will generate a layered architecture diagram from your request details — components, data flows, security zones, and vendor integrations.</p><button class="btn btn-sm" style="background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ Generate Architecture Diagram</button></div>`}</div>
   </div>
   <div>
     <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
@@ -798,6 +810,9 @@ async function showIntakeDetail(id) {
     ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
   </div></div>`;
   setMain(h);
+  if (r.aiDiagram && r.aiDiagram.mermaidCode) {
+    setTimeout(() => mountDiagram(r.aiDiagram.mermaidCode, 'diagram-canvas'), 50);
+  }
 }
 
 function renderVendorSection(r) {
@@ -1184,6 +1199,59 @@ async function runQuickAIAssess(wizardData) {
     </div>`;
   } catch(e) {
     box.innerHTML = '';
+  }
+}
+
+// ─── Architecture Diagram ─────────────────────────────────────────────────────
+mermaid.initialize({
+  startOnLoad: false,
+  theme: 'dark',
+  themeVariables: {
+    darkMode: true,
+    background: '#0d1b2a',
+    primaryColor: '#1B3A6B',
+    primaryTextColor: '#e2e8f0',
+    primaryBorderColor: '#109977',
+    lineColor: '#60a5fa',
+    secondaryColor: '#0f2540',
+    tertiaryColor: '#0a1929',
+    edgeLabelBackground: '#0d1b2a',
+    clusterBkg: '#0f2540',
+    clusterBorder: '#2d4a6b',
+    titleColor: '#60a5fa',
+    nodeTextColor: '#e2e8f0'
+  },
+  flowchart: { htmlLabels: true, curve: 'basis' }
+});
+
+async function mountDiagram(code, canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas || !code) return;
+  try {
+    const id = 'mgraph_' + Date.now();
+    const { svg } = await mermaid.render(id, code);
+    canvas.innerHTML = svg;
+  } catch (e) {
+    canvas.innerHTML = `<div style="color:#f87171;font-size:.75rem;padding:.5rem">Diagram render error: ${e.message||e}</div>`;
+  }
+}
+
+async function generateDiagram(intakeId, refId) {
+  const panel = document.getElementById('diagram-panel');
+  const btn = document.getElementById('diagram-btn');
+  if (panel) panel.innerHTML = `<div class="diagram-panel"><div class="diagram-generating"><span class="diagram-spin"></span> Claude is generating the architecture diagram… this takes 15–25 seconds</div></div>`;
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
+  try {
+    const r = await api.post(`/api/ai/diagram/${intakeId}`, {});
+    const d = r.diagram;
+    if (panel) {
+      panel.innerHTML = `<div class="diagram-panel" id="diagram-card"><h3>⬡ Architecture Diagram <span style="font-size:.6rem;opacity:.55;margin-left:.3rem;font-weight:400">${d.title||''}</span></h3><div class="diagram-canvas" id="diagram-canvas">Rendering…</div>${d.legend?`<div class="diagram-legend">${d.legend}</div>`:''}<div class="diagram-meta">Generated ${d.generatedAt?new Date(d.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${d.model||''}</div></div>`;
+      await mountDiagram(d.mermaidCode, 'diagram-canvas');
+    }
+    if (btn) { btn.textContent = '⬡ Regenerate Diagram'; btn.disabled = false; }
+  } catch(e) {
+    if (panel) panel.innerHTML = `<div class="diagram-panel"><div class="alert alert-danger" style="margin:0">Diagram generation failed: ${e.error||e.message||'Unknown error'}. Check that your ANTHROPIC_API_KEY is valid.</div></div>`;
+    if (btn) { btn.textContent = '⬡ Generate Diagram'; btn.disabled = false; }
   }
 }
 

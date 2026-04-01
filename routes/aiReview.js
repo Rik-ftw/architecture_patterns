@@ -246,6 +246,110 @@ router.post('/quick-assess', async (req, res) => {
   }
 });
 
+function buildDiagramPrompt(intake, patterns, allVendors) {
+  const selectedVendors = allVendors.filter(v => (intake.vendorIds || []).map(Number).includes(v.id));
+  const relatedPatterns = patterns.filter(p => (intake.relatedPatternIds || []).includes(p.patternId));
+  const components = parseJson(intake.components, []);
+  const authMethods = parseJson(intake.auth_methods, []);
+  const dataTypes = parseJson(intake.data_types, []);
+  const newVendors = parseJson(intake.new_vendors, []);
+
+  return `You are a Senior Enterprise Architect creating a Mermaid.js architecture diagram.
+
+Generate a clear, accurate architecture diagram for this intake request. The diagram must use proper zones/layers and show data flows between components.
+
+STRICT MERMAID SYNTAX RULES — follow exactly or the diagram will fail to render:
+1. Start with: flowchart TD
+2. Node IDs: ONLY letters, digits, underscores — NO spaces, hyphens, dots, parentheses in IDs
+3. Node labels use square brackets: nodeId["Label Text"]
+4. Subgraphs: subgraph zoneId["Zone Name"]\\n  ...nodes...\\nend
+5. Arrows: A --> B or A -->|"label"| B
+6. Max 18 nodes total — keep it readable
+7. NO classDef, NO click, NO style lines — plain flowchart only
+8. Escape any quotes inside labels with a backslash
+
+ZONES TO USE (include only what is relevant):
+- User Zone: end users, mobile apps, browsers
+- Security Zone: WAF, MFA, Zero Trust gateway, identity provider
+- Integration Zone: API Gateway, Event Hub, message broker, ESB
+- Application Zone: main services, microservices, logic apps
+- Data Zone: databases, data lake, storage, cache
+- External Zone: external vendors, SaaS tools, legacy systems, OT/ICS equipment
+
+ARCHITECTURE REQUEST:
+Title: ${intake.title}
+Type: ${intake.architecture_type || 'Not specified'}
+Description: ${intake.description || 'Not provided'}
+Strategic Objective: ${intake.strategic_objective || 'Not provided'}
+Hosting: ${intake.hosting_model || 'Not specified'} | Deployment: ${intake.deployment_target || 'Not specified'}
+Integration Points: ${intake.integration_points || 0} | Public Facing: ${intake.is_public_facing ? 'Yes' : 'No'}
+Components: ${components.join(', ') || 'Not specified'}
+Data Types: ${dataTypes.join(', ') || 'None'}
+Data Classification: ${intake.data_classification || 'Not specified'}
+Auth Methods: ${authMethods.join(', ') || 'None'} | MFA: ${intake.has_mfa ? 'Yes' : 'No'} | WAF: ${intake.has_waf ? 'Yes' : 'No'} | Zero Trust: ${intake.is_zero_trust_aligned ? 'Yes' : 'No'}
+Registered Vendors: ${selectedVendors.map(v => v.vendorCompany + ' (' + v.productService + ')').join(', ') || 'None'}
+New Vendors: ${newVendors.join(', ') || 'None'}
+Referenced Patterns: ${relatedPatterns.map(p => p.patternId + ': ' + p.name).join(', ') || 'None'}
+Legacy Systems: ${intake.has_legacy_dependencies ? (intake.legacy_systems || 'Yes') : 'None'}
+Tech Stack Notes: ${intake.tech_stack_notes || 'None'}
+
+Respond with ONLY a valid JSON object — no markdown, no code fences, no explanation:
+{
+  "title": "<concise diagram title, e.g. Azure Event Hub OT Telemetry Architecture>",
+  "mermaidCode": "<complete valid flowchart TD mermaid code — newlines as \\\\n>",
+  "legend": "<1-2 sentences describing what the diagram shows and the main data flow>"
+}`;
+}
+
+router.post('/diagram/:id', async (req, res) => {
+  try {
+    const row = db.prepare('SELECT * FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
+    if (!row) return res.status(404).json({ error: 'Intake not found' });
+
+    const intake = {
+      ...row,
+      relatedPatternIds: parseJson(row.related_pattern_ids, []),
+      vendorIds: parseJson(row.vendor_ids, []),
+      newVendors: parseJson(row.new_vendors, []),
+      dataTypes: parseJson(row.data_types, []),
+      authMethods: parseJson(row.auth_methods, []),
+      components: parseJson(row.components, []),
+    };
+
+    const patterns = loadPatterns();
+    const vendors = loadVendors();
+    const client = new Anthropic();
+
+    const message = await client.messages.create({
+      model: 'claude-sonnet-4-5',
+      max_tokens: 2048,
+      messages: [{ role: 'user', content: buildDiagramPrompt(intake, patterns, vendors) }]
+    });
+
+    let text = message.content[0].text.trim();
+    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
+    const diagram = JSON.parse(text);
+    diagram.generatedAt = new Date().toISOString();
+    diagram.model = 'claude-sonnet-4-5';
+
+    db.prepare(`UPDATE intake_requests SET ai_diagram=?, updated_at=datetime('now') WHERE id=?`)
+      .run(JSON.stringify(diagram), row.id);
+
+    res.json({ diagram });
+  } catch (err) {
+    console.error('Diagram generation error:', err);
+    res.status(500).json({ error: err.message || 'Diagram generation failed' });
+  }
+});
+
+router.get('/diagram/:id', (req, res) => {
+  const row = db.prepare('SELECT ai_diagram FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  const diagram = parseJson(row.ai_diagram, null);
+  if (!diagram) return res.status(404).json({ error: 'No diagram generated yet' });
+  res.json({ diagram });
+});
+
 router.get('/review/:id', (req, res) => {
   const row = db.prepare('SELECT ai_review FROM intake_requests WHERE id=? OR reference_id=?').get(req.params.id, req.params.id);
   if (!row) return res.status(404).json({ error: 'Not found' });

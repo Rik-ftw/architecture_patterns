@@ -85,6 +85,17 @@ Four-dimensional scoring (0-100):
 
 Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critical** (76-100)
 
+### Architecture Diagram Generation
+- **On-demand diagram generation** from any intake detail page via "Generate Diagram" button
+- Claude Sonnet 4.5 reads all request details (components, vendors, auth methods, hosting, data types, patterns) and generates a layered Mermaid.js flowchart
+- Diagram zones: External (OT/ICS/SaaS), Security, Integration, Application, Data, User
+- Rendered live in the browser using Mermaid.js v10 with dark theme and McCain colour accents
+- Stored in `ai_diagram` TEXT column on `intake_requests` — persists across page loads; regeneratable on demand
+- Diagram canvas has full overflow/scroll support for complex architectures
+- Legend beneath diagram explains the main data flow in plain language
+- "Generate Diagram" / "Regenerate Diagram" button in intake detail header (blue accent `#60a5fa`)
+- Endpoints: `POST /api/ai/diagram/:id` (generate + store), `GET /api/ai/diagram/:id` (fetch stored)
+
 ### Claude AI Architecture Reviews
 - **Full Review** — generated on demand from any intake detail page; stored in database as JSON; regeneratable
   - Overall rating (Endorsed / Approved with Conditions / Requires Rework / Not Recommended)
@@ -124,6 +135,8 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - `POST /api/ai/review/:id` — Generate + store full Claude Sonnet review for an intake request
 - `GET /api/ai/review/:id` — Fetch stored AI review for an intake request
 - `POST /api/ai/quick-assess` — Run Claude Haiku quick scan (wizard step 6; not persisted)
+- `POST /api/ai/diagram/:id` — Generate + store architecture diagram (Mermaid flowchart) for an intake
+- `GET /api/ai/diagram/:id` — Fetch stored diagram for an intake request
 
 ## Running
 ```bash

@@ -22,6 +22,7 @@ function serializeIntake(row) {
     riskFlags: parseJson(row.risk_flags, []),
     riskRecommendations: parseJson(row.risk_recommendations, []),
     aiReview: parseJson(row.ai_review, null),
+    aiDiagram: parseJson(row.ai_diagram, null),
   };
 }
 
