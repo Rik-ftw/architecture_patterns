@@ -187,6 +187,36 @@ select.form-control{cursor:pointer}
 .solution-pattern-chips{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
 .pattern-chip{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:.12rem .4rem;font-size:.67rem;font-family:monospace}
 
+/* Pattern level badges */
+.badge-conceptual{background:rgba(124,92,191,.18);color:#c084fc;border:1px solid rgba(124,92,191,.35)}
+.badge-logical{background:rgba(41,128,185,.15);color:#60a5fa;border:1px solid rgba(41,128,185,.3)}
+.badge-component{background:rgba(16,153,119,.15);color:#34d399;border:1px solid rgba(16,153,119,.3)}
+
+/* Review pipeline */
+.review-pipeline{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:1.2rem}
+.review-stage{flex:1;padding:.5rem .4rem;text-align:center;font-size:.68rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);line-height:1.3}
+.review-stage:last-child{border-right:none}
+.review-stage.stage-active{background:var(--navy);color:#fff;font-weight:700}
+.review-stage.stage-approved{background:rgba(46,204,113,.12);color:#2ecc71}
+.review-stage.stage-rejected{background:rgba(231,76,60,.12);color:#e74c3c}
+.review-stage.stage-needs-changes{background:rgba(212,131,10,.12);color:var(--review)}
+.review-artifact{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.55rem;border-left:3px solid var(--border)}
+.review-artifact.art-approved{border-left-color:#2ecc71}
+.review-artifact.art-rejected{border-left-color:#e74c3c}
+.review-artifact.art-needs-changes{border-left-color:var(--review)}
+.review-artifact-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem}
+.review-artifact-stage{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.review-artifact-reviewer{font-size:.8rem;font-weight:600}
+.review-artifact-date{font-size:.67rem;color:var(--muted)}
+.review-artifact-comment{font-size:.8rem;line-height:1.55;margin-top:.3rem}
+
+/* Solution search/filter bar */
+.filter-bar{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.9rem;align-items:center}
+.filter-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.38rem .7rem;color:var(--text);font-size:.8rem;cursor:pointer}
+.filter-select:focus{outline:none;border-color:var(--accent)}
+.badge-in-review{background:rgba(41,128,185,.15);color:#60a5fa;border:1px solid rgba(41,128,185,.3)}
+.badge-needs-changes{background:rgba(212,131,10,.15);color:var(--review);border:1px solid rgba(212,131,10,.25)}
+
 /* KPI charts */
 .kpi-bar-chart{display:flex;flex-direction:column;gap:.5rem}
 .kpi-bar-row{display:flex;align-items:center;gap:.7rem}
@@ -456,7 +486,7 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
   </div>
   <span class="tagline">Enterprise Architecture · Pattern Library · Intake & Review</span>
   <div class="header-right">
-    <button class="btn btn-sm btn-ghost" onclick="showGitHubSync()" id="github-sync-toggle" title="Sync patterns to GitHub">⇅ GitHub Sync</button>
+    <button class="btn btn-sm btn-ghost" onclick="showGitHubSync()" id="github-sync-toggle" title="Sync patterns to GitHub">⇅ GitHub</button>
     <button class="btn btn-sm btn-ghost" onclick="showTeamPortal()" id="portal-toggle">⬡ Team Portal</button>
     <img src="mccain-logo.png" alt="McCain" style="height:28px;width:auto;display:block;opacity:.85">
   </div>
@@ -707,29 +737,84 @@ function showKanban() {
 }
 
 // ─── Solution Designs ─────────────────────────────────────────────────────────
-function showSolutionsList() {
+function showSolutionsList(opts2) {
   S.view='solutions-list'; renderSidebar();
-  let h=`<div class="page-title"><h2>Solution Designs</h2><button class="btn btn-primary btn-sm" onclick="startNewSolution()">＋ New Solution</button></div>`;
+  const fOpts=opts2||S._solutionFilters||{};
+  S._solutionFilters=fOpts;
+  const searchQ=(fOpts.search||'').toLowerCase();
+  const fStatus=fOpts.status||'All';
+  const fLevel=fOpts.level||'All';
+  const fDomain=fOpts.domain||'All';
+  const fBU=fOpts.businessUnit||'All';
+
+  const domains=[...new Set(S.patterns.map(p=>p.domain))].sort();
+  const businessUnits=[...new Set(S.solutions.map(s=>s.business_unit).filter(Boolean))].sort();
+
+  let filtered=S.solutions.filter(s=>{
+    if(fStatus!=='All'&&s.status!==fStatus) return false;
+    if(fBU!=='All'&&s.business_unit!==fBU) return false;
+    if(fLevel!=='All'){
+      const pats=S.patterns.filter(p=>(s.patternIds||[]).includes(p.patternId));
+      if(!pats.some(p=>p.level===fLevel)) return false;
+    }
+    if(fDomain!=='All'){
+      const pats=S.patterns.filter(p=>(s.patternIds||[]).includes(p.patternId));
+      if(!pats.some(p=>p.domain===fDomain)) return false;
+    }
+    if(searchQ){
+      const hay=(s.title+' '+(s.reference_id||'')+' '+(s.business_unit||'')+' '+(s.owner||'')+' '+(s.patternIds||[]).join(' ')).toLowerCase();
+      if(!hay.includes(searchQ)) return false;
+    }
+    return true;
+  });
+
+  let h=`<div class="page-title"><h2>Solutions Library</h2><button class="btn btn-primary btn-sm" onclick="startNewSolution()">＋ New Solution</button></div>`;
+
+  h+=`<div class="filter-bar">
+    <input class="search-bar" style="margin-bottom:0;flex:1;min-width:180px" placeholder="Search by title, reference, pattern ID, owner..." value="${fOpts.search||''}" oninput="showSolutionsList({...S._solutionFilters,search:this.value})"/>
+    <select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,status:this.value})">
+      <option value="All" ${fStatus==='All'?'selected':''}>All Statuses</option>
+      ${['Draft','In Review','Needs Changes','Approved','Rejected'].map(st=>`<option value="${st}" ${fStatus===st?'selected':''}>${st}</option>`).join('')}
+    </select>
+    <select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,level:this.value})">
+      <option value="All" ${fLevel==='All'?'selected':''}>All Levels</option>
+      <option value="Conceptual" ${fLevel==='Conceptual'?'selected':''}>Conceptual</option>
+      <option value="Logical" ${fLevel==='Logical'?'selected':''}>Logical</option>
+      <option value="Component" ${fLevel==='Component'?'selected':''}>Component</option>
+    </select>
+    <select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,domain:this.value})">
+      <option value="All" ${fDomain==='All'?'selected':''}>All Domains</option>
+      ${domains.map(d=>`<option value="${d}" ${fDomain===d?'selected':''}>${d}</option>`).join('')}
+    </select>
+    ${businessUnits.length?`<select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,businessUnit:this.value})">
+      <option value="All" ${fBU==='All'?'selected':''}>All BUs</option>
+      ${businessUnits.map(b=>`<option value="${b}" ${fBU===b?'selected':''}>${b}</option>`).join('')}
+    </select>`:''}
+  </div>`;
+
   if(!S.solutions.length){
-    h+=`<div class="empty">No solution designs yet. Compose patterns into deployable Azure solutions.<br><br><button class="btn btn-primary" onclick="startNewSolution()">Create First Solution</button></div>`;
+    h+=`<div class="empty">No solution designs yet. Compose patterns into deployable solutions.<br><br><button class="btn btn-primary" onclick="startNewSolution()">Create First Solution</button></div>`;
+  } else if(!filtered.length) {
+    h+=`<div class="empty">No solutions match the current filters.</div>`;
   } else {
     h+=`<div class="overview-grid">`;
-    S.solutions.forEach(s=>{
+    filtered.forEach(s=>{
       const pats=S.patterns.filter(p=>(s.patternIds||[]).includes(p.patternId));
+      const levels=[...new Set(pats.map(p=>p.level).filter(Boolean))];
       h+=`<div class="solution-card" onclick="showSolutionDetail(${s.id})">
         <div class="flex justify-between items-center">
           <div class="font-mono text-xs text-muted">${s.reference_id}</div>
-          <span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span>
+          ${solutionStatusBadge(s.status)}
         </div>
         <div class="card-name">${s.title}</div>
         ${s.business_unit?`<div class="card-sub">${s.business_unit}</div>`:''}
         <div class="solution-pattern-chips">
-          ${pats.map(p=>`<span class="pattern-chip">${p.patternId}</span>`).join('')}
+          ${pats.map(p=>`<span class="pattern-chip" title="${p.name}">${p.patternId}</span>`).join('')}
           ${(s.patternIds||[]).length===0?'<span class="text-xs text-muted">No patterns selected</span>':''}
         </div>
-        <div class="flex gap-2 mt-2">
-          ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${s.complexity}</span>`:''}
-          ${s.estimated_cost_band?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${s.estimated_cost_band}</span>`:''}
+        <div class="flex gap-1 mt-2 flex-wrap">
+          ${levels.map(l=>levelBadge(l)).join('')}
+          ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--muted);font-size:.62rem">${s.complexity}</span>`:''}
         </div>
       </div>`;
     });
@@ -744,7 +829,38 @@ async function showSolutionDetail(id) {
   const s=await api.get(`/api/solutions/${id}`);
   S.currentSolution=s;
   const pats=s.patterns||[];
+  const reviews=s.reviews||[];
+  const currentStage=s.currentStage;
+  const STAGES=['EA Review','Security Review','Architecture Board'];
+
+  function stageClass(stage){
+    const r=reviews.filter(rv=>rv.stage===stage);
+    const last=r[r.length-1];
+    if(!last){
+      if(stage===currentStage) return 'stage-active';
+      return '';
+    }
+    if(last.decision==='Approved') return 'stage-approved';
+    if(last.decision==='Rejected') return 'stage-rejected';
+    return 'stage-needs-changes';
+  }
+  function stageLabel(stage){
+    const r=reviews.filter(rv=>rv.stage===stage);
+    const last=r[r.length-1];
+    if(!last && stage===currentStage) return `▶ ${stage}`;
+    if(!last) return stage;
+    const icon={Approved:'✓',Rejected:'✗','Needs Changes':'⟳'}[last.decision]||'';
+    return `${icon} ${stage}`;
+  }
+
+  const canReview = currentStage && ['Draft','In Review','Needs Changes'].includes(s.status);
+  const isApproved = s.status === 'Approved';
+
   let h=`<button class="back-btn" onclick="showSolutionsList()">← Back to Solutions</button>
+  <div class="review-pipeline">
+    ${STAGES.map(st=>`<div class="review-stage ${stageClass(st)}">${stageLabel(st)}</div>`).join('')}
+    <div class="review-stage ${s.status==='Approved'?'stage-approved':''}" style="font-weight:${s.status==='Approved'?700:400}">${s.status==='Approved'?'✓ ':''} Approved</div>
+  </div>
   <div class="two-col">
   <div>
   <div class="detail-header">
@@ -752,13 +868,14 @@ async function showSolutionDetail(id) {
     <h2>${s.title}</h2>
     <div class="detail-meta">${s.business_unit||''}</div>
     <div class="detail-badges mt-1">
-      <span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span>
+      ${solutionStatusBadge(s.status)}
       ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--text)">${s.complexity}</span>`:''}
       ${s.estimated_cost_band?`<span class="badge" style="background:var(--surface2);color:var(--muted)">Cost: ${s.estimated_cost_band}</span>`:''}
     </div>
     <div class="flex gap-2 mt-2" style="flex-wrap:wrap">
-      ${s.status!=='Published'?`<button class="btn btn-success btn-sm" onclick="updateSolutionStatus(${s.id},'Published')">Publish</button>`:''}
-      ${s.status==='Published'?`<button class="btn btn-sm jira-epic-btn" onclick="generateJiraEpics(${s.id})">⬡ ${s.jiraEpics?'Regenerate':'Generate'} Jira Epics</button>`:''}
+      ${canReview?`<button class="btn btn-primary btn-sm" onclick="openSolutionReviewPanel(${s.id})">✓ Submit Review — ${currentStage}</button>`:''}
+      ${isApproved?`<button class="btn btn-success btn-sm" onclick="syncSolutionToGitHub(${s.id},'${s.reference_id}')">⇅ Sync to GitHub</button>`:''}
+      ${isApproved?`<button class="btn btn-sm jira-epic-btn" onclick="generateJiraEpics(${s.id})">⬡ ${s.jiraEpics?'Regenerate':'Generate'} Jira Epics</button>`:''}
       <button class="btn btn-danger btn-sm" onclick="confirmDeleteSolution(${s.id},'${s.reference_id}')">Delete</button>
     </div>
   </div>
@@ -767,25 +884,86 @@ async function showSolutionDetail(id) {
   ${pats.length?`<div class="section-card"><h3>Composed Patterns (${pats.length})</h3>
     ${pats.map(p=>`<div class="flex justify-between items-center" style="padding:.45rem;background:var(--surface2);border-radius:7px;margin-bottom:.4rem;cursor:pointer" onclick="showPattern('${p.patternId}')">
       <div><span class="font-mono text-xs text-muted">${p.patternId}</span><div class="text-sm font-bold" style="margin-top:.1rem">${p.name}</div></div>
-      <div class="flex gap-1"><span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}">${p.status}</span></div>
+      <div class="flex gap-1">${p.level?levelBadge(p.level):''}<span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}">${p.status}</span></div>
     </div>`).join('')}
   </div>`:''}
+  ${reviews.length?`<div class="section-card"><h3>Review Trail</h3>
+    ${reviews.map(rv=>{const cls={Approved:'art-approved',Rejected:'art-rejected','Needs Changes':'art-needs-changes'}[rv.decision]||'';return`<div class="review-artifact ${cls}">
+      <div class="review-artifact-header"><div><span class="review-artifact-stage">${rv.stage}</span> · <span class="review-artifact-reviewer">${rv.reviewer_name}</span></div><span class="review-artifact-date">${fmtDate(rv.reviewed_at)}</span></div>
+      <div><span class="badge ${cls==='art-approved'?'badge-approved':cls==='art-rejected'?'badge-rejected':'badge-review'}">${rv.decision}</span></div>
+      ${rv.comments?`<div class="review-artifact-comment">${rv.comments}</div>`:''}
+    </div>`;}).join('')}
+  </div>`:''}
+  <div id="solution-review-panel"></div>
   ${s.jiraEpics?renderJiraEpicsPanel(s.jiraEpics,s.id):''}
   </div>
   <div class="section-card">
     <h3>Solution Details</h3>
     <div class="kv-grid">
+      <div class="kv-item"><label>Reference ID</label><span class="font-mono">${s.reference_id}</span></div>
+      <div class="kv-item"><label>Status</label><span>${s.status}</span></div>
       <div class="kv-item"><label>Owner</label><span>${s.owner||'–'}</span></div>
       <div class="kv-item"><label>Business Unit</label><span>${s.business_unit||'–'}</span></div>
       <div class="kv-item"><label>Complexity</label><span>${s.complexity||'–'}</span></div>
       <div class="kv-item"><label>Est. Cost Band</label><span>${s.estimated_cost_band||'–'}</span></div>
       <div class="kv-item"><label>Patterns</label><span>${(s.patternIds||[]).length}</span></div>
+      <div class="kv-item"><label>Intake Ref</label><span>${s.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.id);else alert('Intake not found');})()">${s.intake_reference}</span>`:'–'}</span></div>
       <div class="kv-item"><label>Created</label><span>${fmtDate(s.created_at)}</span></div>
+      <div class="kv-item"><label>Review Stage</label><span>${currentStage||'–'}</span></div>
     </div>
     ${s.deploymentRegions&&s.deploymentRegions.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Regions</label><div class="tag-list mt-1">${s.deploymentRegions.map(r=>`<span class="badge" style="background:var(--surface2);color:var(--text)">${r}</span>`).join('')}</div></div>`:''}
+    ${canReview?`<div class="mt-2" id="inline-review-btn"><button class="btn btn-primary btn-sm" style="width:100%" onclick="openSolutionReviewPanel(${s.id})">✓ Submit ${currentStage} Review</button></div>`:''}
+    ${isApproved?`<div class="mt-2"><button class="btn btn-success btn-sm" style="width:100%" onclick="syncSolutionToGitHub(${s.id},'${s.reference_id}')">⇅ Sync to GitHub</button></div>`:''}
   </div>
   </div>`;
   setMain(h);
+}
+
+function openSolutionReviewPanel(solutionId) {
+  const el = document.getElementById('solution-review-panel');
+  if (!el) return;
+  const s = S.currentSolution;
+  const stage = s.currentStage;
+  el.innerHTML = `<div class="section-card" style="border:1px solid rgba(255,212,0,.3)">
+    <h3>✓ Submit ${stage} Review</h3>
+    <div class="form-group"><label>Reviewer Name *</label><input class="form-control" id="sr_reviewer" placeholder="Your name"/></div>
+    <div class="form-group"><label>Decision *</label>
+      <div class="flex gap-2" style="margin-top:.3rem">
+        <button class="btn btn-success btn-sm" style="flex:1" onclick="submitSolutionReview(${solutionId},'${stage}','Approved')">✓ Approve</button>
+        <button class="btn btn-warning btn-sm" style="flex:1" onclick="submitSolutionReview(${solutionId},'${stage}','Needs Changes')">⟳ Needs Changes</button>
+        <button class="btn btn-danger btn-sm" style="flex:1" onclick="submitSolutionReview(${solutionId},'${stage}','Rejected')">✗ Reject</button>
+      </div>
+    </div>
+    <div class="form-group"><label>Comments</label><textarea class="form-control" id="sr_comments" placeholder="Review notes, conditions, or reasons for rejection..." style="min-height:75px"></textarea></div>
+  </div>`;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+async function submitSolutionReview(solutionId, stage, decision) {
+  const reviewer = document.getElementById('sr_reviewer');
+  if (!reviewer || !reviewer.value.trim()) { alert('Please enter your name.'); return; }
+  try {
+    await api.post(`/api/solutions/${solutionId}/review`, {
+      reviewerName: reviewer.value.trim(),
+      stage,
+      decision,
+      comments: (document.getElementById('sr_comments') || {}).value || ''
+    });
+    await loadSolutions();
+    showSolutionDetail(solutionId);
+  } catch(e) {
+    alert('Review submission failed: ' + (e.error || JSON.stringify(e)));
+  }
+}
+
+async function syncSolutionToGitHub(solutionId, refId) {
+  const btn = document.querySelector('.btn-success');
+  try {
+    const r = await api.post('/api/github/sync-solutions', {});
+    alert(`✓ Solution ${refId} synced to GitHub: ${r.solutionsSynced} solution(s) written to /solutions folder.`);
+  } catch(e) {
+    alert('GitHub sync failed: ' + (e.error || e.message || 'Check your GITHUB_PAT'));
+  }
 }
 
 function renderJiraEpicsPanel(jiraEpics, solutionId) {
@@ -926,14 +1104,21 @@ async function submitJiraPush() {
 
 function startNewSolution() {
   S.view='new-solution'; renderSidebar();
-  const d={patternIds:[],vendorIds:[],deploymentRegions:[]};
+  S._sdData={patternIds:[],vendorIds:[],deploymentRegions:[]};
+  S._sdPatternLevelFilter='All';
+  renderNewSolutionForm();
+}
+
+function renderNewSolutionForm() {
   const regions=['Australia East','Australia Southeast','Canada Central','East US','East US 2','North Europe','South Africa North','Southeast Asia','UK South','West Europe'];
+  const lvf=S._sdPatternLevelFilter||'All';
+  const visiblePatterns=S.patterns.filter(p=>lvf==='All'||p.level===lvf);
   let h=`<div class="page-title"><h2>New Solution Design</h2></div>
   <div class="two-col">
   <div>
   <div class="form-row">
     <div class="form-group"><label>Solution Title *</label><input class="form-control" id="sd_title" placeholder="e.g. OT Telemetry Pipeline to Azure"/></div>
-    <div class="form-group"><label>Status</label><select class="form-control" id="sd_status"><option>Draft</option><option>Published</option></select></div>
+    <div class="form-group"><label>Intake Reference (optional)</label><input class="form-control" id="sd_intakeRef" placeholder="e.g. EAR-2026-0001"/></div>
   </div>
   <div class="form-group"><label>Description</label><textarea class="form-control" id="sd_description" placeholder="Describe the solution and what it achieves..."></textarea></div>
   <div class="form-group"><label>Business Context</label><textarea class="form-control" id="sd_businessContext" placeholder="The business problem this solution addresses..."></textarea></div>
@@ -946,30 +1131,51 @@ function startNewSolution() {
     <div class="form-group"><label>Estimated Cost Band</label><select class="form-control" id="sd_costBand"><option value="">Select...</option>${opts(['Low (< $10k/mo)','Medium ($10k–50k/mo)','High ($50k–200k/mo)','Enterprise (> $200k/mo)'],null)}</select></div>
   </div>
   <div class="form-group"><label>Deployment Regions</label>
-    <div class="checkbox-grid">${regions.map(r=>`<label class="checkbox-item"><input type="checkbox" value="${r}" onchange="toggleSDArr('deploymentRegions','${r}')"/>${r}</label>`).join('')}</div>
+    <div class="checkbox-grid">${regions.map(r=>`<label class="checkbox-item"><input type="checkbox" value="${r}" ${(S._sdData.deploymentRegions||[]).includes(r)?'checked':''} onchange="toggleSDArr('deploymentRegions','${r}')"/>${r}</label>`).join('')}</div>
   </div>
-  <div class="form-group"><label>Compose from Patterns</label>
+  <div class="form-group">
+    <div class="flex justify-between items-center" style="margin-bottom:.4rem">
+      <label style="margin-bottom:0">Compose from Patterns</label>
+      <select class="filter-select" style="font-size:.72rem" onchange="S._sdPatternLevelFilter=this.value;renderNewSolutionForm()">
+        <option value="All" ${lvf==='All'?'selected':''}>All Levels</option>
+        <option value="Conceptual" ${lvf==='Conceptual'?'selected':''}>Conceptual</option>
+        <option value="Logical" ${lvf==='Logical'?'selected':''}>Logical</option>
+        <option value="Component" ${lvf==='Component'?'selected':''}>Component</option>
+      </select>
+    </div>
     <div class="checkbox-grid">`;
-  S.patterns.forEach(p=>{
-    h+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" onchange="toggleSDArr('patternIds','${p.patternId}')"/><span class="font-mono text-xs" style="color:var(--muted)">${p.patternId}</span> ${p.name} <span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}" style="margin-left:auto">${p.status}</span></label>`;
+  visiblePatterns.forEach(p=>{
+    h+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" ${(S._sdData.patternIds||[]).includes(p.patternId)?'checked':''} onchange="toggleSDArr('patternIds','${p.patternId}')"/>
+      <span class="font-mono text-xs" style="color:var(--muted)">${p.patternId}</span>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"> ${p.name}</span>
+      ${p.level?levelBadge(p.level):''}
+    </label>`;
   });
   h+=`</div></div>
   <div class="wizard-nav" style="margin-top:0;padding-top:1rem">
     <button class="btn btn-secondary" onclick="showSolutionsList()">Cancel</button>
-    <button class="btn btn-primary" onclick="submitSolution()">Create Solution Design</button>
+    <button class="btn btn-primary" onclick="submitSolution()">Create Solution Design →</button>
   </div>
   </div>
-  <div class="section-card"><h3>Tips</h3>
-    <p class="text-sm text-muted" style="line-height:1.65">Compose related patterns into a unified solution design to document how they interact in a real deployment scenario.</p>
-    <ul class="arrow-list mt-2">
-      <li class="text-sm">Select 2–5 closely related patterns</li>
-      <li class="text-sm">Describe the end-to-end business flow</li>
-      <li class="text-sm">Specify Azure regions for geo compliance</li>
-      <li class="text-sm">Use the cost band to inform budget planning</li>
-    </ul>
+  <div>
+  <div class="section-card"><h3>Pattern Levels Explained</h3>
+    <div style="display:flex;flex-direction:column;gap:.5rem;margin-top:.2rem">
+      <div style="padding:.55rem .7rem;background:var(--surface2);border-radius:7px;border-left:3px solid #c084fc">${levelBadge('Conceptual')}<p class="text-xs text-muted" style="margin-top:.3rem;line-height:1.5">High-level architectural principles and strategic direction. Start here for new domains.</p></div>
+      <div style="padding:.55rem .7rem;background:var(--surface2);border-radius:7px;border-left:3px solid #60a5fa">${levelBadge('Logical')}<p class="text-xs text-muted" style="margin-top:.3rem;line-height:1.5">Platform-agnostic design patterns. Most patterns are at this level.</p></div>
+      <div style="padding:.55rem .7rem;background:var(--surface2);border-radius:7px;border-left:3px solid #34d399">${levelBadge('Component')}<p class="text-xs text-muted" style="margin-top:.3rem;line-height:1.5">Technology-specific blueprints ready for implementation.</p></div>
+    </div>
+  </div>
+  <div class="section-card mt-2"><h3>Review Pipeline</h3>
+    <p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.7rem">After creation, solutions move through:</p>
+    <div style="display:flex;flex-direction:column;gap:.3rem">
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">1. EA Review</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">2. Security Review</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">3. Architecture Board</div>
+      <div style="padding:.4rem .6rem;background:rgba(46,204,113,.1);border-radius:6px;font-size:.78rem;color:#2ecc71">✓ Approved → Sync to GitHub</div>
+    </div>
+  </div>
   </div>
   </div>`;
-  S._sdData={patternIds:[],vendorIds:[],deploymentRegions:[]};
   setMain(h);
 }
 
@@ -982,15 +1188,18 @@ function toggleSDArr(field,val) {
 }
 
 async function submitSolution() {
-  const t=document.getElementById('sd_title').value;
-  if(!t){alert('Please enter a solution title.');return;}
+  const t=document.getElementById('sd_title');
+  if(!t||!t.value.trim()){alert('Please enter a solution title.');return;}
   const payload={
-    title:t, description:document.getElementById('sd_description').value,
-    businessContext:document.getElementById('sd_businessContext').value,
-    owner:document.getElementById('sd_owner').value, businessUnit:document.getElementById('sd_businessUnit').value,
-    complexity:document.getElementById('sd_complexity').value,
-    estimatedCostBand:document.getElementById('sd_costBand').value,
-    status:document.getElementById('sd_status').value,
+    title:t.value.trim(),
+    description:(document.getElementById('sd_description')||{}).value||'',
+    businessContext:(document.getElementById('sd_businessContext')||{}).value||'',
+    owner:(document.getElementById('sd_owner')||{}).value||'',
+    businessUnit:(document.getElementById('sd_businessUnit')||{}).value||'',
+    complexity:(document.getElementById('sd_complexity')||{}).value||'',
+    estimatedCostBand:(document.getElementById('sd_costBand')||{}).value||'',
+    intakeReference:(document.getElementById('sd_intakeRef')||{}).value||'',
+    status:'Draft',
     patternIds:S._sdData.patternIds||[], vendorIds:S._sdData.vendorIds||[],
     deploymentRegions:S._sdData.deploymentRegions||[],
   };
@@ -1401,7 +1610,7 @@ function showPattern(id){
   <div class="detail-header">
     <div class="font-mono text-xs text-muted">${p.patternId} · v${p.version||'?'} · Last reviewed ${p.lastReviewed||'–'}</div>
     <h2>${p.name}</h2><div class="detail-meta">${p.domain}</div>
-    <div class="detail-badges mt-1"><span class="badge ${sClass}">${p.status}</span>${p.tier?`<span class="badge" style="background:var(--surface2);color:var(--text)">${p.tier}</span>`:''}${p.ccoeCertified==='Yes'?`<span class="badge badge-endorsed">CCoE Certified</span>`:''}${p.leanixRef?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${p.leanixRef}</span>`:''}</div>
+    <div class="detail-badges mt-1"><span class="badge ${sClass}">${p.status}</span>${p.level?levelBadge(p.level):''}${p.tier?`<span class="badge" style="background:var(--surface2);color:var(--text);font-size:.62rem">${p.tier}</span>`:''}${p.ccoeCertified==='Yes'?`<span class="badge badge-endorsed">CCoE Certified</span>`:''}${p.leanixRef?`<span class="badge" style="background:var(--surface2);color:var(--muted)">${p.leanixRef}</span>`:''}</div>
   </div>
   ${p.strategicIntent?`<div class="section-card"><h3>Strategic Intent</h3><p class="text-sm" style="line-height:1.65">${p.strategicIntent}</p></div>`:''}
   ${p.problemStatement?`<div class="section-card"><h3>Problem Statement</h3><p class="text-sm" style="line-height:1.65">${p.problemStatement}</p></div>`:''}
@@ -1420,19 +1629,34 @@ function showPattern(id){
   setMain(h);
 }
 
-function showPatternList(){
-  S.view='patterns';S.currentPattern=null;renderSidebar();
+function showPatternList(levelFilter){
+  S.view='patterns';S.currentPattern=null;S._patternLevelFilter=levelFilter||S._patternLevelFilter||'All';renderSidebar();
   const endorsed=S.patterns.filter(p=>p.status==='Endorsed').length;
+  const conceptual=S.patterns.filter(p=>p.level==='Conceptual').length;
+  const logical=S.patterns.filter(p=>p.level==='Logical').length;
+  const component=S.patterns.filter(p=>p.level==='Component').length;
   let h=`<div class="page-title"><h2>Pattern Library</h2><button class="btn btn-secondary btn-sm" onclick="showKanban()">⊞ Board View</button></div>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
     <div class="stat-card"><div class="stat-val">${S.patterns.length}</div><div class="stat-label">Total</div></div>
     <div class="stat-card" style="--accent-color:var(--endorsed)"><div class="stat-val">${endorsed}</div><div class="stat-label">Endorsed</div></div>
-    <div class="stat-card" style="--accent-color:var(--dev)"><div class="stat-val">${S.patterns.filter(p=>p.status==='In Development').length}</div><div class="stat-label">In Development</div></div>
-    <div class="stat-card" style="--accent-color:var(--review)"><div class="stat-val">${S.patterns.filter(p=>p.status==='Under Review').length}</div><div class="stat-label">Under Review</div></div>
+    <div class="stat-card" style="--accent-color:#c084fc"><div class="stat-val">${conceptual}</div><div class="stat-label">Conceptual</div></div>
+    <div class="stat-card" style="--accent-color:#60a5fa"><div class="stat-val">${logical}</div><div class="stat-label">Logical</div></div>
   </div>
-  <input class="search-bar" id="pattern-search" placeholder="Search patterns..." oninput="filterPatterns(this.value)"/>
+  <div class="filter-bar">
+    <input class="search-bar" id="pattern-search" placeholder="Search patterns..." style="margin-bottom:0;flex:1;min-width:200px" oninput="filterPatterns(this.value)"/>
+    <select class="filter-select" onchange="showPatternList(this.value)">
+      <option value="All" ${(S._patternLevelFilter||'All')==='All'?'selected':''}>All Levels</option>
+      <option value="Conceptual" ${S._patternLevelFilter==='Conceptual'?'selected':''}>Conceptual</option>
+      <option value="Logical" ${S._patternLevelFilter==='Logical'?'selected':''}>Logical</option>
+      <option value="Component" ${S._patternLevelFilter==='Component'?'selected':''}>Component</option>
+    </select>
+  </div>
   <div class="overview-grid" id="pattern-grid">`;
-  S.patterns.forEach(p=>{const cls='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');h+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge ${cls}" style="margin-top:.45rem">${p.status}</span></div>`;});
+  const lvf=S._patternLevelFilter||'All';
+  S.patterns.filter(p=>lvf==='All'||p.level===lvf).forEach(p=>{
+    const cls='badge-'+p.status.toLowerCase().replace(/\s+/g,'-');
+    h+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><div class="flex gap-1 mt-2">${levelBadge(p.level)}<span class="badge ${cls}">${p.status}</span></div></div>`;
+  });
   h+=`</div>`;setMain(h);
 }
 function filterPatterns(q){const g=document.getElementById('pattern-grid');if(!g)return;g.querySelectorAll('.card').forEach(c=>{c.style.display=c.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
@@ -1693,7 +1917,8 @@ async function inspectSslFromIntel(vendorId) {
 // ─── GitHub Sync ──────────────────────────────────────────────────────────────
 async function showGitHubSync() {
   S.view = 'github-sync'; renderSidebar();
-  let h = `<div class="page-title"><h2>⇅ GitHub Pattern Sync</h2></div>
+  const approvedSolutions = S.solutions.filter(s => s.status === 'Approved');
+  let h = `<div class="page-title"><h2>⇅ GitHub Sync</h2></div>
   <div class="two-col" style="gap:1.4rem">
     <div>
       <div class="section-card">
@@ -1702,21 +1927,28 @@ async function showGitHubSync() {
           <div class="kv-item"><label>Repo</label><span><a href="https://github.com/Rik-ftw/architecture_patterns" target="_blank" style="color:var(--accent-light)">Rik-ftw/architecture_patterns</a></span></div>
           <div class="kv-item"><label>Branch</label><span style="font-family:monospace">dev</span></div>
           <div class="kv-item"><label>Local Patterns</label><span>${S.patterns.length} JSON files + SVG diagrams</span></div>
+          <div class="kv-item"><label>Approved Solutions</label><span>${approvedSolutions.length} to sync</span></div>
         </div>
         <p class="text-xs text-muted" style="margin-top:.8rem;line-height:1.6">Syncing pushes all pattern JSON files and SVG diagrams to the <code>dev</code> branch. Existing files are updated in-place; new files are created. A README is also generated automatically.</p>
         <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
-          <button class="btn btn-primary" id="sync-btn" onclick="runGitHubSync()">⇅ Sync All Patterns to GitHub</button>
+          <button class="btn btn-primary" id="sync-btn" onclick="runGitHubSync()">⇅ Sync Patterns to GitHub</button>
+          ${approvedSolutions.length?`<button class="btn btn-success" id="sync-solutions-btn" onclick="runGitHubSolutionsSync()">⇅ Sync ${approvedSolutions.length} Approved Solution${approvedSolutions.length!==1?'s':''}</button>`:'<button class="btn btn-secondary" disabled title="No approved solutions yet">⇅ Sync Solutions (none approved)</button>'}
           <button class="btn btn-secondary" id="status-btn" onclick="checkGitHubStatus()">⟳ Check Status</button>
         </div>
       </div>
       <div id="sync-result"></div>
     </div>
     <div>
-      <div class="section-card"><h3>What Gets Synced</h3>
+      <div class="section-card"><h3>Patterns</h3>
         <ul style="list-style:none;padding:0;margin:0">
-          ${S.patterns.map(p => `<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-${p.status==='Endorsed'?'endorsed':'dev'}" style="min-width:80px;text-align:center">${p.status}</span><span class="font-mono" style="color:var(--muted);min-width:58px">${p.patternId}</span><span>${p.name}</span></li>`).join('')}
+          ${S.patterns.map(p => `<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-${p.status==='Endorsed'?'endorsed':'dev'}" style="min-width:80px;text-align:center">${p.status}</span>${p.level?levelBadge(p.level):''}<span class="font-mono" style="color:var(--muted);min-width:58px">${p.patternId}</span><span>${p.name}</span></li>`).join('')}
         </ul>
       </div>
+      ${approvedSolutions.length?`<div class="section-card mt-2"><h3>Approved Solutions to Sync</h3>
+        <ul style="list-style:none;padding:0;margin:0">
+          ${approvedSolutions.map(s=>`<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-approved" style="min-width:70px;text-align:center">Approved</span><span class="font-mono" style="color:var(--muted)">${s.reference_id}</span><span style="flex:1">${s.title}</span></li>`).join('')}
+        </ul>
+      </div>`:''}
     </div>
   </div>`;
   setMain(h);
@@ -1764,7 +1996,20 @@ async function runGitHubSync() {
   } catch(e) {
     if (el) el.innerHTML = `<div class="alert alert-danger mt-2">Sync failed: ${e.error || e.message || 'Unknown error'}. Check your GITHUB_PAT has repo write access.</div>`;
   }
-  if (btn) { btn.disabled = false; btn.textContent = '⇅ Sync All Patterns to GitHub'; }
+  if (btn) { btn.disabled = false; btn.textContent = '⇅ Sync Patterns to GitHub'; }
+}
+
+async function runGitHubSolutionsSync() {
+  const btn=document.getElementById('sync-solutions-btn');
+  if(btn){btn.disabled=true;btn.textContent='Syncing solutions...';}
+  const el=document.getElementById('sync-result');
+  try{
+    const r=await api.post('/api/github/sync-solutions',{});
+    if(el)el.innerHTML=`<div class="section-card mt-2" style="border-left:3px solid var(--endorsed)"><h4>✓ Solutions Synced</h4><p class="text-sm text-muted">${r.message||'Approved solutions pushed to /solutions folder.'}</p>${r.solutionsSynced!==undefined?`<p class="text-xs text-muted mt-1">${r.solutionsSynced} solution(s) written to GitHub /solutions folder</p>`:''}</div>`;
+  }catch(e){
+    if(el)el.innerHTML=`<div class="section-card mt-2" style="border-left:3px solid var(--danger)"><h4>✗ Solutions Sync Failed</h4><p class="text-sm text-muted">${e.error||'Check your GITHUB_PAT and ensure solutions are in Approved status.'}</p></div>`;
+  }
+  if(btn){btn.disabled=false;const n=S.solutions.filter(s=>s.status==='Approved').length;btn.textContent=`⇅ Sync ${n} Approved Solution${n!==1?'s':''}`;}
 }
 
 // ─── Team Portal ──────────────────────────────────────────────────────────────
@@ -2696,9 +2941,12 @@ async function generateDiagram(intakeId, refId) {
 // ─── Utils ────────────────────────────────────────────────────────────────────
 function opts(arr,sel){return arr.map(o=>`<option value="${o}" ${o===sel?'selected':''}>${o}</option>`).join('');}
 function fmtDate(d){if(!d)return'–';try{return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});}catch{return d;}}
-function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved','Approved with Conditions':'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
+function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Review':'under-review',Approved:'approved','Approved with Conditions':'approved',Rejected:'rejected',Deferred:'deferred',Withdrawn:'withdrawn','In Review':'in-review','Needs Changes':'needs-changes'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
+
 function tierBadge(tier,score){return`<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;}
 function critBadge(c){const m={Critical:'badge-critical',High:'badge-high',Medium:'badge-medium',Low:'badge-low'};return`<span class="badge ${m[c]||''}">${c||'–'}</span>`;}
+function levelBadge(lvl){if(!lvl)return'';const m={Conceptual:'badge-conceptual',Logical:'badge-logical',Component:'badge-component'};return`<span class="badge ${m[lvl]||''}" style="font-size:.63rem">${lvl}</span>`;}
+function solutionStatusBadge(s){const m={Draft:'draft',Approved:'approved','In Review':'in-review','Needs Changes':'needs-changes',Rejected:'rejected'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
 
 init();
 </script>
