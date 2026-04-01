@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture Pattern Library</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --border: #2e3245;
+      --accent: #4f8ef7;
+      --accent2: #7c5cbf;
+      --text: #e2e4f0;
+      --muted: #8b90ab;
+      --endorsed: #2ecc71;
+      --review: #f39c12;
+      --dev: #3498db;
+      --critical: #e74c3c;
+      --high: #e67e22;
+      --medium: #f1c40f;
+      --low: #2ecc71;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.3rem; font-weight: 700; letter-spacing: -0.02em; }
+    header span { color: var(--muted); font-size: 0.85rem; }
+    .layout { display: flex; height: calc(100vh - 57px); }
+    nav { width: 260px; min-width: 220px; background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 1rem 0; flex-shrink: 0; }
+    nav h2 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 0.75rem 1.25rem 0.35rem; }
+    nav button { display: block; width: 100%; text-align: left; background: none; border: none; color: var(--text); padding: 0.5rem 1.25rem; cursor: pointer; font-size: 0.85rem; transition: background 0.15s; border-left: 3px solid transparent; }
+    nav button:hover { background: var(--surface2); }
+    nav button.active { background: var(--surface2); border-left-color: var(--accent); color: var(--accent); }
+    nav .nav-id { font-size: 0.7rem; color: var(--muted); font-family: monospace; display: block; }
+    main { flex: 1; overflow-y: auto; padding: 2rem; }
+    .overview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.2rem; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+    .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .card-id { font-size: 0.7rem; font-family: monospace; color: var(--muted); }
+    .card-name { font-size: 1rem; font-weight: 600; margin: 0.4rem 0 0.5rem; }
+    .card-domain { font-size: 0.78rem; color: var(--muted); }
+    .card-status { display: inline-block; font-size: 0.7rem; padding: 0.2rem 0.55rem; border-radius: 999px; font-weight: 600; margin-top: 0.6rem; }
+    .status-endorsed { background: #1a3d2b; color: var(--endorsed); }
+    .status-under-review, .status-under_review { background: #3d2f0d; color: var(--review); }
+    .status-in-development, .status-in_development { background: #0d2540; color: var(--dev); }
+    .detail { max-width: 900px; }
+    .detail-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+    .detail-header h2 { font-size: 1.6rem; font-weight: 700; }
+    .detail-header .meta { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+    .detail-header .badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.6rem; }
+    .badge { font-size: 0.72rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: var(--surface2); border: 1px solid var(--border); }
+    .section { margin-bottom: 1.5rem; }
+    .section h3 { font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); margin-bottom: 0.75rem; }
+    .section p { color: var(--text); line-height: 1.65; font-size: 0.9rem; }
+    ul.items { list-style: none; }
+    ul.items li { padding: 0.4rem 0; font-size: 0.88rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.5rem; }
+    ul.items li::before { content: '→'; color: var(--accent); flex-shrink: 0; }
+    .use-cases { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .use-case-box { background: var(--surface2); border-radius: 8px; padding: 0.85rem; font-size: 0.83rem; }
+    .use-case-box.use { border-left: 3px solid var(--endorsed); }
+    .use-case-box.dont { border-left: 3px solid var(--critical); }
+    .use-case-box strong { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 0.3rem; color: var(--muted); }
+    .guardrails-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+    .guardrails-table th { text-align: left; padding: 0.5rem 0.75rem; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
+    .guardrails-table td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .sev-required { color: var(--critical); font-weight: 600; }
+    .sev-recommended { color: var(--review); font-weight: 600; }
+    .sev-optional { color: var(--dev); }
+    .svg-container { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; overflow: auto; max-height: 480px; }
+    .svg-container img { max-width: 100%; }
+    .tab-bar { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+    .tab { padding: 0.5rem 1rem; cursor: pointer; font-size: 0.85rem; border: none; background: none; color: var(--muted); border-bottom: 2px solid transparent; transition: color 0.15s; }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .vendor-table-wrap { overflow-x: auto; }
+    .vendor-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+    .vendor-table th { text-align: left; padding: 0.55rem 0.85rem; background: var(--surface2); color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; position: sticky; top: 0; }
+    .vendor-table td { padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); }
+    .vendor-table tr:hover td { background: var(--surface2); }
+    .crit-critical { color: var(--critical); font-weight: 600; }
+    .crit-high { color: var(--high); font-weight: 600; }
+    .crit-medium { color: var(--medium); }
+    .crit-low { color: var(--low); }
+    .data-yes { color: var(--review); }
+    .data-no { color: var(--muted); }
+    .loading { color: var(--muted); font-size: 0.9rem; }
+    .search-bar { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 0.5rem 0.9rem; color: var(--text); font-size: 0.88rem; margin-bottom: 1.2rem; }
+    .search-bar:focus { outline: none; border-color: var(--accent); }
+    .back-btn { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.3rem; }
+    .back-btn:hover { text-decoration: underline; }
+    .stats-bar { display: flex; gap: 1.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+    .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1.25rem; }
+    .stat-val { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); }
+    @media (max-width: 700px) {
+      nav { display: none; }
+      .use-cases { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Architecture Pattern Library</h1>
+    <span>Enterprise Architecture Reference</span>
+  </header>
+  <div class="layout">
+    <nav id="sidebar"></nav>
+    <main id="main"></main>
+  </div>
+
+  <script>
+    let patterns = [];
+    let vendors = [];
+    let currentView = 'patterns';
+    let currentPattern = null;
+
+    async function init() {
+      document.getElementById('main').innerHTML = '<p class="loading">Loading...</p>';
+      [patterns, vendors] = await Promise.all([
+        fetch('/api/patterns').then(r => r.json()),
+        fetch('/api/vendors').then(r => r.json())
+      ]);
+      patterns.sort((a, b) => (a.patternId || '').localeCompare(b.patternId || ''));
+      renderSidebar();
+      showPatternList();
+    }
+
+    function renderSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const domains = [...new Set(patterns.map(p => p.domain))].sort();
+
+      let html = `<button class="${currentView === 'patterns' && !currentPattern ? 'active' : ''}" onclick="showPatternList()">All Patterns</button>`;
+      html += `<button class="${currentView === 'vendors' ? 'active' : ''}" onclick="showVendors()">Vendor Registry</button>`;
+
+      domains.forEach(domain => {
+        html += `<h2>${domain}</h2>`;
+        patterns.filter(p => p.domain === domain).forEach(p => {
+          const isActive = currentPattern && currentPattern.patternId === p.patternId;
+          html += `<button class="${isActive ? 'active' : ''}" onclick="showPattern('${p.patternId}')">
+            <span class="nav-id">${p.patternId}</span>
+            ${p.name}
+          </button>`;
+        });
+      });
+
+      sidebar.innerHTML = html;
+    }
+
+    function showPatternList(filter = '') {
+      currentView = 'patterns';
+      currentPattern = null;
+      renderSidebar();
+      const filtered = filter ? patterns.filter(p =>
+        (p.name || '').toLowerCase().includes(filter.toLowerCase()) ||
+        (p.domain || '').toLowerCase().includes(filter.toLowerCase()) ||
+        (p.patternId || '').toLowerCase().includes(filter.toLowerCase())
+      ) : patterns;
+
+      const endorsed = patterns.filter(p => p.status === 'Endorsed').length;
+      const inDev = patterns.filter(p => p.status === 'In Development').length;
+      const underReview = patterns.filter(p => p.status === 'Under Review').length;
+
+      let html = `<div class="stats-bar">
+        <div class="stat"><div class="stat-val">${patterns.length}</div><div class="stat-label">Total Patterns</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--endorsed)">${endorsed}</div><div class="stat-label">Endorsed</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--dev)">${inDev}</div><div class="stat-label">In Development</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--review)">${underReview}</div><div class="stat-label">Under Review</div></div>
+        <div class="stat"><div class="stat-val">${vendors.length}</div><div class="stat-label">Vendors</div></div>
+      </div>`;
+
+      html += `<input class="search-bar" placeholder="Search patterns..." oninput="showPatternList(this.value)" value="${filter}" />`;
+      html += `<div class="overview-grid">`;
+      filtered.forEach(p => {
+        const statusClass = 'status-' + (p.status || '').toLowerCase().replace(/\s+/g, '-');
+        html += `<div class="card" onclick="showPattern('${p.patternId}')">
+          <div class="card-id">${p.patternId}</div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-domain">${p.domain}</div>
+          <span class="card-status ${statusClass}">${p.status}</span>
+        </div>`;
+      });
+      html += `</div>`;
+      document.getElementById('main').innerHTML = html;
+    }
+
+    function showPattern(id) {
+      const p = patterns.find(x => x.patternId === id);
+      if (!p) return;
+      currentPattern = p;
+      currentView = 'patterns';
+      renderSidebar();
+
+      const statusClass = 'status-' + (p.status || '').toLowerCase().replace(/\s+/g, '-');
+      let html = `<div class="detail">
+        <button class="back-btn" onclick="showPatternList()">← Back to All Patterns</button>
+        <div class="detail-header">
+          <div>
+            <div style="font-family:monospace;font-size:0.8rem;color:var(--muted);margin-bottom:0.3rem">${p.patternId} · v${p.version || '?'}</div>
+            <h2>${p.name}</h2>
+            <div class="meta">${p.domain} · Owner: ${p.owner || 'N/A'}</div>
+            <div class="badges">
+              <span class="card-status ${statusClass}">${p.status}</span>
+              ${p.tier ? `<span class="badge">${p.tier}</span>` : ''}
+              ${p.ccoeCertified === 'Yes' ? `<span class="badge" style="color:var(--endorsed)">CCoE Certified</span>` : ''}
+              ${p.leanixRef ? `<span class="badge">${p.leanixRef}</span>` : ''}
+            </div>
+          </div>
+        </div>`;
+
+      if (p.strategicIntent) {
+        html += `<div class="section"><h3>Strategic Intent</h3><p>${p.strategicIntent}</p></div>`;
+      }
+      if (p.problemStatement) {
+        html += `<div class="section"><h3>Problem Statement</h3><p>${p.problemStatement}</p></div>`;
+      }
+
+      if (p.useCases && p.useCases.length) {
+        html += `<div class="section"><h3>Use Cases</h3><div class="use-cases">`;
+        p.useCases.forEach(uc => {
+          html += `<div class="use-case-box use"><strong>Use When</strong>${uc.use}</div>
+                   <div class="use-case-box dont"><strong>Don't Use When</strong>${uc.dontUse}</div>`;
+        });
+        html += `</div></div>`;
+      }
+
+      if (p.components && p.components.length) {
+        html += `<div class="section"><h3>Components</h3><ul class="items">`;
+        p.components.forEach(c => { html += `<li>${c}</li>`; });
+        html += `</ul></div>`;
+      }
+
+      if (p.interactionSteps && p.interactionSteps.length) {
+        html += `<div class="section"><h3>Interaction Flow</h3><ul class="items">`;
+        p.interactionSteps.forEach((s, i) => { html += `<li><span style="color:var(--muted);font-size:0.75rem;min-width:1.5rem">${i+1}.</span>${s}</li>`; });
+        html += `</ul></div>`;
+      }
+
+      if (p.securityConsiderations && p.securityConsiderations.length) {
+        html += `<div class="section"><h3>Security Considerations</h3><ul class="items">`;
+        p.securityConsiderations.forEach(s => { html += `<li>${s}</li>`; });
+        html += `</ul></div>`;
+      }
+
+      if (p.guardrails && p.guardrails.length) {
+        html += `<div class="section"><h3>Guardrails</h3>
+          <table class="guardrails-table">
+            <thead><tr><th>Area</th><th>Rule</th><th>Severity</th></tr></thead><tbody>`;
+        p.guardrails.forEach(g => {
+          const sevClass = 'sev-' + (g.severity || '').toLowerCase();
+          html += `<tr><td>${g.area}</td><td>${g.rule}</td><td class="${sevClass}">${g.severity}</td></tr>`;
+        });
+        html += `</tbody></table></div>`;
+      }
+
+      if (p._svgFile) {
+        html += `<div class="section"><h3>Architecture Diagram</h3>
+          <div class="svg-container">
+            <img src="/api/patterns/${p._svgFile}" alt="Architecture diagram for ${p.name}" />
+          </div></div>`;
+      }
+
+      html += `</div>`;
+      document.getElementById('main').innerHTML = html;
+      document.getElementById('main').scrollTop = 0;
+    }
+
+    function showVendors(filter = '') {
+      currentView = 'vendors';
+      currentPattern = null;
+      renderSidebar();
+
+      const filtered = filter ? vendors.filter(v =>
+        (v.vendorCompany || '').toLowerCase().includes(filter.toLowerCase()) ||
+        (v.productService || '').toLowerCase().includes(filter.toLowerCase()) ||
+        (v.category || '').toLowerCase().includes(filter.toLowerCase())
+      ) : vendors;
+
+      const critical = vendors.filter(v => v.criticality === 'Critical').length;
+      const dataShared = vendors.filter(v => v.dataShared).length;
+
+      let html = `<div class="stats-bar">
+        <div class="stat"><div class="stat-val">${vendors.length}</div><div class="stat-label">Total Vendors</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--critical)">${critical}</div><div class="stat-label">Critical</div></div>
+        <div class="stat"><div class="stat-val" style="color:var(--review)">${dataShared}</div><div class="stat-label">Data Shared</div></div>
+      </div>`;
+
+      html += `<input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${filter}" />`;
+      html += `<div class="vendor-table-wrap"><table class="vendor-table">
+        <thead><tr>
+          <th>Vendor</th><th>Product / Service</th><th>Category</th>
+          <th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Programme Domain</th>
+        </tr></thead><tbody>`;
+
+      filtered.sort((a,b) => (a.vendorCompany||'').localeCompare(b.vendorCompany||'')).forEach(v => {
+        const critClass = 'crit-' + (v.criticality || '').toLowerCase();
+        html += `<tr>
+          <td><strong>${v.vendorCompany}</strong></td>
+          <td>${v.productService}</td>
+          <td>${v.category}</td>
+          <td class="${critClass}">${v.criticality}</td>
+          <td>${v.hostingModel || ''}</td>
+          <td class="${v.dataShared ? 'data-yes' : 'data-no'}">${v.dataShared ? 'Yes' : 'No'}</td>
+          <td>${v.programmeDomain || ''}</td>
+        </tr>`;
+      });
+
+      html += `</tbody></table></div>`;
+      document.getElementById('main').innerHTML = html;
+    }
+
+    init();
+  </script>
+</body>
+</html>
