@@ -1,0 +1,170 @@
+{
+  "microsoft azure": {
+    "data": {
+      "keyword": "Microsoft Azure",
+      "cveCount": 16,
+      "highestCvss": 9.1,
+      "severity": "Critical",
+      "topCves": [
+        {
+          "id": "CVE-2020-8611",
+          "score": 8.8,
+          "description": "In Progress MOVEit Transfer 2019.1 before 2019.1.4 and 2019.2 before 2019.2.1, multiple SQL Injection vulnerabilities ha...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-8611"
+        },
+        {
+          "id": "CVE-2021-31827",
+          "score": 8.8,
+          "description": "In Progress MOVEit Transfer before 2021.0 (13.0), a SQL injection vulnerability has been found in the MOVEit Transfer we...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-31827"
+        },
+        {
+          "id": "CVE-2021-33894",
+          "score": 8.8,
+          "description": "In Progress MOVEit Transfer before 2019.0.6 (11.0.6), 2019.1.x before 2019.1.5 (11.1.5), 2019.2.x before 2019.2.2 (11.2....",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-33894"
+        },
+        {
+          "id": "CVE-2016-7191",
+          "score": 8.1,
+          "description": "The Microsoft Azure Active Directory Passport (aka Passport-Azure-AD) library 1.x before 1.4.6 and 2.x before 2.0.1 for ...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-7191"
+        },
+        {
+          "id": "CVE-2020-35608",
+          "score": 7.8,
+          "description": "A code execution vulnerability exists in the normal world’s signed code execution functionality of Microsoft Azure Spher...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-35608"
+        }
+      ],
+      "fetchedAt": "2026-04-01T21:31:24.955Z"
+    },
+    "fetchedAt": 1775079084955
+  },
+  "node.js": {
+    "data": {
+      "keyword": "Node.js",
+      "cveCount": 30,
+      "highestCvss": 10,
+      "severity": "Critical",
+      "topCves": [
+        {
+          "id": "CVE-2013-4660",
+          "score": 6.8,
+          "description": "The JS-YAML module before 2.0.5 for Node.js parses input without properly considering the unsafe !!js/function tag, whic...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2013-4660"
+        },
+        {
+          "id": "CVE-2013-7379",
+          "score": 6.8,
+          "description": "The admin API in the tomato module before 0.0.6 for Node.js does not properly check the access key when it is set to a s...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2013-7379"
+        },
+        {
+          "id": "CVE-2012-2330",
+          "score": 6.4,
+          "description": "The Update method in src/node_http_parser.cc in Node.js before 0.6.17 and 0.7 before 0.7.8 does not properly check the l...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2012-2330"
+        },
+        {
+          "id": "CVE-2011-5037",
+          "score": 5,
+          "description": "Google V8 computes hash values for form parameters without restricting the ability to trigger hash collisions predictabl...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2011-5037"
+        },
+        {
+          "id": "CVE-2013-4450",
+          "score": 5,
+          "description": "The HTTP server in Node.js 0.10.x before 0.10.21 and 0.8.x before 0.8.26 allows remote attackers to cause a denial of se...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2013-4450"
+        }
+      ],
+      "fetchedAt": "2026-04-01T21:33:40.538Z"
+    },
+    "fetchedAt": 1775079220538
+  },
+  "docker": {
+    "data": {
+      "keyword": "Docker",
+      "cveCount": 30,
+      "highestCvss": 10,
+      "severity": "Critical",
+      "topCves": [
+        {
+          "id": "CVE-2014-9357",
+          "score": 10,
+          "description": "Docker 1.3.2 allows remote attackers to execute arbitrary code with root privileges via a crafted (1) image or (2) build...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-9357"
+        },
+        {
+          "id": "CVE-2014-6407",
+          "score": 7.5,
+          "description": "Docker before 1.3.2 allows remote attackers to write to arbitrary files and execute arbitrary code via a (1) symlink or ...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-6407"
+        },
+        {
+          "id": "CVE-2014-3499",
+          "score": 7.2,
+          "description": "Docker 1.0.0 uses world-readable and world-writable permissions on the management socket, which allows local users to ga...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-3499"
+        },
+        {
+          "id": "CVE-2014-5277",
+          "score": 5,
+          "description": "Docker before 1.3.1 and docker-py before 0.5.3 fall back to HTTP when the HTTPS connection to the registry fails, which ...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-5277"
+        },
+        {
+          "id": "CVE-2014-6408",
+          "score": 5,
+          "description": "Docker 1.3.0 through 1.3.1 allows remote attackers to modify the default run profile of image containers and possibly by...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2014-6408"
+        }
+      ],
+      "fetchedAt": "2026-04-01T21:33:40.893Z"
+    },
+    "fetchedAt": 1775079220893
+  },
+  "azure": {
+    "data": {
+      "keyword": "Azure",
+      "cveCount": 30,
+      "highestCvss": 9.8,
+      "severity": "Critical",
+      "topCves": [
+        {
+          "id": "CVE-2015-7876",
+          "score": 7.5,
+          "description": "The escapeLike function in sqlsrv/database.inc in the Drupal 7 driver for SQL Server and SQL Azure 7.x-1.x before 7.x-1....",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2015-7876"
+        },
+        {
+          "id": "CVE-2008-6587",
+          "score": 6.8,
+          "description": "Cross-site request forgery (CSRF) vulnerability in index.tmpl in Vuze (formerly Azureus HTML WebUI), probably 0.7.6, all...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2008-6587"
+        },
+        {
+          "id": "CVE-2006-3230",
+          "score": 2.6,
+          "description": "Cross-site scripting (XSS) vulnerability in index.tmpl in Azureus Tracker 2.4.0.2 and earlier (Java BitTorrent Client Tr...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2006-3230"
+        },
+        {
+          "id": "CVE-2011-1068",
+          "score": 2.6,
+          "description": "Microsoft Windows Azure Software Development Kit (SDK) 1.3.x before 1.3.20121.1237, when Full IIS and a Web Role are use...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2011-1068"
+        },
+        {
+          "id": "CVE-2011-3649",
+          "score": 2.6,
+          "description": "Mozilla Firefox 7.0 and Thunderbird 7.0, when the Direct2D (aka D2D) API is used on Windows in conjunction with the Azur...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2011-3649"
+        }
+      ],
+      "fetchedAt": "2026-04-01T21:33:40.976Z"
+    },
+    "fetchedAt": 1775079220976
+  }
+}

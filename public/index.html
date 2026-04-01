@@ -314,6 +314,50 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .doc-prefill-banner-close{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.85rem;margin-left:auto;padding:0;line-height:1;flex-shrink:0}
 .doc-error-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:8px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);color:var(--risk-critical);font-size:.8rem;margin-top:.8rem}
 
+/* ─── Risk Deep-Dive Tabs ─── */
+.risk-tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--border);margin-top:.8rem}
+.risk-tab{padding:.45rem 1.05rem;cursor:pointer;font-size:.79rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-weight:600}
+.risk-tab:hover{color:var(--text)}
+.risk-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.risk-tab-panel{display:none}.risk-tab-panel.active{display:block}
+.risk-deepdive-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;margin-bottom:.9rem}
+.sca-summary-bar{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem;padding:.7rem .9rem;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)}
+.sca-summary-stat{display:flex;flex-direction:column;align-items:center;min-width:60px}
+.sca-summary-stat-val{font-size:1.3rem;font-weight:800;line-height:1}
+.sca-summary-stat-label{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:.15rem;text-align:center}
+.tech-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.tech-table th{text-align:left;padding:.45rem .7rem;background:var(--surface2);color:var(--muted);font-size:.67rem;text-transform:uppercase;letter-spacing:.06em}
+.tech-table td{padding:.45rem .7rem;border-bottom:1px solid var(--border)}
+.tech-table tr:last-child td{border-bottom:none}
+.cve-link{color:var(--accent-light);text-decoration:none;font-family:monospace;font-size:.72rem}
+.cve-link:hover{text-decoration:underline}
+.mitre-tactic{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.7rem;border-left:3px solid var(--navy)}
+.mitre-tactic-header{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem}
+.mitre-technique{display:flex;flex-direction:column;gap:.2rem;padding:.55rem .65rem;background:var(--surface);border-radius:6px;margin-bottom:.4rem;border:1px solid var(--border)}
+.mitre-technique:last-child{margin-bottom:0}
+.mitre-technique-id{font-family:monospace;font-size:.68rem;color:var(--muted);margin-right:.3rem}
+.mitre-technique-name{font-size:.8rem;font-weight:600}
+.mitre-technique-reason{font-size:.75rem;color:var(--muted);line-height:1.45;margin-top:.15rem}
+.mitre-technique-mit{font-size:.72rem;color:var(--accent-light);margin-top:.12rem;line-height:1.4}
+.mitre-link{color:var(--accent-light);text-decoration:none;font-size:.68rem;font-family:monospace}
+.mitre-link:hover{text-decoration:underline}
+.vendor-risk-row{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.65rem;border:1px solid var(--border)}
+.vendor-risk-header{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.55rem}
+.vendor-risk-name{font-size:.88rem;font-weight:700;flex:1}
+.cert-badge{display:inline-flex;align-items:center;gap:.22rem;font-size:.65rem;padding:.15rem .42rem;border-radius:4px;font-weight:700;white-space:nowrap;border:1px solid}
+.cert-valid{background:rgba(16,153,119,.12);color:var(--endorsed);border-color:rgba(16,153,119,.3)}
+.cert-expiring{background:rgba(212,131,10,.12);color:var(--review);border-color:rgba(212,131,10,.3)}
+.cert-expired{background:rgba(231,76,60,.12);color:var(--risk-critical);border-color:rgba(231,76,60,.3)}
+.cert-missing{background:rgba(74,85,104,.15);color:var(--muted);border-color:var(--border)}
+.ssl-grade{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;font-size:.88rem;font-weight:900;flex-shrink:0}
+.ssl-a-plus{background:rgba(16,153,119,.2);color:var(--endorsed)}
+.ssl-a{background:rgba(46,204,113,.15);color:#27ae60}
+.ssl-b{background:rgba(243,156,18,.15);color:var(--risk-medium)}
+.ssl-c,.ssl-d,.ssl-f{background:rgba(231,76,60,.15);color:var(--risk-critical)}
+.ssl-unknown{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.loading-pulse{display:flex;align-items:center;gap:.6rem;color:var(--muted);font-size:.82rem;padding:.8rem;background:var(--surface2);border-radius:8px;margin-bottom:.5rem}
+.loading-spin{width:16px;height:16px;border:2px solid rgba(16,153,119,.3);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
 /* ─── Architecture Diagram Panel ─── */
 .diagram-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem 1.1rem 1rem;margin-bottom:.9rem}
 .diagram-panel h3{font-size:.78rem;font-weight:700;color:#60a5fa;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.7rem;display:flex;align-items:center;gap:.4rem}
@@ -782,6 +826,7 @@ async function showReviewQueue() {
 async function showIntakeDetail(id) {
   S.view='intake-detail'; renderSidebar();
   setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  S._scaLoaded = false; S._mitreLoaded = false; S._vendorEnrichLoaded = false;
   const r=await api.get(`/api/intake/${id}`); S.currentIntake=r;
   const canReview=['Submitted','Under Review'].includes(r.status);
   const canSubmit=r.status==='Draft';
@@ -861,7 +906,7 @@ async function showIntakeDetail(id) {
   </div>
   <div>
     <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
-    ${r.risk_tier&&r.riskBreakdown?renderRiskPanel(r.risk_score,r.risk_tier,r.riskBreakdown,r.riskFlags||[],r.riskRecommendations||[]):''}
+    ${r.risk_tier&&r.riskBreakdown?renderRiskDeepDive(r):''}
     ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
   </div></div>`;
   setMain(h);
@@ -1673,6 +1718,270 @@ async function submitOpSupport() {
     showOpSupportDetail(rec.id);
   } catch(e) {
     alert('Failed: ' + (e.error || JSON.stringify(e)));
+  }
+}
+
+// ─── Risk Deep-Dive (Tabbed) ──────────────────────────────────────────────────
+function renderRiskDeepDive(r) {
+  const tabs = ['Overview','Technology Profile','Security','Vendors'];
+  let h = `<div class="risk-deepdive-wrap" id="risk-deepdive">
+    <div class="flex justify-between items-center" style="margin-bottom:.1rem">
+      <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.08em">Risk Assessment</div>
+    </div>
+    <div class="risk-tabs">`;
+  tabs.forEach((t,i) => {
+    h += `<button class="risk-tab${i===0?' active':''}" onclick="switchRiskTab(${i},'risk-deepdive')">${t}</button>`;
+  });
+  h += `</div>
+    <div class="risk-tab-panel active" id="rdtab-0" style="padding-top:.9rem">
+      ${renderRiskPanel(r.risk_score,r.risk_tier,r.riskBreakdown,r.riskFlags||[],r.riskRecommendations||[])}
+    </div>
+    <div class="risk-tab-panel" id="rdtab-1" style="padding-top:.9rem">
+      <div id="sca-panel-${r.id}">
+        <div class="loading-pulse"><div class="loading-spin"></div>Loading technology CVE data…</div>
+      </div>
+    </div>
+    <div class="risk-tab-panel" id="rdtab-2" style="padding-top:.9rem">
+      <div id="mitre-panel-${r.id}">
+        <div class="loading-pulse"><div class="loading-spin"></div>Loading MITRE ATT&amp;CK threat model…</div>
+      </div>
+    </div>
+    <div class="risk-tab-panel" id="rdtab-3" style="padding-top:.9rem">
+      <div id="vendor-panel-${r.id}">
+        <div class="loading-pulse"><div class="loading-spin"></div>Loading vendor enrichment data…</div>
+      </div>
+    </div>
+  </div>`;
+  return h;
+}
+
+function switchRiskTab(idx, wrapperId) {
+  const wrap = document.getElementById(wrapperId);
+  if (!wrap) return;
+  wrap.querySelectorAll('.risk-tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  wrap.querySelectorAll('.risk-tab-panel').forEach((p,i) => p.classList.toggle('active', i===idx));
+  const r = S.currentIntake;
+  if (!r) return;
+  if (idx === 1 && !S._scaLoaded) { loadScaPanel(r); S._scaLoaded = true; }
+  if (idx === 2 && !S._mitreLoaded) { loadMitrePanel(r); S._mitreLoaded = true; }
+  if (idx === 3 && !S._vendorEnrichLoaded) { loadVendorEnrichPanel(r); S._vendorEnrichLoaded = true; }
+}
+
+function extractTechnologies(r) {
+  const techs = new Set();
+  if (r.hosting_model || r.hostingModel) {
+    const hm = (r.hosting_model || r.hostingModel).toLowerCase();
+    if (hm.includes('azure')) techs.add('Microsoft Azure');
+    if (hm.includes('aws')) techs.add('AWS');
+    if (hm.includes('saas')) techs.add('SaaS');
+  }
+  if (r.architecture_type || r.architectureType) {
+    const at = r.architecture_type || r.architectureType;
+    if (at.includes('OT')) { techs.add('SCADA'); techs.add('Modbus'); techs.add('OPC-UA'); }
+    if (at.includes('API')) techs.add('API Gateway');
+  }
+  (r.components || []).forEach(c => { if (c && c.trim()) techs.add(c.trim()); });
+  const knownVendors = S.vendors.filter(v => (r.vendorIds || []).includes(v.id));
+  knownVendors.forEach(v => {
+    if (!['Microsoft', 'AWS', 'Cisco'].includes(v.vendorCompany)) {
+      techs.add(v.vendorCompany);
+    }
+  });
+  if (r.tech_stack_notes || r.techStackNotes) {
+    const notes = r.tech_stack_notes || r.techStackNotes;
+    ['Node.js','Python','Java','Azure','Kubernetes','Docker','Terraform','Nginx','Redis','PostgreSQL','MongoDB'].forEach(t => {
+      if (notes.toLowerCase().includes(t.toLowerCase())) techs.add(t);
+    });
+  }
+  const list = [...techs].slice(0, 12);
+  if (!list.length) list.push('Node.js', 'Azure');
+  return list;
+}
+
+async function loadScaPanel(r) {
+  const el = document.getElementById(`sca-panel-${r.id}`);
+  if (!el) return;
+  const technologies = extractTechnologies(r);
+  try {
+    const result = await api.post('/api/risk/cvss', { technologies });
+    const sevColor = { Critical: 'var(--risk-critical)', High: 'var(--risk-high)', Medium: 'var(--risk-medium)', Low: 'var(--risk-low)', None: 'var(--muted)' };
+    const overallColor = sevColor[result.overallRisk] || 'var(--muted)';
+    let h = `<div class="sca-summary-bar">
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:${overallColor}">${result.overallRisk}</div><div class="sca-summary-stat-label">Overall SCA Risk</div></div>
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:var(--risk-critical)">${result.criticalCount||0}</div><div class="sca-summary-stat-label">Critical CVE Tech</div></div>
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:var(--risk-high)">${result.highCount||0}</div><div class="sca-summary-stat-label">High CVE Tech</div></div>
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val">${technologies.length}</div><div class="sca-summary-stat-label">Technologies</div></div>
+    </div>`;
+    h += `<div class="table-wrap"><table class="tech-table"><thead><tr><th>Technology</th><th>CVE Count</th><th>Highest CVSS</th><th>Severity</th><th>Top CVEs</th></tr></thead><tbody>`;
+    (result.results || []).forEach(tech => {
+      const sc = sevColor[tech.severity] || 'var(--muted)';
+      const cveLinks = (tech.topCves || []).slice(0,3).map(c => `<a class="cve-link" href="${c.url}" target="_blank" title="${c.description}">${c.id}</a>`).join(' ');
+      h += `<tr>
+        <td><strong>${tech.keyword}</strong></td>
+        <td>${tech.cveCount||0}</td>
+        <td style="font-weight:700;color:${sc}">${tech.highestCvss||'–'}</td>
+        <td><span class="badge badge-${tech.severity==='Critical'?'critical':tech.severity==='High'?'high':tech.severity==='Medium'?'medium':tech.severity==='Low'?'low':'draft'}">${tech.severity}</span></td>
+        <td>${cveLinks||'<span class="text-muted text-xs">None found</span>'}</td>
+      </tr>`;
+    });
+    h += `</tbody></table></div>`;
+    if (result.overallRisk === 'Critical' || result.overallRisk === 'High') {
+      h += `<div class="alert alert-warning mt-2" style="margin-bottom:0">⚠ SCA signals have been incorporated into the Security Risk score. Address Critical CVEs before deployment.</div>`;
+    }
+    el.innerHTML = h;
+  } catch(err) {
+    el.innerHTML = `<div class="alert alert-danger">Failed to load CVE data: ${err.error||err.message||'Unknown error'}</div>`;
+  }
+}
+
+async function loadMitrePanel(r) {
+  const el = document.getElementById(`mitre-panel-${r.id}`);
+  if (!el) return;
+  try {
+    const result = await api.post('/api/risk/mitre', r);
+    const rlColor = { Critical: 'var(--risk-critical)', High: 'var(--risk-high)', Medium: 'var(--risk-medium)', Low: 'var(--risk-low)' };
+    const rlc = rlColor[result.riskLevel] || 'var(--muted)';
+    let h = `<div class="sca-summary-bar">
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:${rlc}">${result.riskLevel}</div><div class="sca-summary-stat-label">Threat Risk Level</div></div>
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val">${result.totalTechniques||0}</div><div class="sca-summary-stat-label">Techniques Flagged</div></div>
+      <div class="sca-summary-stat"><div class="sca-summary-stat-val">${(result.tactics||[]).length}</div><div class="sca-summary-stat-label">Tactics Involved</div></div>
+      ${result.isOtScada ? `<div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:var(--risk-high)">ICS</div><div class="sca-summary-stat-label">OT/ICS Scope</div></div>` : ''}
+    </div>`;
+    if (result.isOtScada) {
+      h += `<div class="alert alert-warning" style="margin-bottom:.8rem">⚠ OT/SCADA scope detected — ICS-specific ATT&CK techniques (MITRE ATT&CK for ICS) have been included in this threat model.</div>`;
+    }
+    if (!(result.tactics||[]).length) {
+      h += `<div class="empty">No ATT&CK techniques were flagged based on the current intake attributes.</div>`;
+    } else {
+      (result.tactics||[]).forEach(tactic => {
+        h += `<div class="mitre-tactic">
+          <div class="mitre-tactic-header">
+            <span class="font-mono text-xs" style="color:var(--muted)">${tactic.tacticId}</span>
+            ${tactic.tacticName}
+            <span class="badge" style="background:rgba(16,153,119,.1);color:var(--accent);border:1px solid rgba(16,153,119,.2);margin-left:auto">${tactic.techniques.length} technique${tactic.techniques.length!==1?'s':''}</span>
+          </div>`;
+        tactic.techniques.forEach(t => {
+          h += `<div class="mitre-technique">
+            <div><span class="mitre-technique-id">${t.id}</span><span class="mitre-technique-name">${t.name}</span> <a class="mitre-link" href="${t.url}" target="_blank">[ATT&CK ↗]</a></div>
+            <div class="mitre-technique-reason">${t.reason}</div>
+            <div class="mitre-technique-mit">→ ${t.mitigation}</div>
+          </div>`;
+        });
+        h += `</div>`;
+      });
+    }
+    el.innerHTML = h;
+  } catch(err) {
+    el.innerHTML = `<div class="alert alert-danger">Failed to load MITRE ATT&amp;CK data: ${err.error||err.message||'Unknown error'}</div>`;
+  }
+}
+
+async function loadVendorEnrichPanel(r) {
+  const el = document.getElementById(`vendor-panel-${r.id}`);
+  if (!el) return;
+  const knownVendors = S.vendors.filter(v => (r.vendorIds || []).includes(v.id));
+  if (!knownVendors.length && !(r.newVendors||[]).length) {
+    el.innerHTML = `<div class="empty">No vendors are associated with this intake request.</div>`;
+    return;
+  }
+  const today = new Date();
+  const soonMs = 90 * 24 * 60 * 60 * 1000;
+
+  function certStatus(cert) {
+    if (!cert.validUntil) return 'missing';
+    const expiry = new Date(cert.validUntil);
+    if (expiry < today) return 'expired';
+    if ((expiry - today) < soonMs) return 'expiring';
+    return 'valid';
+  }
+
+  function certBadgeHtml(cert) {
+    const st = certStatus(cert);
+    const cls = { valid: 'cert-valid', expiring: 'cert-expiring', expired: 'cert-expired', missing: 'cert-missing' }[st];
+    const icon = { valid: '✓', expiring: '⚠', expired: '✗', missing: '?' }[st];
+    const expLabel = cert.validUntil ? ` · ${new Date(cert.validUntil).toLocaleDateString('en-GB',{month:'short',year:'numeric'})}` : '';
+    return `<span class="cert-badge ${cls}">${icon} ${cert.name}${expLabel}</span>`;
+  }
+
+  function sslGradeHtml(sslInfo, vendorId) {
+    if (!sslInfo || !sslInfo.grade || sslInfo.grade === 'Unknown') {
+      return `<span class="ssl-grade ssl-unknown" title="Not yet inspected — click Inspect SSL to check">?</span>`;
+    }
+    const cls = { 'A+': 'ssl-a-plus', 'A': 'ssl-a', 'B': 'ssl-b', 'C': 'ssl-c', 'D': 'ssl-d', 'F': 'ssl-f' }[sslInfo.grade] || 'ssl-unknown';
+    return `<span class="ssl-grade ${cls}" title="${(sslInfo.findings||[]).join('; ')}">${sslInfo.grade}</span>`;
+  }
+
+  el.innerHTML = `<div class="loading-pulse"><div class="loading-spin"></div>Fetching vendor SSL status…</div>`;
+
+  const sslMap = {};
+  await Promise.all(knownVendors.map(async v => {
+    try {
+      let res = await api.get(`/api/risk/ssl/${v.id}`);
+      if (!res.ssl || !res.ssl.grade || res.ssl.grade === 'Unknown' && !res.ssl.mock) {
+        res = await api.post(`/api/risk/ssl/${v.id}`, {});
+      }
+      sslMap[v.id] = res.ssl || null;
+    } catch { sslMap[v.id] = null; }
+  }));
+
+  let missingCerts = 0;
+  let failedSsl = 0;
+
+  let h = '';
+  knownVendors.forEach(v => {
+    const certs = v.certifications || [];
+    const criticalCerts = ['SOC2 Type II','ISO 27001'];
+    const hasCritCerts = criticalCerts.every(cn => certs.some(c => c.name === cn && certStatus(c) !== 'expired'));
+    if (!hasCritCerts && (v.criticality === 'Critical' || v.criticality === 'High')) missingCerts++;
+    const ssl = sslMap[v.id];
+    if (ssl && ssl.grade && !['A+','A','Unknown'].includes(ssl.grade)) failedSsl++;
+
+    const riskSummary = [];
+    if (v.criticality === 'Critical') riskSummary.push({ txt: 'Critical tier', color: 'var(--risk-critical)' });
+    if (!hasCritCerts) riskSummary.push({ txt: 'Missing SOC2/ISO27001', color: 'var(--review)' });
+    if (v.dataShared) riskSummary.push({ txt: 'Data shared', color: 'var(--review)' });
+
+    h += `<div class="vendor-risk-row">
+      <div class="vendor-risk-header">
+        <div class="vendor-risk-name">${v.vendorCompany} <span class="text-xs text-muted font-bold" style="font-weight:400">— ${v.productService}</span></div>
+        ${critBadge(v.criticality)}
+        ${sslGradeHtml(ssl, v.id)}
+      </div>
+      <div class="flex gap-1 flex-wrap" style="margin-bottom:.45rem">
+        ${certs.length ? certs.map(certBadgeHtml).join('') : `<span class="cert-badge cert-missing">? No certifications on record</span>`}
+      </div>
+      ${ssl && ssl.grade && ssl.grade !== 'Unknown' ? `<div class="text-xs text-muted" style="margin-bottom:.35rem">SSL: ${ssl.grade}${ssl.mode?' · Mode: '+ssl.mode:''} · ${(ssl.findings||[]).join(' · ')||'No findings'}${ssl.fetchedAt?' · Last checked '+new Date(ssl.fetchedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):''}</div>` : `<div class="text-xs text-muted" style="margin-bottom:.35rem">SSL: ${ssl&&ssl.mock?'<span title="'+((ssl.findings||[]).join('; '))+'">Unknown (Cloudflare token not configured)</span>':'Inspecting…'}</div>`}
+      <div class="flex gap-2 flex-wrap" style="margin-bottom:.25rem">
+        ${v.domain?`<span class="text-xs text-muted">Domain: <span class="font-mono">${v.domain}</span></span>`:''}
+        ${v.hostingModel?`<span class="text-xs text-muted">Hosting: <span class="font-mono">${v.hostingModel}</span></span>`:''}
+        ${v.dataShared?`<span class="text-xs text-muted" style="color:var(--review)">Data shared with vendor</span>`:''}
+      </div>
+      ${riskSummary.length ? `<div class="flex gap-1 flex-wrap mt-1">${riskSummary.map(rs=>`<span class="badge" style="background:rgba(255,255,255,.05);color:${rs.color};border:1px solid ${rs.color}33;font-size:.64rem">${rs.txt}</span>`).join('')}</div>` : ''}
+    </div>`;
+  });
+
+  if ((r.newVendors||[]).length) {
+    h += `<div class="vendor-risk-row" style="border-left-color:var(--risk-high)">
+      <div class="vendor-risk-header"><div class="vendor-risk-name text-muted">Unvetted Vendors</div></div>
+      <div class="flex gap-1 flex-wrap">${r.newVendors.map(n=>`<span class="badge badge-review">⚠ ${n}</span>`).join('')}</div>
+      <div class="text-xs text-muted mt-1">No registry data available — complete vendor security assessments before proceeding.</div>
+    </div>`;
+  }
+
+  if (missingCerts > 0 || failedSsl > 0) {
+    h += `<div class="alert alert-warning" style="margin-bottom:0">⚠ Vendor risk signals (${missingCerts} missing certs, ${failedSsl} poor SSL grades) have been incorporated into the Vendor Risk score.</div>`;
+  }
+
+  el.innerHTML = h;
+}
+
+async function inspectSsl(vendorId) {
+  try {
+    await api.post(`/api/risk/ssl/${vendorId}`, {});
+    const r = S.currentIntake;
+    if (r) { S._vendorEnrichLoaded = false; loadVendorEnrichPanel(r); }
+  } catch(err) {
+    alert('SSL inspection failed: ' + (err.error || err.message || 'Unknown error'));
   }
 }
 

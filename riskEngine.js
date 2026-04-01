@@ -55,7 +55,7 @@ function scoreDataRisk(intake) {
   return { score: Math.min(score, 25), flags, recs, label: 'Data Risk' };
 }
 
-function scoreVendorRisk(intake) {
+function scoreVendorRisk(intake, enrichment) {
   let score = 0;
   const flags = [];
   const recs = [];
@@ -97,10 +97,27 @@ function scoreVendorRisk(intake) {
     recs.push('Evaluate vendor consolidation opportunities to reduce supply chain attack surface');
   }
 
+  // Enrichment: check for missing certifications and failed SSL grades
+  if (enrichment && enrichment.vendorSignals) {
+    const { missingCerts, failedSsl } = enrichment.vendorSignals;
+    if (missingCerts && missingCerts > 0) {
+      const add = Math.min(missingCerts * 2, 6);
+      score += add;
+      flags.push(`${missingCerts} vendor(s) missing key security certifications (SOC2/ISO27001)`);
+      recs.push('Obtain and verify security certification documentation for all critical and high-tier vendors');
+    }
+    if (failedSsl && failedSsl > 0) {
+      const add = Math.min(failedSsl * 3, 6);
+      score += add;
+      flags.push(`${failedSsl} vendor domain(s) with poor SSL/TLS grade`);
+      recs.push('Engage affected vendors to remediate SSL/TLS configuration to achieve A grade or higher');
+    }
+  }
+
   return { score: Math.min(score, 25), flags, recs, label: 'Vendor Risk' };
 }
 
-function scoreSecurityRisk(intake) {
+function scoreSecurityRisk(intake, enrichment) {
   let score = 0;
   const flags = [];
   const recs = [];
@@ -151,6 +168,22 @@ function scoreSecurityRisk(intake) {
     score += 6;
     flags.push('Restricted data classification on public-facing surface — high exposure risk');
     recs.push('Re-evaluate public exposure; apply strict data minimisation and consider private endpoint patterns');
+  }
+
+  // Enrichment: SCA critical CVE count adds to Security Risk
+  if (enrichment && enrichment.scaSignals) {
+    const { criticalCount, highCount } = enrichment.scaSignals;
+    if (criticalCount && criticalCount > 0) {
+      const add = Math.min(criticalCount * 4, 10);
+      score += add;
+      flags.push(`SCA: ${criticalCount} technology component(s) with known Critical CVEs`);
+      recs.push('Review and patch or mitigate Critical CVEs identified in the technology stack via the Technology Profile tab');
+    }
+    if (highCount && highCount >= 3) {
+      score += 3;
+      flags.push(`SCA: ${highCount} technology component(s) with known High CVEs`);
+      recs.push('Establish a patch management schedule for High CVE components in the technology stack');
+    }
   }
 
   return { score: Math.min(score, 25), flags, recs, label: 'Security Risk' };
@@ -221,10 +254,10 @@ function getTier(total) {
   return { tier: 'Critical', color: '#e74c3c', description: 'Critical risk — CISO and Architecture Board joint review mandatory before any implementation.' };
 }
 
-function assessRisk(intake) {
+function assessRisk(intake, enrichment) {
   const data = scoreDataRisk(intake);
-  const vendor = scoreVendorRisk(intake);
-  const security = scoreSecurityRisk(intake);
+  const vendor = scoreVendorRisk(intake, enrichment);
+  const security = scoreSecurityRisk(intake, enrichment);
   const complexity = scoreComplexityRisk(intake);
 
   const total = data.score + vendor.score + security.score + complexity.score;

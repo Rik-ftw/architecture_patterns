@@ -1,7 +1,52 @@
 const express = require('express');
 const router = express.Router();
+const fs = require('fs');
+const path = require('path');
 const { db, generateRefId } = require('../db');
 const { assessRisk } = require('../riskEngine');
+const { buildScaSignalsAsync, getSslCacheForDomain } = require('./riskEnrichment');
+
+async function buildEnrichmentSignals(intake) {
+  try {
+    const vendors = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vendors', 'registry.json'), 'utf8'));
+    const vendorIds = (intake.vendorIds || intake.vendor_ids || []).map(Number);
+    const selectedVendors = vendors.filter(v => vendorIds.includes(v.id));
+    const today = new Date();
+    const criticalCerts = ['SOC2 Type II', 'ISO 27001'];
+
+    let missingCerts = 0;
+    let failedSsl = 0;
+
+    selectedVendors.forEach(v => {
+      if (v.criticality === 'Critical' || v.criticality === 'High') {
+        const certs = v.certifications || [];
+        const hasCritCerts = criticalCerts.every(cn =>
+          certs.some(c => {
+            if (c.name !== cn) return false;
+            if (!c.validUntil) return false;
+            return new Date(c.validUntil) >= today;
+          })
+        );
+        if (!hasCritCerts) missingCerts++;
+      }
+      if (v.domain) {
+        const sslData = getSslCacheForDomain(v.domain.toLowerCase());
+        if (sslData && sslData.grade && !['A+', 'A', 'Unknown'].includes(sslData.grade)) {
+          failedSsl++;
+        }
+      }
+    });
+
+    const scaSignals = await buildScaSignalsAsync(intake);
+
+    return {
+      vendorSignals: { missingCerts, failedSsl },
+      scaSignals
+    };
+  } catch {
+    return null;
+  }
+}
 
 function parseJson(val, fallback) {
   try { return JSON.parse(val); } catch { return fallback; }
@@ -59,15 +104,21 @@ router.get('/:id', (req, res) => {
   res.json({ ...serializeIntake(row), comments, history });
 });
 
-router.post('/assess', (req, res) => {
-  const result = assessRisk(req.body);
-  res.json(result);
+router.post('/assess', async (req, res) => {
+  try {
+    const enrichment = await buildEnrichmentSignals(req.body);
+    const result = assessRisk(req.body, enrichment);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const d = req.body;
   const refId = generateRefId();
-  const risk = assessRisk(d);
+  const enrichment = await buildEnrichmentSignals(d);
+  const risk = assessRisk(d, enrichment);
 
   const stmt = db.prepare(`
     INSERT INTO intake_requests (
@@ -111,13 +162,14 @@ router.post('/', (req, res) => {
   res.status(201).json(serializeIntake(row));
 });
 
-router.patch('/:id', (req, res) => {
+router.patch('/:id', async (req, res) => {
   const existing = db.prepare('SELECT * FROM intake_requests WHERE id = ? OR reference_id = ?').get(req.params.id, req.params.id);
   if (!existing) return res.status(404).json({ error: 'Not found' });
   const d = req.body;
 
   const merged = { ...serializeIntake(existing), ...d };
-  const risk = assessRisk(merged);
+  const enrichment = await buildEnrichmentSignals(merged);
+  const risk = assessRisk(merged, enrichment);
 
   db.prepare(`UPDATE intake_requests SET
     title=?, description=?, strategic_objective=?,

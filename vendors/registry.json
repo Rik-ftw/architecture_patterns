@@ -13,6 +13,25 @@
     "spendBand": "Low-Medium",
     "reviewDate": "Annual",
     "notes": "AWS S3 with Object Lock used as off-site immutable copy of OT backup and log data. Separate from Azure to avoid single-cloud dependency. WORM-compliant.",
+    "domain": "aws.amazon.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-10-01"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-09-30"
+      },
+      {
+        "name": "CSA STAR",
+        "validUntil": "2026-08-01"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -30,6 +49,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Alternate historian platform at select sites alongside FactoryTalk Historian. Same security controls apply. Data available via OPC-UA / FTLinx bridge.",
+    "domain": "aveva.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-06-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -47,6 +73,13 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Alert correlation and noise reduction for IT operations. Review data flows — ensure OT alert data is NOT routed to BigPanda without explicit approval architecture decision. Maintain IT/OT data separation.",
+    "domain": "bigpanda.io",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-09-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -64,6 +97,17 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Cisco managed switches in OT network segments and enterprise LAN. Syslog emissions feed Log Fabric via centralised collector. Firmware patching tracked.",
+    "domain": "cisco.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -81,6 +125,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Existing Cisco SD-WAN extended to OT architecture. Virtual NVA in OT Azure Hub. Site CPE = existing hardened router. No raw payload. Routing policy enforces site-to-hub only — no spoke-to-spoke.",
+    "domain": "cisco.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -98,8 +153,28 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "SaaS API integration to Event Hub integrated. No inbound access permitted — xDome processes OT network telemetry — verify data residency and sub-processor list.",
+    "domain": "claroty.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-08-31"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-07-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
-    "updatedAt": "2026-03-15T01:22:13.879Z"
+    "updatedAt": "2026-03-15T01:22:13.879Z",
+    "sslCache": {
+      "grade": "Unknown",
+      "protocol": "Unknown",
+      "findings": [
+        "Cloudflare API token not configured"
+      ],
+      "fetchedAt": "2026-04-01T21:31:11.599Z",
+      "mock": true
+    }
   },
   {
     "id": 2,
@@ -115,8 +190,28 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Sole vendor remote access mechanism. All vendor sessions brokered here. Session recordings may contain operational IP. Confirm data residency. Integrated with CyberArk PAM.",
+    "domain": "claroty.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-08-31"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-07-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
-    "updatedAt": "2026-03-15T01:22:13.879Z"
+    "updatedAt": "2026-03-15T01:22:13.879Z",
+    "sslCache": {
+      "grade": "Unknown",
+      "protocol": "Unknown",
+      "findings": [
+        "Cloudflare API token not configured"
+      ],
+      "fetchedAt": "2026-04-01T21:31:11.599Z",
+      "mock": true
+    }
   },
   {
     "id": 3,
@@ -132,6 +227,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Core PAM platform for OT and enterprise. OT vault isolated from corporate. PSM session recordings contain sensitive operational activity. Key risk: credential vault availability.",
+    "domain": "cyberark.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-10-31"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-09-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -149,6 +255,13 @@
     "spendBand": "Low-Volume",
     "reviewDate": "Annual",
     "notes": "Used as reverse proxy and API gateway layer. If NGINX Plus — review F5 support terms and update cadence. Patching follows standard infrastructure change process.",
+    "domain": "f5.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-05-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -166,6 +279,17 @@
     "spendBand": "Low-Medium",
     "reviewDate": "Annual",
     "notes": "OT infrastructure observability platform. Telemetry slides one-way through DMZ. If using Grafana Cloud, review data residency and DPA. If self-hosted in OT tenant, no external data sharing.",
+    "domain": "grafana.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-06-30"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-11-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -183,6 +307,25 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Long-term log retention (365+ days). Hierarchical namespace. WORM compliance. OT log partitions separated from IT. Key risk: access control to raw data.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "CSA STAR",
+        "validUntil": "2026-10-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -200,6 +343,17 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "DMZ servers, OT domain controllers, engineering workstations. WSUS qualification process applies before any patch deployment to OT environments. HyperV used at DMZ layer.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -217,6 +371,21 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "UAL ingested into Log Fabric via Graph API polling. Standard M365 DPA applies. Sub-processor list to be reviewed annually.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-11-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -234,6 +403,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Used at DMZ layer for virtualisation. Being evaluated against Nutanix / Azure Local for site compute platform. WSUS patching applied.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -251,6 +427,21 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "OT tenant fully separated from corporate tenant's Entra. Zero federation. MFA enforced on all OT access. Entra Connect syncs IT-managed accounts to OT AD forest. Identity data is highest classification.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "CSA STAR",
+        "validUntil": "2026-10-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -268,6 +459,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "OT tenant instance separate from corporate Defender. Deployed on OT engineering workstations and DMZ controllers. Not deployed to PLCs or SCADA controllers.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -285,6 +487,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Used for OT infrastructure drift detection and management plane extension. Resource configuration data flows to OT Azure tenant.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -302,6 +515,21 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "WORM-protected backup vaults per site. Off-site immutable copy. Backup data may include OT configuration and PLC logic — treat as confidential. Geo-redundant.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-11-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -319,6 +547,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Central telemetry broker for Log Fabric. Premium tier with private endpoints. OT and IT namespaces separate. All data transits through Event Hub before ADLS & Sentinel.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -336,6 +575,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "OT Sentinel workspace in dedicated OT tenant. Enterprise Sentinel in corporate tenant. Curated one-way alert feed between instances. Data processed by Microsoft — verify LAIR data retention settings.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -353,6 +603,25 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Primary cloud platform. Services include Sentinel, Defender, Azure Arc, Event Hub, ADLS. Data sovereignty and residency must be confirmed per region. Review Microsoft DPA annually. Sub-processor list is long.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      },
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "CSA STAR",
+        "validUntil": "2026-10-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -370,6 +639,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Candidate HCI for site compute. Azure Arc-managed. Telemetry to Azure is controllable. Key comparison vs Nutanix — Azure Local aligns better with existing Azure tooling but introduces cloud dependency at edge.",
+    "domain": "microsoft.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2027-01-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -387,6 +663,17 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Candidate site compute platform (HCI) at pilot — vs Azure Local / AHV hypervisor. Prism management console in DMZ. Platform selection impacts backup, patching, monitoring strategy.",
+    "domain": "nutanix.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-09-30"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-08-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -404,6 +691,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "OPC-UA middleware bridging PLCs to SCADA and historian layers. Critical integration point — failure impacts data visibility. Runs on engineering workstations or dedicated servers.",
+    "domain": "ptc.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-07-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -421,6 +715,13 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Primary SCADA/HMI across manufacturing sites. ControlLogix / CompactLogix / GuardPLC base. Patching via WSUS qualification. OMS support relationships — confirm SLA and remote access.",
+    "domain": "rockwellautomation.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-06-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -438,6 +739,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Process historian at each site. Data available to DMZ data gateway for analytics. Historian downtime = site flat production output. Patching more flexible than PLC/SCADA.",
+    "domain": "rockwellautomation.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-06-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -455,6 +763,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Engineering software for PLC programming and diagnostics. Deployed on engineering workstations. Defender for Endpoint covers these hosts. Software update cadence follows WSUS qualifications process.",
+    "domain": "rockwellautomation.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-06-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -472,6 +787,21 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "API log ingestion to Log Fabric via OAuth 2.0. Review Salesforce DPA and sub-processor list. Data residency to be confirmed against McCain data sovereignty requirements.",
+    "domain": "salesforce.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-12-31"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "PCI-DSS",
+        "validUntil": "2026-09-30"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -489,6 +819,17 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "CMDB receives one-way read-only OT asset feed from xDome via Log Fabric. OT CAB change management process. Review data classification for OT asset data in CMDB — asset topology is sensitive.",
+    "domain": "servicenow.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-11-30"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-10-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -506,6 +847,13 @@
     "spendBand": "Volume",
     "reviewDate": "Annual",
     "notes": "Licenses cover Nutanix AHV and Azure Local. Agentless integration. Backup data stays on-premises and in Azure (via Azure Backup relay). No Veeam cloud services.",
+    "domain": "veeam.com",
+    "certifications": [
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-08-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   },
@@ -523,6 +871,21 @@
     "spendBand": "Enterprise",
     "reviewDate": "Annual",
     "notes": "Used as outbound proxy for xDome SaaS connectivity and OT cloud egress. Whitelisted for specific OT SaaS endpoints. ZIA processes network metadata — verify data flows.",
+    "domain": "zscaler.com",
+    "certifications": [
+      {
+        "name": "SOC2 Type II",
+        "validUntil": "2026-10-31"
+      },
+      {
+        "name": "ISO 27001",
+        "validUntil": "2026-09-30"
+      },
+      {
+        "name": "CSA STAR",
+        "validUntil": "2026-07-31"
+      }
+    ],
     "createdAt": "2026-03-15T01:22:13.879Z",
     "updatedAt": "2026-03-15T01:22:13.879Z"
   }

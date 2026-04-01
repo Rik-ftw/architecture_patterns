@@ -1,0 +1,384 @@
+{
+  "tactics": [
+    {
+      "id": "TA0001",
+      "name": "Initial Access",
+      "techniques": [
+        {
+          "id": "T1190",
+          "name": "Exploit Public-Facing Application",
+          "conditions": ["isPublicFacing"],
+          "reason": "Public-facing endpoints can be exploited to gain initial access",
+          "mitigation": "Deploy WAF, apply OWASP Top 10 controls, and regularly patch internet-facing services",
+          "url": "https://attack.mitre.org/techniques/T1190/"
+        },
+        {
+          "id": "T1133",
+          "name": "External Remote Services",
+          "conditions": ["isPublicFacing", "hasLegacyDependencies"],
+          "reason": "External remote services and VPN gateways are common initial access vectors",
+          "mitigation": "Restrict external remote access to authorised users via MFA; use zero trust network access",
+          "url": "https://attack.mitre.org/techniques/T1133/"
+        },
+        {
+          "id": "T1078",
+          "name": "Valid Accounts",
+          "conditions": ["hostingModel_cloud", "hasMfa_false"],
+          "reason": "Cloud-hosted systems are targeted via credential stuffing and account compromise",
+          "mitigation": "Enforce MFA on all accounts; implement Conditional Access policies",
+          "url": "https://attack.mitre.org/techniques/T1078/"
+        },
+        {
+          "id": "T1199",
+          "name": "Trusted Relationship",
+          "conditions": ["vendorCount_high"],
+          "reason": "High vendor count increases trusted third-party access paths",
+          "mitigation": "Apply least privilege to all vendor integrations; review vendor access quarterly",
+          "url": "https://attack.mitre.org/techniques/T1199/"
+        },
+        {
+          "id": "T1566",
+          "name": "Phishing",
+          "conditions": ["externalDataSharing"],
+          "reason": "External data sharing increases phishing surface via known email addresses",
+          "mitigation": "Enable anti-phishing controls; train staff on social engineering",
+          "url": "https://attack.mitre.org/techniques/T1566/"
+        }
+      ]
+    },
+    {
+      "id": "TA0002",
+      "name": "Execution",
+      "techniques": [
+        {
+          "id": "T1059",
+          "name": "Command and Scripting Interpreter",
+          "conditions": ["hasLegacyDependencies"],
+          "reason": "Legacy systems often expose scripting interfaces that can be abused",
+          "mitigation": "Restrict scripting capabilities; apply application allowlisting on legacy hosts",
+          "url": "https://attack.mitre.org/techniques/T1059/"
+        },
+        {
+          "id": "T1072",
+          "name": "Software Deployment Tools",
+          "conditions": ["integrationPoints_high"],
+          "reason": "Numerous integration points increase attack surface for deployment tool abuse",
+          "mitigation": "Restrict deployment pipeline access; sign and verify all deployment artefacts",
+          "url": "https://attack.mitre.org/techniques/T1072/"
+        }
+      ]
+    },
+    {
+      "id": "TA0003",
+      "name": "Persistence",
+      "techniques": [
+        {
+          "id": "T1098",
+          "name": "Account Manipulation",
+          "conditions": ["hasMfa_false"],
+          "reason": "Without MFA, attackers can persist by modifying account credentials",
+          "mitigation": "Enforce MFA; monitor for account creation or modification events",
+          "url": "https://attack.mitre.org/techniques/T1098/"
+        },
+        {
+          "id": "T1505",
+          "name": "Server Software Component",
+          "conditions": ["isPublicFacing"],
+          "reason": "Public-facing web servers can be compromised and backdoored",
+          "mitigation": "Apply file integrity monitoring; restrict write access to server directories",
+          "url": "https://attack.mitre.org/techniques/T1505/"
+        }
+      ]
+    },
+    {
+      "id": "TA0004",
+      "name": "Privilege Escalation",
+      "techniques": [
+        {
+          "id": "T1068",
+          "name": "Exploitation for Privilege Escalation",
+          "conditions": ["hasLegacyDependencies"],
+          "reason": "Unpatched legacy software is a common target for privilege escalation exploits",
+          "mitigation": "Maintain regular patching cadence; implement endpoint privilege management",
+          "url": "https://attack.mitre.org/techniques/T1068/"
+        },
+        {
+          "id": "T1548",
+          "name": "Abuse Elevation Control Mechanism",
+          "conditions": ["isZeroTrustAligned_false"],
+          "reason": "Non-zero-trust architectures may allow elevation through misconfigured roles",
+          "mitigation": "Apply least privilege principles; review IAM role assignments regularly",
+          "url": "https://attack.mitre.org/techniques/T1548/"
+        }
+      ]
+    },
+    {
+      "id": "TA0005",
+      "name": "Defense Evasion",
+      "techniques": [
+        {
+          "id": "T1562",
+          "name": "Impair Defenses",
+          "conditions": ["hasMonitoring_false"],
+          "reason": "Absence of monitoring allows attackers to disable defenses undetected",
+          "mitigation": "Implement centralised SIEM with tamper-evident log storage",
+          "url": "https://attack.mitre.org/techniques/T1562/"
+        },
+        {
+          "id": "T1070",
+          "name": "Indicator Removal",
+          "conditions": ["hasMonitoring_false"],
+          "reason": "Without monitoring, attackers can remove forensic evidence undetected",
+          "mitigation": "Send logs to immutable, off-host storage in real-time; enable audit logging",
+          "url": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    },
+    {
+      "id": "TA0006",
+      "name": "Credential Access",
+      "techniques": [
+        {
+          "id": "T1110",
+          "name": "Brute Force",
+          "conditions": ["isPublicFacing", "hasMfa_false"],
+          "reason": "Public-facing services without MFA are vulnerable to brute force attacks",
+          "mitigation": "Enable account lockout policies; require MFA on all public-facing authentication",
+          "url": "https://attack.mitre.org/techniques/T1110/"
+        },
+        {
+          "id": "T1555",
+          "name": "Credentials from Password Stores",
+          "conditions": ["dataTypes_credentials"],
+          "reason": "Systems handling credentials are targeted for extraction from password stores",
+          "mitigation": "Use a secrets manager (Azure Key Vault); avoid storing credentials in code or configs",
+          "url": "https://attack.mitre.org/techniques/T1555/"
+        }
+      ]
+    },
+    {
+      "id": "TA0007",
+      "name": "Discovery",
+      "techniques": [
+        {
+          "id": "T1046",
+          "name": "Network Service Discovery",
+          "conditions": ["integrationPoints_high", "isZeroTrustAligned_false"],
+          "reason": "Large integration footprint without zero trust allows lateral discovery",
+          "mitigation": "Implement network segmentation; enforce micro-perimeter controls",
+          "url": "https://attack.mitre.org/techniques/T1046/"
+        },
+        {
+          "id": "T1018",
+          "name": "Remote System Discovery",
+          "conditions": ["isZeroTrustAligned_false", "hasLegacyDependencies"],
+          "reason": "Flat legacy networks allow adversaries to enumerate accessible systems",
+          "mitigation": "Apply zero trust network segmentation; restrict ICMP and port scanning capabilities",
+          "url": "https://attack.mitre.org/techniques/T1018/"
+        }
+      ]
+    },
+    {
+      "id": "TA0008",
+      "name": "Lateral Movement",
+      "techniques": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "conditions": ["isZeroTrustAligned_false"],
+          "reason": "Without zero trust controls, adversaries can move laterally via remote services",
+          "mitigation": "Require re-authentication for remote service access; apply just-in-time access",
+          "url": "https://attack.mitre.org/techniques/T1021/"
+        },
+        {
+          "id": "T1563",
+          "name": "Remote Service Session Hijacking",
+          "conditions": ["vendorCount_high"],
+          "reason": "Multiple vendor remote sessions increase session hijacking risk",
+          "mitigation": "Use PAM solutions with session recording; rotate session tokens frequently",
+          "url": "https://attack.mitre.org/techniques/T1563/"
+        }
+      ]
+    },
+    {
+      "id": "TA0009",
+      "name": "Collection",
+      "techniques": [
+        {
+          "id": "T1530",
+          "name": "Data from Cloud Storage",
+          "conditions": ["hostingModel_cloud", "dataClassification_sensitive"],
+          "reason": "Cloud-hosted sensitive data is targeted for unauthorised collection",
+          "mitigation": "Apply storage ACLs and private endpoints; enable storage access logging",
+          "url": "https://attack.mitre.org/techniques/T1530/"
+        },
+        {
+          "id": "T1213",
+          "name": "Data from Information Repositories",
+          "conditions": ["dataTypes_pii"],
+          "reason": "Systems processing PII are targeted for bulk data collection",
+          "mitigation": "Implement DLP controls; restrict bulk data export capabilities",
+          "url": "https://attack.mitre.org/techniques/T1213/"
+        }
+      ]
+    },
+    {
+      "id": "TA0010",
+      "name": "Exfiltration",
+      "techniques": [
+        {
+          "id": "T1048",
+          "name": "Exfiltration Over Alternative Protocol",
+          "conditions": ["externalDataSharing"],
+          "reason": "External data sharing paths can be abused for data exfiltration",
+          "mitigation": "Inspect and restrict outbound traffic; apply egress filtering and DLP",
+          "url": "https://attack.mitre.org/techniques/T1048/"
+        },
+        {
+          "id": "T1567",
+          "name": "Exfiltration Over Web Service",
+          "conditions": ["hostingModel_cloud", "isPublicFacing"],
+          "reason": "Cloud-hosted public services can be used as exfiltration channels",
+          "mitigation": "Monitor outbound data flows for anomalies; apply CASB controls",
+          "url": "https://attack.mitre.org/techniques/T1567/"
+        }
+      ]
+    },
+    {
+      "id": "TA0011",
+      "name": "Impact",
+      "techniques": [
+        {
+          "id": "T1485",
+          "name": "Data Destruction",
+          "conditions": ["encryptionAtRest_false"],
+          "reason": "Unencrypted data stores are vulnerable to destructive attacks",
+          "mitigation": "Enable encryption at rest; implement immutable backup strategies",
+          "url": "https://attack.mitre.org/techniques/T1485/"
+        },
+        {
+          "id": "T1486",
+          "name": "Data Encrypted for Impact (Ransomware)",
+          "conditions": ["hasLegacyDependencies"],
+          "reason": "Legacy systems are frequently targeted in ransomware campaigns",
+          "mitigation": "Maintain offline/immutable backups; segment legacy systems from production networks",
+          "url": "https://attack.mitre.org/techniques/T1486/"
+        },
+        {
+          "id": "T1499",
+          "name": "Endpoint Denial of Service",
+          "conditions": ["isPublicFacing", "hasWaf_false"],
+          "reason": "Public endpoints without WAF protection are vulnerable to DoS attacks",
+          "mitigation": "Deploy DDoS protection (Azure DDoS Standard) and WAF in front of public endpoints",
+          "url": "https://attack.mitre.org/techniques/T1499/"
+        }
+      ]
+    }
+  ],
+  "ics_tactics": [
+    {
+      "id": "TA0108",
+      "name": "Initial Access (ICS)",
+      "techniques": [
+        {
+          "id": "T0817",
+          "name": "Drive-by Compromise",
+          "conditions": ["otScada"],
+          "reason": "Engineering workstations accessing the internet can be compromised via drive-by downloads",
+          "mitigation": "Restrict internet access from OT engineering workstations; apply application allowlisting",
+          "url": "https://attack.mitre.org/techniques/T0817/"
+        },
+        {
+          "id": "T0886",
+          "name": "Remote Services",
+          "conditions": ["otScada"],
+          "reason": "OT/SCADA systems with remote access capabilities are prime targets",
+          "mitigation": "Broker all remote access through a dedicated secure remote access solution (e.g. Claroty SRA)",
+          "url": "https://attack.mitre.org/techniques/T0886/"
+        },
+        {
+          "id": "T0865",
+          "name": "Spearphishing Attachment",
+          "conditions": ["otScada"],
+          "reason": "OT staff are targeted via spearphishing to gain initial access",
+          "mitigation": "Enable email security controls; conduct OT-specific security awareness training",
+          "url": "https://attack.mitre.org/techniques/T0865/"
+        }
+      ]
+    },
+    {
+      "id": "TA0104",
+      "name": "Execution (ICS)",
+      "techniques": [
+        {
+          "id": "T0807",
+          "name": "Command-Line Interface",
+          "conditions": ["otScada"],
+          "reason": "CLI access to OT systems can be exploited to execute malicious commands",
+          "mitigation": "Restrict CLI access; log all command execution; require PAM session management",
+          "url": "https://attack.mitre.org/techniques/T0807/"
+        },
+        {
+          "id": "T0871",
+          "name": "Execution through API",
+          "conditions": ["otScada", "integrationPoints_high"],
+          "reason": "OT APIs with many integrations can be used to execute unauthorised commands",
+          "mitigation": "Apply strict API authentication and authorisation for OT system APIs",
+          "url": "https://attack.mitre.org/techniques/T0871/"
+        }
+      ]
+    },
+    {
+      "id": "TA0110",
+      "name": "Lateral Movement (ICS)",
+      "techniques": [
+        {
+          "id": "T0812",
+          "name": "Default Credentials",
+          "conditions": ["otScada"],
+          "reason": "OT devices frequently shipped with default credentials that are never changed",
+          "mitigation": "Enforce credential change procedures for all OT devices; use PAM to vault credentials",
+          "url": "https://attack.mitre.org/techniques/T0812/"
+        },
+        {
+          "id": "T0866",
+          "name": "Exploitation of Remote Services",
+          "conditions": ["otScada", "hasLegacyDependencies"],
+          "reason": "Legacy OT remote services often have unpatched vulnerabilities",
+          "mitigation": "Apply compensating controls (firewall, IDS) around legacy OT remote services",
+          "url": "https://attack.mitre.org/techniques/T0866/"
+        }
+      ]
+    },
+    {
+      "id": "TA0111",
+      "name": "Impact (ICS)",
+      "techniques": [
+        {
+          "id": "T0826",
+          "name": "Loss of Availability",
+          "conditions": ["otScada"],
+          "reason": "OT/SCADA systems are targeted to cause loss of operational availability",
+          "mitigation": "Implement redundancy and BCDR plans; test OT recovery procedures regularly",
+          "url": "https://attack.mitre.org/techniques/T0826/"
+        },
+        {
+          "id": "T0831",
+          "name": "Manipulation of Control",
+          "conditions": ["otScada"],
+          "reason": "Attackers can manipulate control systems to cause physical process disruption",
+          "mitigation": "Implement IEC 62443 zone and conduit model; apply data diodes at OT/IT boundary",
+          "url": "https://attack.mitre.org/techniques/T0831/"
+        },
+        {
+          "id": "T0882",
+          "name": "Theft of Operational Information",
+          "conditions": ["otScada", "dataTypes_ot"],
+          "reason": "OT operational data is valuable intelligence for adversaries planning physical attacks",
+          "mitigation": "Apply need-to-know controls on OT data; restrict data export from OT boundary",
+          "url": "https://attack.mitre.org/techniques/T0882/"
+        }
+      ]
+    }
+  ]
+}

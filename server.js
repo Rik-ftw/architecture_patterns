@@ -37,7 +37,11 @@ app.get('/api/patterns/:file', (req, res) => {
 
 app.get('/api/vendors', (req, res) => {
   const data = JSON.parse(fs.readFileSync(path.join(__dirname, 'vendors', 'registry.json'), 'utf8'));
-  res.json(data);
+  const sanitized = data.map(v => {
+    const { sslCache, ...rest } = v;
+    return rest;
+  });
+  res.json(sanitized);
 });
 
 app.use('/api/intake', require('./routes/intake'));
@@ -45,6 +49,7 @@ app.use('/api/solutions', require('./routes/solutions'));
 app.use('/api/ai', require('./routes/aiReview'));
 app.use('/api/github', require('./routes/github'));
 app.use('/api/operational-support', require('./routes/operationalSupport'));
+app.use('/api/risk', require('./routes/riskEnrichment'));
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`EA Platform running on http://0.0.0.0:${PORT}`);
