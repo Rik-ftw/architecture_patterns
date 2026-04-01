@@ -385,10 +385,12 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 // ─── State ───────────────────────────────────────────────────────────────────
 const S = {
   view:'dashboard', patterns:[], vendors:[], intakes:[], intakeStats:null, solutions:[],
+  opSupport:[], opSupportStats:null, currentOpSupport:null,
   currentIntake:null, currentPattern:null, currentSolution:null,
   wizardStep:1, wizardData:{}, wizardRisk:null,
   reviewAction:null, reviewIntakeId:null, commentIntakeId:null,
   tabFilter:'All', searchQ:'', deleteCallback:null,
+  _opsLicenses:[], _opsRunbooks:[], _opsDashboards:[], _opsEscalations:[],
 };
 
 // ─── API ─────────────────────────────────────────────────────────────────────
@@ -396,6 +398,7 @@ const api = {
   get: url => fetch(url).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
   post: (url,b) => fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
   patch: (url,b) => fetch(url,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
+  put: (url,b) => fetch(url,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
   del: url => fetch(url,{method:'DELETE'}).then(r=>r.ok?r.json():r.json().then(e=>{throw e})),
 };
 
@@ -404,7 +407,7 @@ async function init() {
   setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
   [S.patterns, S.vendors] = await Promise.all([api.get('/api/patterns'), api.get('/api/vendors')]);
   S.patterns.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
-  await Promise.all([loadIntakes(), loadSolutions()]);
+  await Promise.all([loadIntakes(), loadSolutions(), loadOpSupport()]);
   renderSidebar();
   showDashboard();
 }
@@ -415,6 +418,10 @@ async function loadIntakes() {
 }
 async function loadSolutions() {
   try { S.solutions = await api.get('/api/solutions'); } catch { S.solutions=[]; }
+}
+async function loadOpSupport() {
+  try { [S.opSupport, S.opSupportStats] = await Promise.all([api.get('/api/operational-support'), api.get('/api/operational-support/stats')]); }
+  catch { S.opSupport=[]; S.opSupportStats=null; }
 }
 
 function setMain(h){ document.getElementById('main').innerHTML=h; }
@@ -445,7 +452,12 @@ function renderSidebar() {
       h+=`<button class="${isA?'active':''}" onclick="showPattern('${p.patternId}')"><span class="ni" style="margin-left:0;margin-right:.3rem">${p.patternId}</span>${p.name}</button>`;
     });
   });
-  h+=`<div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${S.vendors.length}</span></button>`;
+  h+=`<div class="divider"></div>
+    <div class="nav-section">Operational Support</div>
+    <button class="${v==='ops-new'?'active':''}" onclick="startNewOpSupport()">＋ New Support Record</button>
+    <button class="${v==='ops-list'?'active':''}" onclick="showOpSupportList()">≡ All Records <span class="ni">${S.opSupport.length}</span></button>
+    ${(S.opSupportStats&&S.opSupportStats.expiring)?`<button class="${v==='ops-expiring'?'active':''}" onclick="showOpSupportList('expiring')" style="color:var(--risk-high)">⚠ Expiring Licences <span class="ni" style="color:var(--risk-high)">${S.opSupportStats.expiring}</span></button>`:''}
+    <div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${S.vendors.length}</span></button>`;
   document.getElementById('sidebar').innerHTML=h;
 }
 
@@ -774,7 +786,24 @@ async function showIntakeDetail(id) {
   const canReview=['Submitted','Under Review'].includes(r.status);
   const canSubmit=r.status==='Draft';
 
+  const opsRecord = S.opSupport.find(o=>o.intake_reference===r.reference_id);
+  const lifecycleStages=[
+    {key:'Draft',label:'Draft',done:['Draft','Submitted','Under Review','Approved'].includes(r.status)},
+    {key:'Submitted',label:'Submitted',done:['Submitted','Under Review','Approved'].includes(r.status)},
+    {key:'Under Review',label:'Under Review',done:['Under Review','Approved'].includes(r.status)},
+    {key:'Approved',label:'Approved',done:r.status==='Approved'},
+    {key:'Live',label:'Live',done:!!opsRecord},
+  ];
   let h=`<button class="back-btn" onclick="showIntakeList()">← Back to All Requests</button>
+  <div style="display:flex;gap:0;margin-bottom:1.1rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)">
+  ${lifecycleStages.map((s,i)=>{
+    const isActive=s.key==='Live'?!!opsRecord:r.status===s.key;
+    const isDone=s.done;
+    const bg=isActive?(s.key==='Live'?'rgba(16,153,119,.25)':'var(--navy)'):(isDone?'rgba(16,153,119,.12)':'var(--surface2)');
+    const color=isActive?(s.key==='Live'?'var(--accent-light)':'#fff'):(isDone?'var(--accent)':'var(--muted)');
+    return`<div style="flex:1;padding:.45rem .3rem;text-align:center;font-size:.68rem;background:${bg};color:${color};border-right:1px solid var(--border);${i===lifecycleStages.length-1?'border-right:none':''};line-height:1.3;font-weight:${isActive?700:400}">${isDone?'✓ ':s.key==='Live'&&!opsRecord?'○ ':''}${s.label}</div>`;
+  }).join('')}
+  </div>
   <div class="two-col">
   <div>
   <div class="detail-header">
@@ -786,13 +815,14 @@ async function showIntakeDetail(id) {
       ${r.risk_tier?tierBadge(r.risk_tier,r.risk_score):''}
       ${r.business_unit?`<span class="badge" style="background:var(--surface2);color:var(--text)">${r.business_unit}</span>`:''}
     </div>
-    <div class="flex gap-2 mt-2">
+    <div class="flex gap-2 mt-2" style="flex-wrap:wrap">
       ${canSubmit?`<button class="btn btn-primary btn-sm" onclick="openReviewModal('${r.id}','Submitted','submit')">Submit for Review</button>`:''}
       ${canReview?`<button class="btn btn-success btn-sm" onclick="openReviewModal('${r.id}','Approved')">Approve</button><button class="btn btn-warning btn-sm" onclick="openReviewModal('${r.id}','Deferred')">Defer</button><button class="btn btn-danger btn-sm" onclick="openReviewModal('${r.id}','Rejected')">Reject</button>`:''}
       ${canReview&&r.status==='Submitted'?`<button class="btn btn-secondary btn-sm" onclick="openReviewModal('${r.id}','Under Review')">Mark Under Review</button>`:''}
       <button class="btn btn-ghost btn-sm" onclick="openCommentModal('${r.id}')">＋ Comment</button>
       <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
       <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
+      ${r.status==='Approved'?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
   </div>
   ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
@@ -1237,6 +1267,413 @@ function showTeamPortal(){
   <div class="overview-grid">`;
   endorsed.forEach(p=>{h+=`<div class="card" onclick="showPattern('${p.patternId}')"><div class="card-id">${p.patternId} · v${p.version||'?'}</div><div class="card-name">${p.name}</div><div class="card-sub">${p.domain}</div><span class="badge badge-endorsed" style="margin-top:.4rem">✓ Endorsed</span></div>`;});
   h+=`</div>`;setMain(h);
+}
+
+// ─── Operational Support ──────────────────────────────────────────────────────
+async function showOpSupportList(filter) {
+  S.view = filter === 'expiring' ? 'ops-expiring' : 'ops-list';
+  renderSidebar();
+  await loadOpSupport();
+  const st = S.opSupportStats || {};
+  let records = S.opSupport;
+  const searchQ = S._opsSearchQ || '';
+
+  if (filter === 'expiring') {
+    records = records.filter(r => r.hasExpiringLicense);
+  }
+  if (searchQ) {
+    const q = searchQ.toLowerCase();
+    records = records.filter(r => (r.solution_name + r.reference_id + (r.owner_name||'') + (r.owner_team||'')).toLowerCase().includes(q));
+  }
+
+  let h = `<div class="page-title"><h2>Operational Support</h2><button class="btn btn-primary btn-sm" onclick="startNewOpSupport()">＋ New Record</button></div>`;
+  h += `<div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.1rem">
+    <div class="stat-card"><div class="stat-val">${st.total||0}</div><div class="stat-label">Total Records</div></div>
+    <div class="stat-card" style="--accent-color:var(--risk-high)"><div class="stat-val">${st.expiring||0}</div><div class="stat-label">Licences Expiring ≤90 Days</div></div>
+    <div class="stat-card" style="--accent-color:var(--accent)"><div class="stat-val">${S.opSupport.filter(r=>(r.licenses||[]).length>0).length}</div><div class="stat-label">With Licence Data</div></div>
+  </div>`;
+  h += `<div class="flex gap-2 items-center" style="margin-bottom:.8rem">
+    <input class="search-bar" style="margin-bottom:0;flex:1" placeholder="Search by name, reference, owner, team..." value="${searchQ}" oninput="S._opsSearchQ=this.value;showOpSupportList('${filter||''}')">
+    ${filter==='expiring'?`<button class="btn btn-secondary btn-sm" onclick="showOpSupportList()">Show All</button>`:st.expiring?`<button class="btn btn-sm" style="background:rgba(230,126,34,.15);color:var(--risk-high);border:1px solid rgba(230,126,34,.35);white-space:nowrap" onclick="showOpSupportList('expiring')">⚠ ${st.expiring} Expiring</button>`:''}
+  </div>`;
+  if (!records.length) {
+    h += `<div class="empty">${filter==='expiring'?'No licences expiring within 90 days.':'No operational support records yet. Create one from an approved intake request or click + New Record.'}</div>`;
+  } else {
+    h += `<div class="table-wrap"><table><thead><tr><th>Reference</th><th>Solution</th><th>Owner</th><th>Team</th><th>Support Tier</th><th>Intake</th><th>Licences</th><th>Created</th></tr></thead><tbody>`;
+    records.forEach(r => {
+      const licExpiry = (r.licenses||[]).filter(l=>l.renewalDate).sort((a,b)=>new Date(a.renewalDate)-new Date(b.renewalDate))[0];
+      const expiryBadge = r.hasExpiringLicense
+        ? `<span class="badge badge-high" style="font-size:.63rem">⚠ Expiring ${licExpiry?fmtDate(licExpiry.renewalDate):''}</span>`
+        : licExpiry ? `<span class="badge" style="background:var(--surface2);color:var(--muted);font-size:.63rem">${fmtDate(licExpiry.renewalDate)}</span>` : '<span class="text-muted text-xs">–</span>';
+      h += `<tr onclick="showOpSupportDetail(${r.id})">
+        <td class="font-mono text-xs">${r.reference_id}</td>
+        <td><strong>${r.solution_name}</strong></td>
+        <td class="text-sm">${r.owner_name||'–'}</td>
+        <td class="text-sm text-muted">${r.owner_team||'–'}</td>
+        <td>${r.support_tier?`<span class="badge badge-dev">${r.support_tier}</span>`:'<span class="text-muted text-xs">–</span>'}</td>
+        <td class="font-mono text-xs">${r.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="event.stopPropagation();showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:'–'}</td>
+        <td>${expiryBadge}</td>
+        <td class="text-xs text-muted">${fmtDate(r.created_at)}</td>
+      </tr>`;
+    });
+    h += `</tbody></table></div>`;
+  }
+  setMain(h);
+}
+
+async function showOpSupportDetail(id) {
+  S.view = 'ops-detail'; renderSidebar();
+  setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  const r = await api.get(`/api/operational-support/${id}`);
+  S.currentOpSupport = r;
+
+  const nearestExpiry = (r.licenses||[]).filter(l=>l.renewalDate).sort((a,b)=>new Date(a.renewalDate)-new Date(b.renewalDate))[0];
+
+  let h = `<button class="back-btn" onclick="showOpSupportList()">← Back to Operational Support</button>
+  <div class="two-col">
+  <div>
+  <div class="detail-header">
+    <div class="font-mono text-xs text-muted">${r.reference_id}</div>
+    <h2>${r.solution_name}</h2>
+    ${r.intake_reference||r.solution_reference?`<div class="detail-meta">${r.intake_reference?`Intake: <span style="cursor:pointer;color:var(--accent)" onclick="showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:''}${r.intake_reference&&r.solution_reference?' · ':''}${r.solution_reference?`Solution: <span style="cursor:pointer;color:var(--accent)" onclick="showSolutionDetail(${r.solution_id})">${r.solution_reference}</span>`:''}</div>`:''}
+    <div class="detail-badges mt-1">
+      ${r.support_tier?`<span class="badge badge-dev">${r.support_tier}</span>`:''}
+      ${r.hasExpiringLicense?`<span class="badge badge-high">⚠ Licence Expiring Soon</span>`:''}
+      <span class="badge badge-${r.status==='Active'?'approved':'draft'}">${r.status||'Active'}</span>
+    </div>
+    <div class="flex gap-2 mt-2">
+      <button class="btn btn-primary btn-sm" onclick="startEditOpSupport(${r.id})">✎ Edit</button>
+      ${r.intake_reference?`<button class="btn btn-secondary btn-sm" onclick="showIntakeDetail('${r.intake_reference}')">View Intake →</button>`:''}
+      ${r.solution_reference&&r.solution_id?`<button class="btn btn-secondary btn-sm" onclick="showSolutionDetail(${r.solution_id})">View Solution →</button>`:''}
+    </div>
+  </div>
+
+  <div class="section-card"><h3>Ownership</h3><div class="kv-grid">
+    <div class="kv-item"><label>Owner</label><span>${r.owner_name||'–'}</span></div>
+    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent)">${r.owner_email}</a>`:'–'}</span></div>
+    <div class="kv-item"><label>Team</label><span>${r.owner_team||'–'}</span></div>
+    <div class="kv-item"><label>Review Cadence</label><span>${r.review_cadence||'–'}</span></div>
+  </div></div>
+
+  <div class="section-card"><h3>Support</h3><div class="kv-grid">
+    <div class="kv-item"><label>Support Tier</label><span>${r.support_tier||'–'}</span></div>
+    <div class="kv-item"><label>SLA</label><span>${r.sla||'–'}</span></div>
+    <div class="kv-item"><label>Support Channel</label><span>${r.support_channel||'–'}</span></div>
+    <div class="kv-item"><label>Channel Detail</label><span>${r.support_channel_detail||'–'}</span></div>
+  </div>
+  ${r.escalationContacts&&r.escalationContacts.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Escalation Contacts</label>
+    ${r.escalationContacts.map(c=>`<div style="padding:.38rem .55rem;background:var(--surface2);border-radius:6px;margin-top:.3rem;font-size:.8rem"><strong>${c.name||'–'}</strong>${c.role?' · '+c.role:''} ${c.email?`<a href="mailto:${c.email}" style="color:var(--accent);margin-left:.35rem">${c.email}</a>`:''}</div>`).join('')}
+  </div>`:''}
+  </div>
+
+  ${r.licenses&&r.licenses.length?`<div class="section-card"><h3>Licensing (${r.licenses.length})</h3>
+    ${r.licenses.map(l=>{
+      const isExp = !!l.renewalDate && (new Date(l.renewalDate)-new Date())/(1000*60*60*24)<=90 && (new Date(l.renewalDate)-new Date())>=0;
+      return`<div style="padding:.6rem .75rem;background:var(--surface2);border-radius:8px;margin-bottom:.45rem;border-left:3px solid ${isExp?'var(--risk-high)':'var(--border)'}">
+        <div class="flex justify-between items-center" style="margin-bottom:.3rem">
+          <strong class="text-sm">${l.vendor||'–'}</strong>
+          ${isExp?`<span class="badge badge-high" style="font-size:.62rem">⚠ Expiring ${fmtDate(l.renewalDate)}</span>`:(l.renewalDate?`<span class="badge" style="background:var(--surface2);color:var(--muted);border:1px solid var(--border);font-size:.62rem">Renews ${fmtDate(l.renewalDate)}</span>`:'')}
+        </div>
+        <div class="kv-grid" style="gap:.35rem">
+          ${l.licenseType?`<div class="kv-item"><label>Type</label><span>${l.licenseType}</span></div>`:''}
+          ${l.seatCount?`<div class="kv-item"><label>Seats</label><span>${l.seatCount}</span></div>`:''}
+          ${l.annualCost?`<div class="kv-item"><label>Annual Cost</label><span>${l.annualCost}</span></div>`:''}
+          ${l.licenseOwner?`<div class="kv-item"><label>Licence Owner</label><span>${l.licenseOwner}</span></div>`:''}
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`:''}
+
+  ${r.notes?`<div class="section-card"><h3>Notes</h3><p class="text-sm" style="line-height:1.65;white-space:pre-wrap">${r.notes}</p></div>`:''}
+  </div>
+  <div>
+  <div class="section-card"><h3>References</h3>
+    ${r.runbookUrls&&r.runbookUrls.length?`<div class="mb-2"><label class="text-xs text-muted" style="text-transform:uppercase">Runbooks</label>${r.runbookUrls.map(u=>`<div style="margin-top:.28rem"><a href="${u}" target="_blank" style="color:var(--accent-light);font-size:.8rem;word-break:break-all">${u}</a></div>`).join('')}</div>`:''}
+    ${r.dashboardUrls&&r.dashboardUrls.length?`<div><label class="text-xs text-muted" style="text-transform:uppercase">Monitoring Dashboards</label>${r.dashboardUrls.map(u=>`<div style="margin-top:.28rem"><a href="${u}" target="_blank" style="color:var(--accent-light);font-size:.8rem;word-break:break-all">${u}</a></div>`).join('')}</div>`:''}
+    ${(!r.runbookUrls||!r.runbookUrls.length)&&(!r.dashboardUrls||!r.dashboardUrls.length)?`<p class="text-sm text-muted">No reference links added.</p>`:''}
+  </div>
+  <div class="section-card"><h3>Record Details</h3><div class="kv-grid">
+    <div class="kv-item"><label>Reference</label><span class="font-mono text-xs">${r.reference_id}</span></div>
+    <div class="kv-item"><label>Status</label><span>${r.status||'Active'}</span></div>
+    <div class="kv-item"><label>Created</label><span>${fmtDate(r.created_at)}</span></div>
+    <div class="kv-item"><label>Updated</label><span>${fmtDate(r.updated_at)}</span></div>
+  </div></div>
+  </div></div>`;
+  setMain(h);
+}
+
+function startNewOpSupport(prefillIntakeRef) {
+  S.view = 'ops-new'; renderSidebar();
+  S._opsLicenses = [];
+  S._opsRunbooks = [];
+  S._opsDashboards = [];
+  S._opsEscalations = [];
+  S._opsEditId = null;
+  S._opsPrefillIntake = prefillIntakeRef || '';
+  S._opsPrefillSolution = '';
+  renderOpSupportForm();
+}
+
+async function startEditOpSupport(id) {
+  S.view = 'ops-detail'; renderSidebar();
+  setMain('<p class="text-muted" style="padding:2rem">Loading...</p>');
+  const r = await api.get(`/api/operational-support/${id}`);
+  S.currentOpSupport = r;
+  S._opsEditId = id;
+  S._opsLicenses = r.licenses || [];
+  S._opsRunbooks = r.runbookUrls || [];
+  S._opsDashboards = r.dashboardUrls || [];
+  S._opsEscalations = r.escalationContacts || [];
+  S._opsPrefillIntake = r.intake_reference || '';
+  S._opsPrefillSolution = r.solution_reference || '';
+  renderOpSupportForm(r);
+}
+
+function renderOpSupportForm(prefill) {
+  const d = prefill || {};
+  const isEdit = !!S._opsEditId;
+  const approvedIntakes = S.intakes.filter(i => i.status === 'Approved');
+
+  let h = `<div class="page-title"><h2>${isEdit?'Edit':'New'} Operational Support Record</h2></div>
+  <div class="two-col">
+  <div>
+  <div class="section-card"><h3>Ownership</h3>
+    <div class="form-group"><label>Solution Name *</label><input class="form-control" id="ops_solutionName" value="${d.solution_name||''}" placeholder="e.g. OT Telemetry Pipeline"/></div>
+    <div class="form-group"><label>Linked Intake Request</label>
+      <div style="position:relative">
+        <input class="form-control" id="ops_intakeSearch" value="${(S._opsPrefillIntake||(d.intake_reference?d.intake_reference+' — '+(approvedIntakes.find(i=>i.reference_id===d.intake_reference)||{title:''}).title:''))}" placeholder="Search by reference or title..." autocomplete="off"
+          oninput="opsFilterIntakeDropdown(this.value)" onfocus="opsFilterIntakeDropdown(this.value)" onblur="setTimeout(()=>{const dd=document.getElementById('ops_intakeDropdown');if(dd)dd.style.display='none'},200)"/>
+        <input type="hidden" id="ops_intakeRef" value="${S._opsPrefillIntake||d.intake_reference||''}"/>
+        <div id="ops_intakeDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--accent);border-radius:0 0 7px 7px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.4)">
+          <div style="padding:.35rem .65rem;font-size:.75rem;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--border)" onclick="opsSelectIntake('','')">— None —</div>
+          ${approvedIntakes.map(i=>`<div style="padding:.38rem .65rem;font-size:.8rem;cursor:pointer;border-bottom:1px solid var(--border)" class="ops-intake-opt" onclick="opsSelectIntake('${i.reference_id}','${i.reference_id} — ${i.title.replace(/'/g,"\\'")}')"><span class="font-mono text-xs" style="color:var(--muted)">${i.reference_id}</span> ${i.title}</div>`).join('')}
+        </div>
+      </div>
+      <div class="text-xs text-muted mt-1">Only approved intake requests are shown. Start typing to search.</div>
+    </div>
+    <div class="form-group"><label>Linked Solution Design</label>
+      <div style="position:relative">
+        <input class="form-control" id="ops_solutionSearch" value="${d.solution_reference?(d.solution_reference+' — '+(S.solutions.find(s=>s.reference_id===d.solution_reference)||{title:''}).title):(S._opsPrefillSolution?S._opsPrefillSolution:'')}" placeholder="Search by reference or title..." autocomplete="off"
+          oninput="opsFilterSolutionDropdown(this.value)" onfocus="opsFilterSolutionDropdown(this.value)" onblur="setTimeout(()=>{const dd=document.getElementById('ops_solutionDropdown');if(dd)dd.style.display='none'},200)"/>
+        <input type="hidden" id="ops_solutionRef" value="${d.solution_reference||S._opsPrefillSolution||''}"/>
+        <div id="ops_solutionDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface2);border:1px solid var(--accent);border-radius:0 0 7px 7px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.4)">
+          <div style="padding:.35rem .65rem;font-size:.75rem;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--border)" onclick="opsSelectSolution('','')">— None —</div>
+          ${S.solutions.map(s=>`<div style="padding:.38rem .65rem;font-size:.8rem;cursor:pointer;border-bottom:1px solid var(--border)" class="ops-solution-opt" onclick="opsSelectSolution('${s.reference_id}','${s.reference_id} — ${(s.title||'').replace(/'/g,"\\'")}')"><span class="font-mono text-xs" style="color:var(--muted)">${s.reference_id}</span> ${s.title}</div>`).join('')}
+        </div>
+      </div>
+      <div class="text-xs text-muted mt-1">Optionally link to a solution design. Start typing to search.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Owner Name</label><input class="form-control" id="ops_ownerName" value="${d.owner_name||''}" placeholder="Full name"/></div>
+      <div class="form-group"><label>Owner Email</label><input class="form-control" id="ops_ownerEmail" value="${d.owner_email||''}" type="email"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Owner Team</label><input class="form-control" id="ops_ownerTeam" value="${d.owner_team||''}" placeholder="e.g. Platform Engineering"/></div>
+      <div class="form-group"><label>Review Cadence</label><select class="form-control" id="ops_reviewCadence"><option value="">Select...</option>${opts(['Monthly','Quarterly','Semi-Annual','Annual'],d.review_cadence)}</select></div>
+    </div>
+  </div>
+
+  <div class="section-card"><h3>Support Team</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Support Tier</label><select class="form-control" id="ops_supportTier"><option value="">Select...</option>${opts(['Tier 1 (Self-service)','Tier 2 (Team support)','Tier 3 (Expert escalation)','Vendor-managed'],d.support_tier)}</select></div>
+      <div class="form-group"><label>SLA</label><input class="form-control" id="ops_sla" value="${d.sla||''}" placeholder="e.g. 4h response / 24h resolve"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Support Channel</label><select class="form-control" id="ops_supportChannel"><option value="">Select...</option>${opts(['Email','Slack','ServiceNow','Teams','Jira','PagerDuty','Other'],d.support_channel)}</select></div>
+      <div class="form-group"><label>Channel Detail</label><input class="form-control" id="ops_supportChannelDetail" value="${d.support_channel_detail||''}" placeholder="e.g. #platform-support, queue ID"/></div>
+    </div>
+    <div class="form-group"><label>Escalation Contacts</label>
+      <div id="ops-escalations">
+        ${S._opsEscalations.map((c,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.35rem;align-items:center">
+          <input class="form-control" style="flex:1" placeholder="Name" value="${c.name||''}" oninput="S._opsEscalations[${i}].name=this.value"/>
+          <input class="form-control" style="flex:1" placeholder="Role" value="${c.role||''}" oninput="S._opsEscalations[${i}].role=this.value"/>
+          <input class="form-control" style="flex:1" placeholder="Email" value="${c.email||''}" oninput="S._opsEscalations[${i}].email=this.value"/>
+          <button class="btn btn-danger btn-sm" onclick="opsRemoveEscalation(${i})">✕</button>
+        </div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm mt-1" onclick="opsAddEscalation()">＋ Add Contact</button>
+    </div>
+  </div>
+
+  <div class="section-card"><h3>Licensing</h3>
+    <div id="ops-licenses">
+      ${S._opsLicenses.map((l,i)=>`<div style="background:var(--surface2);border-radius:8px;padding:.7rem;margin-bottom:.5rem;position:relative">
+        <button class="btn btn-danger btn-sm" style="position:absolute;top:.45rem;right:.45rem" onclick="opsRemoveLicense(${i})">✕</button>
+        <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Vendor</label><input class="form-control" value="${l.vendor||''}" placeholder="e.g. Microsoft" oninput="S._opsLicenses[${i}].vendor=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Licence Type</label><input class="form-control" value="${l.licenseType||''}" placeholder="e.g. Enterprise, SaaS subscription" oninput="S._opsLicenses[${i}].licenseType=this.value"/></div></div>
+        <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Seat Count</label><input class="form-control" type="number" value="${l.seatCount||''}" placeholder="e.g. 500" oninput="S._opsLicenses[${i}].seatCount=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Annual Cost</label><input class="form-control" value="${l.annualCost||''}" placeholder="e.g. $50,000" oninput="S._opsLicenses[${i}].annualCost=this.value"/></div></div>
+        <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Renewal Date</label><input class="form-control" type="date" value="${l.renewalDate||''}" oninput="S._opsLicenses[${i}].renewalDate=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Licence Owner</label><input class="form-control" value="${l.licenseOwner||''}" placeholder="e.g. Jane Smith" oninput="S._opsLicenses[${i}].licenseOwner=this.value"/></div></div>
+      </div>`).join('')}
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="opsAddLicense()">＋ Add Licence</button>
+  </div>
+
+  <div class="section-card"><h3>References</h3>
+    <div class="form-group"><label>Runbook URLs</label>
+      <div id="ops-runbooks">
+        ${S._opsRunbooks.map((u,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.3rem"><input class="form-control" value="${u}" placeholder="https://..." oninput="S._opsRunbooks[${i}]=this.value"/><button class="btn btn-danger btn-sm" onclick="opsRemoveRunbook(${i})">✕</button></div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm mt-1" onclick="opsAddRunbook()">＋ Add Runbook URL</button>
+    </div>
+    <div class="form-group"><label>Monitoring Dashboard URLs</label>
+      <div id="ops-dashboards">
+        ${S._opsDashboards.map((u,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.3rem"><input class="form-control" value="${u}" placeholder="https://..." oninput="S._opsDashboards[${i}]=this.value"/><button class="btn btn-danger btn-sm" onclick="opsRemoveDashboard(${i})">✕</button></div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm mt-1" onclick="opsAddDashboard()">＋ Add Dashboard URL</button>
+    </div>
+  </div>
+
+  <div class="section-card"><h3>Notes & Review</h3>
+    <div class="form-group"><label>Status</label><select class="form-control" id="ops_status"><option value="">Active</option>${opts(['Active','Under Review','Decommissioned'],d.status)}</select></div>
+    <div class="form-group"><label>Notes</label><textarea class="form-control" id="ops_notes" style="min-height:110px" placeholder="Any additional operational notes, known issues, or context...">${d.notes||''}</textarea></div>
+  </div>
+
+  <div class="wizard-nav" style="margin-top:0;padding-top:1rem">
+    <button class="btn btn-secondary" onclick="${isEdit?`showOpSupportDetail(${S._opsEditId})`:'showOpSupportList()'}">Cancel</button>
+    <button class="btn btn-primary" onclick="submitOpSupport()">${isEdit?'Save Changes':'Create Record'}</button>
+  </div>
+  </div>
+  <div>
+  <div class="section-card"><h3>About this module</h3>
+    <p class="text-sm text-muted" style="line-height:1.65">Operational Support records capture ongoing ownership and support information for approved solutions in production. They mark the solution as <strong>Live</strong> in the lifecycle.</p>
+    <ul class="arrow-list mt-2">
+      <li class="text-sm">Link to an approved intake request</li>
+      <li class="text-sm">Track support tiers and escalation paths</li>
+      <li class="text-sm">Manage licence renewals and costs</li>
+      <li class="text-sm">Reference runbooks and monitoring dashboards</li>
+    </ul>
+  </div>
+  </div></div>`;
+  setMain(h);
+}
+
+function opsAddLicense() {
+  S._opsLicenses.push({ vendor:'', licenseType:'', seatCount:'', annualCost:'', renewalDate:'', licenseOwner:'' });
+  reRenderOpsSections();
+}
+function opsRemoveLicense(i) {
+  S._opsLicenses.splice(i, 1);
+  reRenderOpsSections();
+}
+function opsAddRunbook() {
+  S._opsRunbooks.push('');
+  reRenderOpsSections();
+}
+function opsRemoveRunbook(i) {
+  S._opsRunbooks.splice(i, 1);
+  reRenderOpsSections();
+}
+function opsAddDashboard() {
+  S._opsDashboards.push('');
+  reRenderOpsSections();
+}
+function opsRemoveDashboard(i) {
+  S._opsDashboards.splice(i, 1);
+  reRenderOpsSections();
+}
+function opsAddEscalation() {
+  S._opsEscalations.push({ name:'', role:'', email:'' });
+  reRenderOpsSections();
+}
+function opsRemoveEscalation(i) {
+  S._opsEscalations.splice(i, 1);
+  reRenderOpsSections();
+}
+
+function reRenderOpsSections() {
+  const licEl = document.getElementById('ops-licenses');
+  if (licEl) licEl.innerHTML = S._opsLicenses.map((l,i)=>`<div style="background:var(--surface2);border-radius:8px;padding:.7rem;margin-bottom:.5rem;position:relative">
+    <button class="btn btn-danger btn-sm" style="position:absolute;top:.45rem;right:.45rem" onclick="opsRemoveLicense(${i})">✕</button>
+    <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Vendor</label><input class="form-control" value="${l.vendor||''}" placeholder="e.g. Microsoft" oninput="S._opsLicenses[${i}].vendor=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Licence Type</label><input class="form-control" value="${l.licenseType||''}" placeholder="e.g. Enterprise, SaaS subscription" oninput="S._opsLicenses[${i}].licenseType=this.value"/></div></div>
+    <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Seat Count</label><input class="form-control" type="number" value="${l.seatCount||''}" placeholder="e.g. 500" oninput="S._opsLicenses[${i}].seatCount=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Annual Cost</label><input class="form-control" value="${l.annualCost||''}" placeholder="e.g. $50,000" oninput="S._opsLicenses[${i}].annualCost=this.value"/></div></div>
+    <div class="form-row"><div class="form-group" style="margin-bottom:.5rem"><label>Renewal Date</label><input class="form-control" type="date" value="${l.renewalDate||''}" oninput="S._opsLicenses[${i}].renewalDate=this.value"/></div><div class="form-group" style="margin-bottom:.5rem"><label>Licence Owner</label><input class="form-control" value="${l.licenseOwner||''}" placeholder="e.g. Jane Smith" oninput="S._opsLicenses[${i}].licenseOwner=this.value"/></div></div>
+  </div>`).join('');
+
+  const rbEl = document.getElementById('ops-runbooks');
+  if (rbEl) rbEl.innerHTML = S._opsRunbooks.map((u,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.3rem"><input class="form-control" value="${u}" placeholder="https://..." oninput="S._opsRunbooks[${i}]=this.value"/><button class="btn btn-danger btn-sm" onclick="opsRemoveRunbook(${i})">✕</button></div>`).join('');
+
+  const dbEl = document.getElementById('ops-dashboards');
+  if (dbEl) dbEl.innerHTML = S._opsDashboards.map((u,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.3rem"><input class="form-control" value="${u}" placeholder="https://..." oninput="S._opsDashboards[${i}]=this.value"/><button class="btn btn-danger btn-sm" onclick="opsRemoveDashboard(${i})">✕</button></div>`).join('');
+
+  const escEl = document.getElementById('ops-escalations');
+  if (escEl) escEl.innerHTML = S._opsEscalations.map((c,i)=>`<div style="display:flex;gap:.4rem;margin-bottom:.35rem;align-items:center">
+    <input class="form-control" style="flex:1" placeholder="Name" value="${c.name||''}" oninput="S._opsEscalations[${i}].name=this.value"/>
+    <input class="form-control" style="flex:1" placeholder="Role" value="${c.role||''}" oninput="S._opsEscalations[${i}].role=this.value"/>
+    <input class="form-control" style="flex:1" placeholder="Email" value="${c.email||''}" oninput="S._opsEscalations[${i}].email=this.value"/>
+    <button class="btn btn-danger btn-sm" onclick="opsRemoveEscalation(${i})">✕</button>
+  </div>`).join('');
+}
+
+function opsFilterIntakeDropdown(q) {
+  const dd = document.getElementById('ops_intakeDropdown');
+  if (!dd) return;
+  dd.style.display = 'block';
+  const items = dd.querySelectorAll('.ops-intake-opt');
+  items.forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function opsSelectIntake(ref, label) {
+  document.getElementById('ops_intakeRef').value = ref;
+  document.getElementById('ops_intakeSearch').value = label;
+  const dd = document.getElementById('ops_intakeDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+function opsFilterSolutionDropdown(q) {
+  const dd = document.getElementById('ops_solutionDropdown');
+  if (!dd) return;
+  dd.style.display = 'block';
+  const items = dd.querySelectorAll('.ops-solution-opt');
+  items.forEach(el => {
+    el.style.display = el.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function opsSelectSolution(ref, label) {
+  document.getElementById('ops_solutionRef').value = ref;
+  document.getElementById('ops_solutionSearch').value = label;
+  const dd = document.getElementById('ops_solutionDropdown');
+  if (dd) dd.style.display = 'none';
+}
+
+async function submitOpSupport() {
+  const solutionName = document.getElementById('ops_solutionName').value.trim();
+  if (!solutionName) { alert('Please enter a solution name.'); return; }
+
+  const payload = {
+    solutionName,
+    intakeReference: document.getElementById('ops_intakeRef').value || null,
+    solutionReference: document.getElementById('ops_solutionRef').value || null,
+    ownerName: document.getElementById('ops_ownerName').value,
+    ownerEmail: document.getElementById('ops_ownerEmail').value,
+    ownerTeam: document.getElementById('ops_ownerTeam').value,
+    supportTier: document.getElementById('ops_supportTier').value,
+    sla: document.getElementById('ops_sla').value,
+    supportChannel: document.getElementById('ops_supportChannel').value,
+    supportChannelDetail: document.getElementById('ops_supportChannelDetail').value,
+    reviewCadence: document.getElementById('ops_reviewCadence').value,
+    notes: document.getElementById('ops_notes').value,
+    status: document.getElementById('ops_status').value || 'Active',
+    licenses: S._opsLicenses,
+    runbookUrls: S._opsRunbooks.filter(u=>u.trim()),
+    dashboardUrls: S._opsDashboards.filter(u=>u.trim()),
+    escalationContacts: S._opsEscalations,
+  };
+
+  try {
+    let rec;
+    if (S._opsEditId) {
+      rec = await api.put(`/api/operational-support/${S._opsEditId}`, payload);
+    } else {
+      rec = await api.post('/api/operational-support', payload);
+    }
+    await loadOpSupport();
+    renderSidebar();
+    showOpSupportDetail(rec.id);
+  } catch(e) {
+    alert('Failed: ' + (e.error || JSON.stringify(e)));
+  }
 }
 
 // ─── Risk Panel Renderer ──────────────────────────────────────────────────────

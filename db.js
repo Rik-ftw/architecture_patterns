@@ -111,11 +111,43 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS operational_support (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reference_id TEXT UNIQUE NOT NULL,
+    solution_name TEXT NOT NULL,
+    intake_id INTEGER REFERENCES intake_requests(id),
+    intake_reference TEXT,
+    owner_name TEXT,
+    owner_email TEXT,
+    owner_team TEXT,
+    support_tier TEXT,
+    sla TEXT,
+    support_channel TEXT,
+    support_channel_detail TEXT,
+    escalation_contacts TEXT DEFAULT '[]',
+    licenses TEXT DEFAULT '[]',
+    runbook_urls TEXT DEFAULT '[]',
+    dashboard_urls TEXT DEFAULT '[]',
+    review_cadence TEXT,
+    notes TEXT,
+    status TEXT DEFAULT 'Active',
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+`);
+
 try {
   db.exec(`ALTER TABLE intake_requests ADD COLUMN ai_review TEXT`);
 } catch {}
 try {
   db.exec(`ALTER TABLE intake_requests ADD COLUMN ai_diagram TEXT`);
+} catch {}
+try {
+  db.exec(`ALTER TABLE operational_support ADD COLUMN solution_id INTEGER REFERENCES solution_designs(id)`);
+} catch {}
+try {
+  db.exec(`ALTER TABLE operational_support ADD COLUMN solution_reference TEXT`);
 } catch {}
 
 function generateRefId() {
@@ -142,4 +174,16 @@ function generateSolutionRefId() {
   return `${prefix}-${year}-${String(seq).padStart(4, '0')}`;
 }
 
-module.exports = { db, generateRefId, generateSolutionRefId };
+function generateOpSupportRefId() {
+  const prefix = 'OPS';
+  const year = new Date().getFullYear();
+  const last = db.prepare(`SELECT reference_id FROM operational_support ORDER BY id DESC LIMIT 1`).get();
+  let seq = 1;
+  if (last) {
+    const match = last.reference_id.match(/(\d+)$/);
+    if (match) seq = parseInt(match[1]) + 1;
+  }
+  return `${prefix}-${year}-${String(seq).padStart(4, '0')}`;
+}
+
+module.exports = { db, generateRefId, generateSolutionRefId, generateOpSupportRefId };

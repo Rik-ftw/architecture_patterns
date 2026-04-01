@@ -44,6 +44,7 @@ app.use('/api/intake', require('./routes/intake'));
 app.use('/api/solutions', require('./routes/solutions'));
 app.use('/api/ai', require('./routes/aiReview'));
 app.use('/api/github', require('./routes/github'));
+app.use('/api/operational-support', require('./routes/operationalSupport'));
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`EA Platform running on http://0.0.0.0:${PORT}`);

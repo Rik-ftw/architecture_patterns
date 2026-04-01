@@ -126,6 +126,17 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - Browse endorsed patterns catalogue
 - Quick access to intake submission and request tracking
 
+### Operational Support Module
+Tracks ongoing ownership, support team details, and licensing for approved solutions in production.
+- **Reference IDs:** OPS-YYYY-NNNN format
+- **Linked to intake requests:** Each record can be associated with an approved intake request
+- **Fields:** Solution name, owner (name/email/team), support tier, SLA, support channel, escalation contacts (repeatable), licences (repeatable with vendor/type/seats/cost/renewal date/owner), runbook URLs, monitoring dashboard URLs, review cadence, notes, status
+- **Lifecycle indicator** on intake detail: Draft → Submitted → Under Review → Approved → Live (activates once an Ops Support record is linked)
+- **Approved intake CTA:** When viewing an approved intake, a contextual button to create or view the linked support record appears
+- **List view:** Searchable table with licence expiry at-a-glance highlighting (⚠ within 90 days highlighted)
+- **Sidebar nav:** "Operational Support" section with all records count and expiring licence count
+- **Storage:** SQLite `operational_support` table (JSON columns for arrays)
+
 ## API Endpoints
 - `GET /api/patterns` — All patterns
 - `GET /api/patterns/:file` — Single pattern (JSON or SVG)
@@ -150,6 +161,11 @@ Risk tiers: **Low** (0-25) · **Medium** (26-50) · **High** (51-75) · **Critic
 - `POST /api/ai/diagram/:id` — Generate + store architecture diagram (Mermaid flowchart) for an intake
 - `GET /api/ai/diagram/:id` — Fetch stored diagram for an intake request
 - `POST /api/ai/parse-documents` — Parse uploaded documents (multipart) and return Claude-extracted intake field JSON
+- `GET /api/operational-support` — All support records (filterable: search, intake_reference, expiring=true)
+- `GET /api/operational-support/stats` — Stats (total, expiring within 90 days)
+- `GET /api/operational-support/:id` — Single record by id or reference_id
+- `POST /api/operational-support` — Create new support record
+- `PUT /api/operational-support/:id` — Update a support record
 
 ## Running
 ```bash
