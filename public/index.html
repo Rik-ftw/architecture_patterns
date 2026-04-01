@@ -2984,7 +2984,7 @@ function renderIaCPanel(iac, context, entityId, refId) {
     <div class="iac-actions">
       <button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="${genFn}">⟳ Regenerate</button>
       <button class="btn btn-sm" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="iacDownloadZip('${cacheKey}')">↓ Download ZIP</button>
-      <button class="btn btn-sm" style="background:rgba(74,222,128,.08);color:#86efac;border:1px solid rgba(74,222,128,.2)" onclick="iacPushToGitHub('${pushLabel}','${cacheKey}','${refId}')">⇅ Push to GitHub</button>
+      <button class="btn btn-sm" style="background:rgba(74,222,128,.08);color:#86efac;border:1px solid rgba(74,222,128,.2)" onclick="iacPushToGitHub(this,'${pushLabel}','${cacheKey}','${refId}')">⇅ Push to GitHub</button>
     </div>
     <div class="iac-meta">
       ${iac.resourceCount!==undefined?`<span class="iac-stat">${iac.resourceCount} resources</span>`:''}
@@ -3036,14 +3036,13 @@ async function iacDownloadZip(cacheKey) {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-async function iacPushToGitHub(pathPrefix, cacheKey, label) {
+async function iacPushToGitHub(btn, pathPrefix, cacheKey, label) {
   const filesObj = _iacFilesCache[cacheKey];
   if (!filesObj) { alert('IaC files not found in cache'); return; }
-  const btn = event.currentTarget;
   const orig = btn.textContent;
   btn.disabled = true; btn.textContent = '⟳ Pushing…';
   try {
-    const r = await api.post('/api/github/push-iac', { pathPrefix, files: filesObj, label });
+    const r = await api.post('/api/github/push-iac', { path: pathPrefix, files: filesObj, label });
     btn.textContent = `✓ Pushed ${r.pushed} files`;
     btn.style.color = '#4ade80';
     setTimeout(() => { btn.textContent = orig; btn.disabled = false; btn.style.color = ''; }, 3500);
