@@ -22,6 +22,7 @@ function serialize(row) {
     patternIds: parseJson(row.pattern_ids, []),
     vendorIds: parseJson(row.vendor_ids, []),
     deploymentRegions: parseJson(row.deployment_regions, []),
+    jiraEpics: parseJson(row.jira_epics, null),
   };
 }
 

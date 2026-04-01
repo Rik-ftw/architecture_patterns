@@ -45,6 +45,7 @@ app.get('/api/vendors', (req, res) => {
 });
 
 app.use('/api/intake', require('./routes/intake'));
+app.use('/api/solutions', require('./routes/jiraEpics'));
 app.use('/api/solutions', require('./routes/solutions'));
 app.use('/api/ai', require('./routes/aiReview'));
 app.use('/api/github', require('./routes/github'));

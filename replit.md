@@ -64,6 +64,19 @@ Architecture-Pattern-Hub/ — Original monorepo spec/config (reference only)
 - Status lifecycle: Draft → Published
 - Pattern chip display showing which patterns compose the solution
 
+### Jira Epics & Stories Generator
+- **Generate Jira Epics** button appears on Published solution designs only
+- Calls `POST /api/solutions/:id/generate-epics` — Claude Sonnet 4.5 reads the solution's patterns, vendors, regions, and business context to produce a structured JSON payload of 4–7 Epics with 3–6 Stories each (titles, descriptions, acceptance criteria)
+- Expandable accordion UI: Epic rows collapse/expand to reveal Stories; acceptance criteria shown per Story
+- Generated output persisted in `jira_epics` JSON column on `solution_designs` table
+- **Push to Jira** button opens a modal prompting for Jira base URL, project key, user email, and API token
+- `POST /api/solutions/:id/push-to-jira` creates Jira issues via REST API v3 (Epic per top-level item, Story per child linked to its parent), using Atlassian Document Format for descriptions
+- After push, each Epic/Story shows its newly created Jira issue key as a clickable link (↗ KEY)
+- Jira connection settings (base URL, project key, email) saved to `jira_settings` table for subsequent use — API token NOT stored for security
+- `GET /api/solutions/jira-settings/config` returns saved settings (without the token)
+- Visual identity: Jira blue panel accent (`#4c9aff` / `rgba(38,132,255,...)`)
+- Handles both `Epic` and `Story` issue types with fallback if Epic type not available in the project
+
 ### Vendor Registry
 - 31 vendors with criticality, data sharing, and hosting model info
 - Searchable table with criticality badges and data-sharing flags
@@ -151,10 +164,13 @@ Tracks ongoing ownership, support team details, and licensing for approved solut
 - `POST /api/intake/:id/comments` — Add a comment
 - `DELETE /api/intake/:id` — Delete Draft/Withdrawn requests
 - `GET /api/solutions` — All solution designs
-- `GET /api/solutions/:id` — Single solution with composed pattern details
+- `GET /api/solutions/:id` — Single solution with composed pattern details (includes `jiraEpics` field)
 - `POST /api/solutions` — Create solution design
 - `PATCH /api/solutions/:id` — Update solution design
 - `DELETE /api/solutions/:id` — Delete solution design
+- `POST /api/solutions/:id/generate-epics` — Generate Jira Epics & Stories via Claude (Published only)
+- `POST /api/solutions/:id/push-to-jira` — Push generated Epics & Stories to Jira REST API
+- `GET /api/solutions/jira-settings/config` — Get saved Jira settings (without API token)
 - `POST /api/ai/review/:id` — Generate + store full Claude Sonnet review for an intake request
 - `GET /api/ai/review/:id` — Fetch stored AI review for an intake request
 - `POST /api/ai/quick-assess` — Run Claude Haiku quick scan (wizard step 6; not persisted)

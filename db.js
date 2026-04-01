@@ -149,6 +149,21 @@ try {
 try {
   db.exec(`ALTER TABLE operational_support ADD COLUMN solution_reference TEXT`);
 } catch {}
+try {
+  db.exec(`ALTER TABLE solution_designs ADD COLUMN jira_epics TEXT`);
+} catch {}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS jira_settings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    base_url TEXT NOT NULL,
+    project_key TEXT NOT NULL,
+    user_email TEXT NOT NULL,
+    api_token TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
+`);
 
 function generateRefId() {
   const prefix = 'EAR';
