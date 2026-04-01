@@ -334,6 +334,7 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
   </div>
   <span class="tagline">Enterprise Architecture · Pattern Library · Intake & Review</span>
   <div class="header-right">
+    <button class="btn btn-sm btn-ghost" onclick="showGitHubSync()" id="github-sync-toggle" title="Sync patterns to GitHub">⇅ GitHub Sync</button>
     <button class="btn btn-sm btn-ghost" onclick="showTeamPortal()" id="portal-toggle">⬡ Team Portal</button>
   </div>
 </header>
@@ -1135,6 +1136,83 @@ function showVendors(q=''){
   <div class="table-wrap"><table><thead><tr><th>Vendor</th><th>Product / Service</th><th>Category</th><th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Domain</th></tr></thead><tbody>`;
   filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<tr><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-xs text-muted">${v.hostingModel||''}</td><td>${v.dataShared?`<span style="color:var(--review)">Yes</span>`:`<span class="text-muted">No</span>`}</td><td class="text-xs text-muted">${v.programmeDomain||''}</td></tr>`;});
   h+=`</tbody></table></div>`;setMain(h);
+}
+
+// ─── GitHub Sync ──────────────────────────────────────────────────────────────
+async function showGitHubSync() {
+  S.view = 'github-sync'; renderSidebar();
+  let h = `<div class="page-title"><h2>⇅ GitHub Pattern Sync</h2></div>
+  <div class="two-col" style="gap:1.4rem">
+    <div>
+      <div class="section-card">
+        <h3>Repository</h3>
+        <div class="kv-grid">
+          <div class="kv-item"><label>Repo</label><span><a href="https://github.com/Rik-ftw/architecture_patterns" target="_blank" style="color:var(--accent-light)">Rik-ftw/architecture_patterns</a></span></div>
+          <div class="kv-item"><label>Branch</label><span style="font-family:monospace">dev</span></div>
+          <div class="kv-item"><label>Local Patterns</label><span>${S.patterns.length} JSON files + SVG diagrams</span></div>
+        </div>
+        <p class="text-xs text-muted" style="margin-top:.8rem;line-height:1.6">Syncing pushes all pattern JSON files and SVG diagrams to the <code>dev</code> branch. Existing files are updated in-place; new files are created. A README is also generated automatically.</p>
+        <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
+          <button class="btn btn-primary" id="sync-btn" onclick="runGitHubSync()">⇅ Sync All Patterns to GitHub</button>
+          <button class="btn btn-secondary" id="status-btn" onclick="checkGitHubStatus()">⟳ Check Status</button>
+        </div>
+      </div>
+      <div id="sync-result"></div>
+    </div>
+    <div>
+      <div class="section-card"><h3>What Gets Synced</h3>
+        <ul style="list-style:none;padding:0;margin:0">
+          ${S.patterns.map(p => `<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-${p.status==='Endorsed'?'endorsed':'dev'}" style="min-width:80px;text-align:center">${p.status}</span><span class="font-mono" style="color:var(--muted);min-width:58px">${p.patternId}</span><span>${p.name}</span></li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  </div>`;
+  setMain(h);
+  checkGitHubStatus();
+}
+
+async function checkGitHubStatus() {
+  const el = document.getElementById('sync-result');
+  if (el) el.innerHTML = `<div class="section-card mt-2" style="color:var(--muted);font-size:.82rem">Checking GitHub status…</div>`;
+  try {
+    const r = await api.get('/api/github/sync-status');
+    let html = `<div class="section-card mt-2"><h3>GitHub Status</h3><div class="kv-grid">
+      <div class="kv-item"><label>Branch</label><span class="${r.branchExists ? 'text-success' : 'text-warning'}">${r.branchExists ? '✓ dev branch exists' : '⚠ dev branch not yet created'}</span></div>
+      <div class="kv-item"><label>Patterns in Repo</label><span>${r.patternsSynced} JSON files</span></div>
+      <div class="kv-item"><label>Last Push</label><span>${r.lastPush ? new Date(r.lastPush).toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}) : '–'}</span></div>
+      <div class="kv-item"><label>Repo URL</label><span><a href="${r.repoUrl}" target="_blank" style="color:var(--accent-light)">${r.repoUrl}</a></span></div>
+    </div></div>`;
+    if (el) el.innerHTML = html;
+  } catch(e) {
+    if (el) el.innerHTML = `<div class="alert alert-danger mt-2">Could not reach GitHub: ${e.error || e.message || 'Check that GITHUB_PAT is valid and has repo scope.'}</div>`;
+  }
+}
+
+async function runGitHubSync() {
+  const btn = document.getElementById('sync-btn');
+  const el = document.getElementById('sync-result');
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Syncing…'; }
+  if (el) el.innerHTML = `<div class="section-card mt-2" style="color:var(--muted);font-size:.82rem"><span class="ai-spin" style="display:inline-block;margin-right:.5rem"></span> Pushing ${S.patterns.length} patterns to GitHub dev branch…</div>`;
+  try {
+    const r = await api.post('/api/github/sync-patterns', {});
+    let html = `<div class="section-card mt-2">
+      <h3 style="color:${r.errors === 0 ? 'var(--accent-light)' : '#f87171'}">${r.errors === 0 ? '✓ Sync Complete' : '⚠ Sync Completed with Errors'}</h3>
+      <div class="kv-grid" style="margin-bottom:.8rem">
+        <div class="kv-item"><label>Files Synced</label><span style="color:var(--accent-light)">${r.synced}</span></div>
+        <div class="kv-item"><label>Errors</label><span style="color:${r.errors > 0 ? '#f87171' : 'var(--muted)'}">${r.errors}</span></div>
+        <div class="kv-item"><label>Branch</label><span class="font-mono">dev</span></div>
+        <div class="kv-item"><label>Synced At</label><span>${new Date(r.syncedAt).toLocaleTimeString('en-GB')}</span></div>
+      </div>
+      <a href="https://github.com/Rik-ftw/architecture_patterns/tree/dev/patterns" target="_blank" class="btn btn-secondary btn-sm">View on GitHub →</a>`;
+    if (r.errors.length) {
+      html += `<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Errors</label><ul style="margin:.4rem 0 0;padding-left:1.2rem;font-size:.78rem;color:#f87171">${r.errors.map(e => `<li>${e.file}: ${e.error}</li>`).join('')}</ul></div>`;
+    }
+    html += `</div>`;
+    if (el) el.innerHTML = html;
+  } catch(e) {
+    if (el) el.innerHTML = `<div class="alert alert-danger mt-2">Sync failed: ${e.error || e.message || 'Unknown error'}. Check your GITHUB_PAT has repo write access.</div>`;
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '⇅ Sync All Patterns to GitHub'; }
 }
 
 // ─── Team Portal ──────────────────────────────────────────────────────────────
