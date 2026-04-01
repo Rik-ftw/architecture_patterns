@@ -258,7 +258,7 @@ router.post('/push-iac', async (req, res) => {
       branch: BRANCH,
       path: prefix,
       pushed: results.length,
-      errors: errors.length,
+      errorCount: errors.length,
       results,
       errors,
       pushedAt: new Date().toISOString()
