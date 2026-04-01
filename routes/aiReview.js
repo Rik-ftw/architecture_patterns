@@ -365,9 +365,9 @@ function buildDiagramPrompt(intake, patterns, allVendors) {
   const dataTypes = parseJson(intake.data_types, []);
   const newVendors = parseJson(intake.new_vendors, []);
 
-  return `You are a Senior Enterprise Architect creating a Mermaid.js architecture diagram.
+  return `You are a Senior Enterprise Architect creating a Microsoft Azure-style Mermaid.js architecture diagram.
 
-Generate a clear, accurate architecture diagram for this intake request. The diagram must use proper zones/layers and show data flows between components.
+Generate a clean, professional architecture diagram following Microsoft Azure reference architecture conventions. Use Azure service names where applicable, keep zone labels concise, and produce a structured top-down layered flow consistent with Microsoft reference architectures.
 
 STRICT MERMAID SYNTAX RULES — follow exactly or the diagram will fail to render:
 1. Start with: flowchart TD
@@ -379,13 +379,24 @@ STRICT MERMAID SYNTAX RULES — follow exactly or the diagram will fail to rende
 7. NO classDef, NO click, NO style lines — plain flowchart only
 8. Escape any quotes inside labels with a backslash
 
-ZONES TO USE (include only what is relevant):
-- User Zone: end users, mobile apps, browsers
-- Security Zone: WAF, MFA, Zero Trust gateway, identity provider
-- Integration Zone: API Gateway, Event Hub, message broker, ESB
-- Application Zone: main services, microservices, logic apps
-- Data Zone: databases, data lake, storage, cache
-- External Zone: external vendors, SaaS tools, legacy systems, OT/ICS equipment
+AZURE SERVICE NAMING — use official Azure service names where applicable:
+- API Gateway → Azure API Management
+- Message broker / Event Hub → Azure Service Bus or Azure Event Hubs
+- Identity provider / MFA → Microsoft Entra ID (Azure AD)
+- WAF → Azure Web Application Firewall
+- Cache → Azure Cache for Redis
+- Storage → Azure Blob Storage or Azure Data Lake Storage
+- CDN → Azure Front Door
+- Functions / Logic → Azure Functions or Azure Logic Apps
+- Container runtime → Azure Kubernetes Service (AKS) or Azure Container Apps
+
+ZONES TO USE (include only what is relevant, top-down order):
+- Client Zone: end users, browsers, mobile apps, IoT devices
+- Security Zone: Azure Web Application Firewall, Microsoft Entra ID, Zero Trust gateway
+- Integration Zone: Azure API Management, Azure Service Bus, Azure Event Hubs
+- Application Zone: main services, Azure Functions, Azure Logic Apps, microservices
+- Data Zone: Azure SQL, Azure Cosmos DB, Azure Blob Storage, Azure Cache for Redis
+- External Zone: external vendors, SaaS tools, legacy systems, on-premises / OT equipment
 
 ARCHITECTURE REQUEST:
 Title: ${intake.title}
