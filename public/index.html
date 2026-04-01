@@ -392,6 +392,57 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .jira-link-btn:hover{background:rgba(38,132,255,.15)}
 .jira-generating{display:flex;align-items:center;gap:.7rem;color:#4c9aff;font-size:.82rem;padding:1.2rem 1rem}
 .jira-spin{width:16px;height:16px;border:2px solid rgba(76,154,255,.3);border-top-color:#4c9aff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+
+/* ─── Vendor Intel Panel ─── */
+.vi-panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.3rem 1.4rem;margin-bottom:1.2rem;position:relative;overflow:hidden}
+.vi-panel::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#f6821f,#fbad41,#f6821f)}
+.vi-panel h3{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#fbad41;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.vi-search-row{display:flex;gap:.7rem;align-items:center;margin-bottom:1.1rem;flex-wrap:wrap}
+.vi-search-input{flex:1;min-width:180px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:.52rem .85rem;color:var(--text);font-size:.85rem;transition:border-color .15s}
+.vi-search-input:focus{outline:none;border-color:#fbad41}
+.vi-scan-btn{background:rgba(246,130,31,.2);color:#fbad41;border:1px solid rgba(246,130,31,.4);border-radius:7px;padding:.5rem 1.1rem;font-size:.82rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .15s}
+.vi-scan-btn:hover{background:rgba(246,130,31,.32)}
+.vi-scan-btn:disabled{opacity:.5;cursor:default}
+.vi-vendor-pills{display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.9rem}
+.vi-vendor-pill{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:.22rem .65rem;font-size:.72rem;cursor:pointer;transition:border-color .12s,background .12s}
+.vi-vendor-pill:hover{border-color:#fbad41;background:rgba(246,130,31,.08)}
+.vi-scorecard{background:var(--surface2);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:1rem}
+.vi-scorecard-header{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.3rem;flex-wrap:wrap}
+.vi-grade-circle{width:72px;height:72px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;font-size:2rem;font-weight:900;line-height:1;border:3px solid}
+.vi-grade-A{background:rgba(46,204,113,.12);color:#27ae60;border-color:rgba(46,204,113,.4)}
+.vi-grade-B{background:rgba(243,156,18,.12);color:var(--risk-medium);border-color:rgba(243,156,18,.4)}
+.vi-grade-C{background:rgba(230,126,34,.12);color:var(--risk-high);border-color:rgba(230,126,34,.4)}
+.vi-grade-D,.vi-grade-F{background:rgba(231,76,60,.12);color:var(--risk-critical);border-color:rgba(231,76,60,.4)}
+.vi-grade-unknown{background:rgba(74,85,104,.2);color:var(--muted);border-color:var(--border)}
+.vi-scorecard-meta{flex:1}
+.vi-scorecard-domain{font-size:1.1rem;font-weight:700;margin-bottom:.2rem}
+.vi-scorecard-sub{font-size:.75rem;color:var(--muted)}
+.vi-scorecard-score{font-size:.8rem;color:var(--muted);margin-top:.2rem}
+.vi-sections{display:flex;flex-direction:column;gap:0}
+.vi-section{border-top:1px solid var(--border)}
+.vi-section-header{display:flex;align-items:center;justify-content:space-between;padding:.72rem 1.1rem;cursor:pointer;transition:background .12s;user-select:none}
+.vi-section-header:hover{background:rgba(255,255,255,.03)}
+.vi-section-title{display:flex;align-items:center;gap:.55rem;font-size:.8rem;font-weight:700}
+.vi-section-icon{font-size:.9rem}
+.vi-section-status{display:flex;align-items:center;gap:.5rem}
+.vi-section-chevron{color:var(--muted);font-size:.65rem;transition:transform .15s}
+.vi-section-body{display:none;padding:.3rem 1.1rem .9rem}
+.vi-section-body.open{display:block}
+.vi-kv{display:grid;grid-template-columns:1fr 1fr;gap:.4rem .7rem;margin-bottom:.5rem}
+.vi-kv-item label{font-size:.63rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block;margin-bottom:.06rem}
+.vi-kv-item span{font-size:.8rem}
+.vi-status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.vi-dot-ok{background:var(--risk-low)}
+.vi-dot-warn{background:var(--risk-medium)}
+.vi-dot-bad{background:var(--risk-critical)}
+.vi-dot-unknown{background:var(--muted)}
+.vi-header-list{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.5rem}
+.vi-header-badge{font-size:.65rem;padding:.14rem .45rem;border-radius:4px;font-weight:700;white-space:nowrap}
+.vi-header-present{background:rgba(46,204,113,.12);color:#27ae60;border:1px solid rgba(46,204,113,.3)}
+.vi-header-missing{background:rgba(231,76,60,.1);color:var(--risk-critical);border:1px solid rgba(231,76,60,.25)}
+.vi-tech-list{display:flex;flex-wrap:wrap;gap:.28rem;margin-top:.45rem}
+.vi-tech-chip{background:var(--surface3);border:1px solid var(--border);border-radius:4px;padding:.1rem .4rem;font-size:.7rem;font-family:monospace}
+.vi-cached-notice{font-size:.67rem;color:var(--muted);margin-top:.3rem;text-align:right}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 </head>
@@ -548,7 +599,8 @@ function renderSidebar() {
     <button class="${v==='ops-new'?'active':''}" onclick="startNewOpSupport()">＋ New Support Record</button>
     <button class="${v==='ops-list'?'active':''}" onclick="showOpSupportList()">≡ All Records <span class="ni">${S.opSupport.length}</span></button>
     ${(S.opSupportStats&&S.opSupportStats.expiring)?`<button class="${v==='ops-expiring'?'active':''}" onclick="showOpSupportList('expiring')" style="color:var(--risk-high)">⚠ Expiring Licences <span class="ni" style="color:var(--risk-high)">${S.opSupportStats.expiring}</span></button>`:''}
-    <div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${S.vendors.length}</span></button>`;
+    <div class="divider"></div><button class="${v==='vendors'?'active':''}" onclick="showVendors()">⊞ Vendor Registry <span class="ni">${S.vendors.length}</span></button>
+    <button class="${v==='vendor-intel'?'active':''}" onclick="showVendorIntel()">◉ Vendor Intel</button>`;
   document.getElementById('sidebar').innerHTML=h;
 }
 
@@ -1390,16 +1442,252 @@ function showVendors(q=''){
   S.view='vendors';renderSidebar();
   const filtered=q?S.vendors.filter(v=>(v.vendorCompany+v.productService+v.category).toLowerCase().includes(q.toLowerCase())):S.vendors;
   const critical=S.vendors.filter(v=>v.criticality==='Critical').length;
-  let h=`<div class="page-title"><h2>Vendor Registry</h2></div>
+  let h=`<div class="page-title"><h2>Vendor Registry</h2><button class="btn btn-sm vi-scan-btn" onclick="showVendorIntel()">◉ Vendor Intel</button></div>
   <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
     <div class="stat-card"><div class="stat-val">${S.vendors.length}</div><div class="stat-label">Total Vendors</div></div>
     <div class="stat-card" style="--accent-color:var(--risk-critical)"><div class="stat-val">${critical}</div><div class="stat-label">Critical Tier</div></div>
     <div class="stat-card" style="--accent-color:var(--review)"><div class="stat-val">${S.vendors.filter(v=>v.dataShared).length}</div><div class="stat-label">Data Shared</div></div>
   </div>
   <input class="search-bar" placeholder="Search vendors..." oninput="showVendors(this.value)" value="${q}"/>
-  <div class="table-wrap"><table><thead><tr><th>Vendor</th><th>Product / Service</th><th>Category</th><th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Domain</th></tr></thead><tbody>`;
-  filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<tr><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-xs text-muted">${v.hostingModel||''}</td><td>${v.dataShared?`<span style="color:var(--review)">Yes</span>`:`<span class="text-muted">No</span>`}</td><td class="text-xs text-muted">${v.programmeDomain||''}</td></tr>`;});
+  <div class="table-wrap"><table><thead><tr><th>Vendor</th><th>Product / Service</th><th>Category</th><th>Criticality</th><th>Hosting</th><th>Data Shared</th><th>Domain</th><th></th></tr></thead><tbody>`;
+  filtered.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<tr onclick="showVendorIntelFromRegistry('${(v.domain||'').replace(/'/g,"\\'")}','${(v.vendorCompany||'').replace(/'/g,"\\'")}')"><td><strong>${v.vendorCompany}</strong></td><td>${v.productService}</td><td>${v.category}</td><td>${critBadge(v.criticality)}</td><td class="text-xs text-muted">${v.hostingModel||''}</td><td>${v.dataShared?`<span style="color:var(--review)">Yes</span>`:`<span class="text-muted">No</span>`}</td><td class="text-xs text-muted font-mono">${v.domain||''}</td><td><span class="text-xs" style="color:#fbad41">Intel →</span></td></tr>`;});
   h+=`</tbody></table></div>`;setMain(h);
+}
+
+function showVendorIntelFromRegistry(domain, vendorName) {
+  if (!domain && !vendorName) return;
+  showVendorIntel(domain || vendorName);
+}
+
+// ─── Vendor Intel Panel ──────────────────────────────────────────────────────
+function showVendorIntel(prefillDomain) {
+  S.view = 'vendor-intel'; renderSidebar();
+  const uniqueVendors = [];
+  const seen = new Set();
+  S.vendors.forEach(v => {
+    if (v.domain && !seen.has(v.domain)) {
+      seen.add(v.domain);
+      uniqueVendors.push({ domain: v.domain, name: v.vendorCompany });
+    }
+  });
+  uniqueVendors.sort((a,b) => a.name.localeCompare(b.name));
+
+  let h = `<div class="page-title"><h2>◉ Vendor Intel</h2><div class="text-muted text-sm" style="margin-top:.2rem">Cloudflare Radar-powered security posture reports</div></div>
+  <div class="vi-panel">
+    <h3>⟳ Domain Scan</h3>
+    <div class="vi-search-row">
+      <input class="vi-search-input" id="vi-domain-input" placeholder="e.g. claroty.com or vendor name…" value="${prefillDomain||''}" onkeydown="if(event.key==='Enter')runVendorIntelScan()"/>
+      <button class="vi-scan-btn" id="vi-scan-btn" onclick="runVendorIntelScan()">▶ Run Scan</button>
+    </div>
+    <div class="vi-vendor-pills">`;
+  uniqueVendors.slice(0, 20).forEach(v => {
+    h += `<span class="vi-vendor-pill" onclick="prefillViDomain('${v.domain.replace(/'/g,"\\'")}','${v.name.replace(/'/g,"\\'")}')">
+      ${v.name} <span style="color:var(--muted);font-family:monospace;font-size:.62rem">${v.domain}</span>
+    </span>`;
+  });
+  h += `</div>
+    <div id="vi-result"></div>
+  </div>`;
+  setMain(h);
+  if (prefillDomain) {
+    setTimeout(() => runVendorIntelScan(), 80);
+  }
+}
+
+function prefillViDomain(domain, name) {
+  const inp = document.getElementById('vi-domain-input');
+  if (inp) inp.value = domain;
+  runVendorIntelScan();
+}
+
+async function runVendorIntelScan() {
+  const inp = document.getElementById('vi-domain-input');
+  if (!inp) return;
+  let raw = (inp.value || '').trim();
+  if (!raw) return;
+  raw = raw.replace(/^https?:\/\//i,'').replace(/\/.*/,'').replace(/^www\./,'');
+  inp.value = raw;
+
+  const el = document.getElementById('vi-result');
+  if (!el) return;
+
+  const btn = document.getElementById('vi-scan-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Scanning…'; }
+  el.innerHTML = `<div class="loading-pulse"><div class="loading-spin"></div>Scanning ${raw} — gathering Cloudflare Radar signals, DNS health, and CVE data…</div>`;
+
+  try {
+    const report = await api.post('/api/vendor-intel/', { domain: raw });
+
+    if (!report) {
+      el.innerHTML = `<div class="alert alert-danger">Scan failed: no response from server</div>`;
+      return;
+    }
+
+    el.innerHTML = renderVendorIntelScorecard(report);
+  } catch (err) {
+    el.innerHTML = `<div class="alert alert-danger">Scan failed: ${err.error || err.message || 'Unknown error'}</div>`;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '▶ Run Scan'; }
+  }
+}
+
+function viGradeClass(grade) {
+  if (!grade || grade === 'Unknown') return 'vi-grade-unknown';
+  if (grade === 'A' || grade === 'A+') return 'vi-grade-A';
+  if (grade === 'B') return 'vi-grade-B';
+  if (grade === 'C') return 'vi-grade-C';
+  return 'vi-grade-F';
+}
+
+function renderVendorIntelScorecard(report) {
+  const grade = (report.riskGrade && report.riskGrade.grade) || 'Unknown';
+  const score = (report.riskGrade && report.riskGrade.score) || null;
+  const gradeClass = viGradeClass(grade);
+  const dns = report.dns || {};
+  const ssl = report.ssl || {};
+  const threat = report.threat || {};
+  const urlScan = report.urlScan || {};
+  const cves = report.cves || {};
+  const breakdown = (report.riskGrade && report.riskGrade.breakdown) || {};
+
+  const vendorMatch = S.vendors.find(v => v.domain && v.domain.toLowerCase() === report.domain);
+  const vendorName = report.resolvedVendorName || (vendorMatch ? vendorMatch.vendorCompany : report.domain);
+
+  const cachedNote = report.cached ? `<div class="vi-cached-notice">Results from cache · ${report.fetchedAt ? new Date(report.fetchedAt).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</div>` : `<div class="vi-cached-notice">Scanned now · ${new Date().toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>`;
+
+  let threatStatus = threat.malicious ? 'bad' : (threat.phishing || threat.botnet || threat.spam ? 'warn' : 'ok');
+  let threatLabel = threat.malicious ? 'Malicious' : (threat.phishing ? 'Phishing Detected' : threat.botnet ? 'Botnet Flags' : threat.spam ? 'Spam Signals' : 'Clean');
+  if (threat.note) { threatStatus = 'unknown'; threatLabel = 'Token not configured'; }
+
+  let dnsStatus = dns.dnssecEnabled && dns.hasSPF && dns.hasDMARC ? 'ok' : (!dns.dnssecEnabled && !dns.hasSPF && !dns.hasDMARC ? 'bad' : 'warn');
+  let dnsLabel = dns.dnssecEnabled ? 'DNSSEC enabled' : 'DNSSEC not found';
+
+  let sslStatus = ssl.grade === 'A+' || ssl.grade === 'A' ? 'ok' : ssl.grade === 'B' ? 'warn' : ssl.grade === 'Unknown' ? 'unknown' : 'bad';
+  let sslLabel = ssl.grade && ssl.grade !== 'Unknown' ? `Grade ${ssl.grade}` : 'Not inspected';
+
+  let urlScanStatus = urlScan.scanned ? (urlScan.verdict && urlScan.verdict.malicious ? 'bad' : 'ok') : 'unknown';
+  let urlScanLabel = urlScan.scanned ? (urlScan.verdict && urlScan.verdict.malicious ? 'Malicious verdict' : 'Clean') : (urlScan.note || urlScan.error || 'Not scanned');
+
+  let cveStatus = cves.severity === 'Critical' ? 'bad' : cves.severity === 'High' ? 'warn' : cves.severity === 'Medium' || cves.severity === 'Low' ? 'ok' : 'unknown';
+  let cveLabel = cves.cveCount > 0 ? `${cves.cveCount} CVEs · ${cves.severity}` : 'No CVEs found';
+
+  function dot(status) {
+    const cls = { ok: 'vi-dot-ok', warn: 'vi-dot-warn', bad: 'vi-dot-bad', unknown: 'vi-dot-unknown' }[status] || 'vi-dot-unknown';
+    return `<span class="vi-status-dot ${cls}"></span>`;
+  }
+
+  function section(id, icon, title, statusDot, statusLabel, bodyHtml) {
+    return `<div class="vi-section">
+      <div class="vi-section-header" onclick="toggleViSection('${id}')">
+        <div class="vi-section-title"><span class="vi-section-icon">${icon}</span>${title}</div>
+        <div class="vi-section-status">${dot(statusDot)}<span class="text-xs text-muted">${statusLabel}</span><span class="vi-section-chevron" id="vi-chev-${id}">▶</span></div>
+      </div>
+      <div class="vi-section-body" id="vi-body-${id}">${bodyHtml}</div>
+    </div>`;
+  }
+
+  const threatBody = threat.note ? `<div class="alert alert-info" style="margin:0">${threat.note}</div>` : `
+    <div class="vi-kv">
+      <div class="vi-kv-item"><label>Malicious</label><span style="color:${threat.malicious?'var(--risk-critical)':'var(--risk-low)'}">${threat.malicious?'Yes ✗':'No ✓'}</span></div>
+      <div class="vi-kv-item"><label>Phishing</label><span style="color:${threat.phishing?'var(--risk-critical)':'var(--risk-low)'}">${threat.phishing?'Yes ✗':'No ✓'}</span></div>
+      <div class="vi-kv-item"><label>Botnet</label><span style="color:${threat.botnet?'var(--risk-critical)':'var(--risk-low)'}">${threat.botnet?'Yes ✗':'No ✓'}</span></div>
+      <div class="vi-kv-item"><label>Spam</label><span style="color:${threat.spam?'var(--risk-high)':'var(--risk-low)'}">${threat.spam?'Yes ✗':'No ✓'}</span></div>
+    </div>
+    ${threat.categories && threat.categories.length ? `<div class="text-xs text-muted" style="margin-top:.3rem">Categories: <span style="color:var(--text)">${threat.categories.join(', ')}</span></div>` : ''}
+    ${threat.rank ? `<div class="text-xs text-muted" style="margin-top:.2rem">Global rank: <span style="color:var(--text)">#${threat.rank.toLocaleString()}</span></div>` : ''}`;
+
+  const urlBody = urlScan.note ? `<div class="alert alert-info" style="margin:0">${urlScan.note}</div>` : !urlScan.scanned ? `<div class="text-sm text-muted">${urlScan.error || 'URL scan not available'}</div>` : `
+    ${urlScan.tlsCert ? `<div class="vi-kv" style="margin-bottom:.5rem">
+      <div class="vi-kv-item"><label>TLS Issuer</label><span>${urlScan.tlsCert.issuer||'Unknown'}</span></div>
+      <div class="vi-kv-item"><label>Protocol</label><span>${urlScan.tlsCert.protocol||'Unknown'}</span></div>
+      <div class="vi-kv-item"><label>Valid To</label><span>${urlScan.tlsCert.validTo?new Date(urlScan.tlsCert.validTo).toLocaleDateString('en-GB'):'Unknown'}</span></div>
+    </div>` : ''}
+    <div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem">Security Headers</div>
+    <div class="vi-header-list">
+      ${Object.entries(urlScan.securityHeaders||{}).map(([h,present])=>`<span class="vi-header-badge ${present?'vi-header-present':'vi-header-missing'}">${present?'✓':'✗'} ${h}</span>`).join('')}
+    </div>
+    ${urlScan.technologies && urlScan.technologies.length ? `<div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.04em;margin:.6rem 0 .3rem">Detected Technologies</div>
+    <div class="vi-tech-list">${urlScan.technologies.map(t=>`<span class="vi-tech-chip">${t}</span>`).join('')}</div>` : ''}`;
+
+  const dnsBody = `<div class="vi-kv">
+    <div class="vi-kv-item"><label>DNSSEC</label><span style="color:${dns.dnssecEnabled?'var(--risk-low)':'var(--risk-critical)'}">${dns.dnssecEnabled?'Enabled ✓':'Not enabled ✗'}</span></div>
+    <div class="vi-kv-item"><label>MX Records</label><span style="color:${dns.hasMx?'var(--risk-low)':'var(--muted)'}">${dns.hasMx?`${dns.mxRecords&&dns.mxRecords.length} record(s) ✓`:'None found'}</span></div>
+    <div class="vi-kv-item"><label>SPF</label><span style="color:${dns.hasSPF?'var(--risk-low)':'var(--risk-medium)'}">${dns.hasSPF?'Present ✓':'Missing ✗'}</span></div>
+    <div class="vi-kv-item"><label>DMARC</label><span style="color:${dns.hasDMARC?'var(--risk-low)':'var(--risk-medium)'}">${dns.hasDMARC?'Present ✓':'Missing ✗'}</span></div>
+  </div>
+  ${dns.spfRecord ? `<div class="text-xs text-muted" style="margin-top:.3rem;font-family:monospace;word-break:break-all">${dns.spfRecord}</div>` : ''}
+  ${dns.dmarcRecord ? `<div class="text-xs text-muted" style="margin-top:.2rem;font-family:monospace;word-break:break-all">${dns.dmarcRecord}</div>` : ''}
+  ${dns.radarSummary ? `<div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.04em;margin:.6rem 0 .25rem">Cloudflare Radar DNS Data</div>
+  <div class="vi-kv">
+    ${dns.radarSummary.protocol && dns.radarSummary.protocol.HTTPS ? `<div class="vi-kv-item"><label>DNS-over-HTTPS</label><span>${dns.radarSummary.protocol.HTTPS}%</span></div>` : ''}
+    ${dns.radarSummary.topLocations && dns.radarSummary.topLocations.length ? `<div class="vi-kv-item"><label>Top Query Locations</label><span>${dns.radarSummary.topLocations.map(l=>l.clientCountryAlpha2||l.location||l).join(', ')}</span></div>` : ''}
+  </div>` : ''}`;
+
+  const sslBody = ssl.grade && ssl.grade !== 'Unknown' ? `<div class="vi-kv">
+    <div class="vi-kv-item"><label>Grade</label><span style="font-size:1.1rem;font-weight:800;color:${ssl.grade==='A+'||ssl.grade==='A'?'var(--risk-low)':ssl.grade==='B'?'var(--risk-medium)':'var(--risk-critical)'}">${ssl.grade}</span></div>
+    <div class="vi-kv-item"><label>Protocol</label><span>${ssl.protocol||'–'}</span></div>
+    <div class="vi-kv-item"><label>Mode</label><span>${ssl.mode||'–'}</span></div>
+    <div class="vi-kv-item"><label>Last checked</label><span>${ssl.fetchedAt?new Date(ssl.fetchedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}):'–'}</span></div>
+  </div>
+  ${ssl.findings && ssl.findings.length ? `<ul style="margin-top:.5rem;list-style:none;display:flex;flex-direction:column;gap:.2rem">${ssl.findings.map(f=>`<li class="text-xs text-muted" style="padding:.15rem 0;border-bottom:1px solid var(--border)">${f}</li>`).join('')}</ul>` : ''}` : `<div class="text-sm text-muted">SSL not yet inspected. Use the Vendor Registry to trigger an SSL check first.</div>
+  ${vendorMatch && vendorMatch.id ? `<button class="btn btn-sm btn-secondary" style="margin-top:.6rem" onclick="inspectSslFromIntel(${vendorMatch.id})">Run SSL Check</button>` : ''}`;
+
+  const cvesBody = cves.cveCount > 0 ? `<div class="vi-kv" style="margin-bottom:.5rem">
+    <div class="vi-kv-item"><label>CVE Count</label><span style="font-weight:700">${cves.cveCount}</span></div>
+    <div class="vi-kv-item"><label>Highest CVSS</label><span style="font-weight:700;color:${cves.severity==='Critical'?'var(--risk-critical)':cves.severity==='High'?'var(--risk-high)':cves.severity==='Medium'?'var(--risk-medium)':'var(--text)'}">${cves.highestCvss||'–'}</span></div>
+    <div class="vi-kv-item"><label>Severity</label><span class="badge badge-${cves.severity==='Critical'?'critical':cves.severity==='High'?'high':cves.severity==='Medium'?'medium':'low'}">${cves.severity}</span></div>
+    <div class="vi-kv-item"><label>Keyword</label><span class="font-mono text-xs">${cves.keyword||report.domain}</span></div>
+  </div>
+  ${cves.topCves && cves.topCves.length ? `<div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem">Top CVEs</div>
+  <div class="table-wrap"><table class="tech-table"><thead><tr><th>CVE ID</th><th>CVSS</th><th>Description</th></tr></thead><tbody>
+  ${cves.topCves.slice(0,5).map(c=>`<tr><td><a class="cve-link" href="${c.url}" target="_blank">${c.id}</a></td><td style="font-weight:700">${c.score||'–'}</td><td class="text-xs text-muted">${c.description||''}</td></tr>`).join('')}
+  </tbody></table></div>` : ''}` : `<div class="text-sm text-muted">No CVEs found for this vendor name in the NVD database.</div>`;
+
+  const breakdownHtml = Object.entries(breakdown).map(([k, v]) => {
+    const pct = v.deduction === 0 ? 100 : Math.max(0, Math.round((1 - v.deduction / (v.max || 1)) * 100));
+    const col = v.deduction === 0 ? 'var(--risk-low)' : v.deduction >= v.max ? 'var(--risk-critical)' : 'var(--risk-medium)';
+    return `<div class="risk-bar-row"><div class="risk-bar-label text-xs">${v.label}</div><div class="risk-bar-track"><div class="risk-bar-fill" style="width:${pct}%;background:${col}"></div></div><div class="risk-bar-val text-xs" style="color:${col}">${v.deduction === 0 ? '✓' : '-'+v.deduction}</div></div>`;
+  }).join('');
+
+  return `
+  <div class="vi-scorecard">
+    <div class="vi-scorecard-header">
+      <div class="vi-grade-circle ${gradeClass}">${grade}</div>
+      <div class="vi-scorecard-meta">
+        <div class="vi-scorecard-domain">${vendorName}</div>
+        <div class="vi-scorecard-sub">${report.domain}</div>
+        ${score !== null ? `<div class="vi-scorecard-score">Risk score: ${score}/100</div>` : ''}
+        ${threat.malicious ? `<div class="badge badge-critical" style="margin-top:.35rem">⚠ Malicious domain detected</div>` : ''}
+      </div>
+      ${breakdownHtml ? `<div class="risk-bars" style="min-width:180px;max-width:220px">${breakdownHtml}</div>` : ''}
+    </div>
+    <div class="vi-sections">
+      ${section('threat', '🔍', 'Threat Intelligence', threatStatus, threatLabel, threatBody)}
+      ${section('urlscan', '🔗', 'URL Scan Results', urlScanStatus, urlScanLabel, urlBody)}
+      ${section('dns', '🌐', 'DNS Health', dnsStatus, dnsLabel, dnsBody)}
+      ${section('ssl', '🔒', 'SSL Grade', sslStatus, sslLabel, sslBody)}
+      ${section('cves', '⚠', 'Known CVEs', cveStatus, cveLabel, cvesBody)}
+    </div>
+  </div>
+  ${cachedNote}`;
+}
+
+function toggleViSection(id) {
+  const body = document.getElementById(`vi-body-${id}`);
+  const chev = document.getElementById(`vi-chev-${id}`);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (chev) chev.textContent = open ? '▼' : '▶';
+}
+
+async function inspectSslFromIntel(vendorId) {
+  try {
+    await api.post(`/api/risk/ssl/${vendorId}`, {});
+    const inp = document.getElementById('vi-domain-input');
+    if (inp && inp.value) runVendorIntelScan();
+  } catch(err) {
+    alert('SSL inspection failed: ' + (err.error || err.message || 'Unknown error'));
+  }
 }
 
 // ─── GitHub Sync ──────────────────────────────────────────────────────────────

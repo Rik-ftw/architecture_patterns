@@ -495,3 +495,4 @@ module.exports.buildScaSignals = buildScaSignals;
 module.exports.buildScaSignalsAsync = buildScaSignalsAsync;
 module.exports.getSslCacheForDomain = getSslCacheForDomain;
 module.exports.extractTechKeywords = extractTechKeywords;
+module.exports.fetchNvdData = fetchNvdData;

@@ -166,5 +166,35 @@
       "fetchedAt": "2026-04-01T21:33:40.976Z"
     },
     "fetchedAt": 1775079220976
+  },
+  "claroty": {
+    "data": {
+      "keyword": "claroty",
+      "cveCount": 3,
+      "highestCvss": 7.7,
+      "severity": "High",
+      "topCves": [
+        {
+          "id": "CVE-2024-7847",
+          "score": 7.7,
+          "description": "VULNERABILITY DETAILS\n\nRockwell Automation used the latest versions of the CVSS scoring system to assess the following v...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-7847"
+        },
+        {
+          "id": "CVE-2025-54603",
+          "score": 6.5,
+          "description": "An incorrect OIDC authentication flow in Claroty Secure Access 3.3.0 through 4.0.2 can result in unauthorized user creat...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54603"
+        },
+        {
+          "id": "CVE-2021-32958",
+          "score": 5.5,
+          "description": "Successful exploitation of this vulnerability on Claroty Secure Remote Access (SRA) Site versions 3.0 through 3.2 allows...",
+          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-32958"
+        }
+      ],
+      "fetchedAt": "2026-04-01T22:15:22.867Z"
+    },
+    "fetchedAt": 1775081722867
   }
 }

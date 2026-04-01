@@ -1,0 +1,79 @@
+{
+  "claroty.com": {
+    "data": {
+      "domain": "claroty.com",
+      "fetchedAt": "2026-04-01T22:18:24.547Z",
+      "cached": false,
+      "dns": {
+        "dnssecEnabled": false,
+        "dnssecStatus": "OK",
+        "dnssecAuthenticated": false,
+        "hasMx": true,
+        "mxRecords": [
+          "1 mxa-00829901.gslb.pphosted.com.",
+          "1 mxb-00829901.gslb.pphosted.com."
+        ],
+        "hasSPF": true,
+        "hasDMARC": false,
+        "spfRecord": "v=spf1 include:_spf.google.com include:%{ir}.%{v}.%{d}.spf.has.pphosted.com ~all",
+        "dmarcRecord": null
+      },
+      "threat": {
+        "malicious": false,
+        "phishing": false,
+        "botnet": false,
+        "spam": false,
+        "categories": [],
+        "note": "Cloudflare Radar token not configured — threat intel unavailable"
+      },
+      "urlScan": {
+        "scanned": false,
+        "note": "Cloudflare Radar token not configured — URL scan unavailable",
+        "securityHeaders": {},
+        "technologies": [],
+        "tlsCert": null,
+        "verdict": {
+          "malicious": false,
+          "categories": [],
+          "tags": []
+        }
+      },
+      "ssl": {
+        "grade": "Unknown",
+        "protocol": "Unknown",
+        "findings": [
+          "Cloudflare API token not configured"
+        ],
+        "fetchedAt": "2026-04-01T21:31:11.599Z"
+      },
+      "cves": {
+        "keyword": "claroty",
+        "cveCount": 3,
+        "highestCvss": 7.7,
+        "severity": "High",
+        "topCves": [
+          {
+            "id": "CVE-2024-7847",
+            "score": 7.7,
+            "description": "VULNERABILITY DETAILS\n\nRockwell Automation used the latest versions of the CVSS scoring system to assess the following v...",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-7847"
+          },
+          {
+            "id": "CVE-2025-54603",
+            "score": 6.5,
+            "description": "An incorrect OIDC authentication flow in Claroty Secure Access 3.3.0 through 4.0.2 can result in unauthorized user creat...",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2025-54603"
+          },
+          {
+            "id": "CVE-2021-32958",
+            "score": 5.5,
+            "description": "Successful exploitation of this vulnerability on Claroty Secure Remote Access (SRA) Site versions 3.0 through 3.2 allows...",
+            "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-32958"
+          }
+        ],
+        "fetchedAt": "2026-04-01T22:15:22.867Z"
+      }
+    },
+    "fetchedAt": 1775081904626
+  }
+}
