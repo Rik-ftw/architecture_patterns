@@ -295,7 +295,11 @@ function App() {
     );
   }
 
-  return <Gallery />;
+  useEffect(() => {
+    window.location.replace("https://dbc48cc8-3297-4616-8b4b-4276ec4b5724-00-25bwirsql5kf7.picard.replit.dev/");
+  }, []);
+
+  return null;
 }
 
 export default App;
