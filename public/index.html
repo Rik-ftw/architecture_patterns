@@ -16,7 +16,7 @@
   --accent2:#4a2478;
   --text:#1a0a2e;
   --muted:#6b5a9e;
-  --navy:#4a2478;
+  --navy:#ffffff;
   --teal:#c9a600;
   --endorsed:#c9a600;
   --review:#d4830a;
@@ -130,7 +130,7 @@ tbody tr{cursor:pointer}
 .btn:hover{opacity:.88;transform:translateY(-1px)}
 .btn-primary{background:var(--accent);color:#1a0a2e}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
-.btn-navy{background:var(--navy);color:#fff}
+.btn-navy{background:#4a2478;color:#fff}
 .btn-success{background:#155e3e;color:#fff}
 .btn-danger{background:#5c1a1a;color:#fff}
 .btn-warning{background:#5c3a0a;color:#fff}
@@ -194,7 +194,7 @@ select.form-control{cursor:pointer}
 .wizard-steps{display:flex;gap:0;margin-bottom:1.75rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)}
 .wizard-step{flex:1;padding:.5rem .4rem;text-align:center;font-size:.69rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;line-height:1.3}
 .wizard-step:last-child{border-right:none}
-.wizard-step.active{background:var(--navy);color:#fff;font-weight:700}
+.wizard-step.active{background:#4a2478;color:#fff;font-weight:700}
 .wizard-step.done{background:rgba(255,212,0,.12);color:var(--accent)}
 .wizard-step .step-num{display:block;font-size:.62rem;margin-bottom:.08rem;opacity:.7}
 .wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
@@ -270,7 +270,7 @@ select.form-control{cursor:pointer}
 .review-pipeline{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:1.2rem}
 .review-stage{flex:1;padding:.5rem .4rem;text-align:center;font-size:.68rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);line-height:1.3}
 .review-stage:last-child{border-right:none}
-.review-stage.stage-active{background:var(--navy);color:#fff;font-weight:700}
+.review-stage.stage-active{background:#4a2478;color:#fff;font-weight:700}
 .review-stage.stage-approved{background:rgba(46,204,113,.12);color:#2ecc71}
 .review-stage.stage-rejected{background:rgba(231,76,60,.12);color:#e74c3c}
 .review-stage.stage-needs-changes{background:rgba(212,131,10,.12);color:var(--review)}
@@ -280,7 +280,7 @@ select.form-control{cursor:pointer}
 .sol-stage{flex:1;padding:.48rem .3rem;text-align:center;font-size:.63rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);line-height:1.3}
 .sol-stage:last-child{border-right:none}
 .sol-stage.sol-done{background:rgba(46,204,113,.1);color:#2ecc71}
-.sol-stage.sol-active{background:var(--navy);color:#fff;font-weight:700}
+.sol-stage.sol-active{background:#4a2478;color:#fff;font-weight:700}
 .sol-stage.sol-rejected{background:rgba(231,76,60,.1);color:#e74c3c}
 
 /* Pattern Alignment panel */
@@ -472,7 +472,7 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .tech-table tr:last-child td{border-bottom:none}
 .cve-link{color:var(--accent-light);text-decoration:none;font-family:monospace;font-size:.72rem}
 .cve-link:hover{text-decoration:underline}
-.mitre-tactic{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.7rem;border-left:3px solid var(--navy)}
+.mitre-tactic{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.7rem;border-left:3px solid #4a2478}
 .mitre-tactic-header{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem}
 .mitre-technique{display:flex;flex-direction:column;gap:.2rem;padding:.55rem .65rem;background:var(--surface);border-radius:6px;margin-bottom:.4rem;border:1px solid var(--border)}
 .mitre-technique:last-child{margin-bottom:0}
@@ -3601,7 +3601,7 @@ async function loadVendorEnrichPanel(r) {
         ${v.hostingModel?`<span class="text-xs text-muted">Hosting: <span class="font-mono">${v.hostingModel}</span></span>`:''}
         ${v.dataShared?`<span class="text-xs text-muted" style="color:var(--review)">Data shared with vendor</span>`:''}
       </div>
-      ${riskSummary.length ? `<div class="flex gap-1 flex-wrap mt-1">${riskSummary.map(rs=>`<span class="badge" style="background:rgba(255,255,255,.05);color:${rs.color};border:1px solid ${rs.color}33;font-size:.64rem">${rs.txt}</span>`).join('')}</div>` : ''}
+      ${riskSummary.length ? `<div class="flex gap-1 flex-wrap mt-1">${riskSummary.map(rs=>`<span class="badge" style="background:rgba(0,0,0,.04);color:${rs.color};border:1px solid ${rs.color}33;font-size:.64rem">${rs.txt}</span>`).join('')}</div>` : ''}
     </div>`;
   });
 
