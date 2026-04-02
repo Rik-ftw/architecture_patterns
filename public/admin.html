@@ -210,7 +210,7 @@ async function doLogin() {
   const t = document.getElementById('token-input').value.trim();
   if (!t) return;
   try {
-    const r = await apiFetch('/api/admin/stats', { headers: { 'X-Admin-Token': t } });
+    const r = await apiFetch('/api/admin/ping', { headers: { 'X-Admin-Token': t } });
     if (r.error) throw new Error(r.error);
     ADMIN_TOKEN = t;
     document.getElementById('login-screen').style.display = 'none';

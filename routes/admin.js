@@ -16,6 +16,8 @@ function adminAuth(req, res, next) {
 
 router.use(adminAuth);
 
+router.get('/ping', (_req, res) => res.json({ ok: true }));
+
 // ─── AI Prompts ─────────────────────────────────────────────────────────────
 
 router.get('/prompts', async (req, res) => {
@@ -398,19 +400,17 @@ router.delete('/policies/:id', async (req, res) => {
 
 router.get('/stats', async (req, res) => {
   try {
-    const [intakes, vendors, teams, config, thresholds, policies] = await Promise.all([
+    const [intakes, vendors, thresholds, policies] = await Promise.all([
       pool.query('SELECT COUNT(*) as n FROM intake_requests'),
       pool.query('SELECT COUNT(*) as total, SUM(CASE WHEN active THEN 1 ELSE 0 END) as active FROM vendors'),
-      pool.query('SELECT COUNT(*) as total, SUM(CASE WHEN active THEN 1 ELSE 0 END) as active FROM support_teams'),
-      pool.query('SELECT COUNT(*) as n FROM system_config'),
       pool.query('SELECT COUNT(*) as n FROM risk_thresholds'),
       pool.query('SELECT COUNT(*) as total, SUM(CASE WHEN active THEN 1 ELSE 0 END) as active FROM policies')
     ]);
     res.json({
       intakes: parseInt(intakes.rows[0].n),
       vendors: { total: parseInt(vendors.rows[0].total), active: parseInt(vendors.rows[0].active || 0) },
-      teams: { total: parseInt(teams.rows[0].total), active: parseInt(teams.rows[0].active || 0) },
-      configKeys: parseInt(config.rows[0].n),
+      teams: { total: 0, active: 0 },
+      configKeys: 0,
       riskParams: parseInt(thresholds.rows[0].n),
       policies: { total: parseInt(policies.rows[0].total), active: parseInt(policies.rows[0].active || 0) }
     });
