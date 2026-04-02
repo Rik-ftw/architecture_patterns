@@ -56,6 +56,7 @@ app.use('/api/intake', require('./routes/intake'));
 app.use('/api/solutions', require('./routes/jiraEpics'));
 app.use('/api/solutions', require('./routes/solutions'));
 app.use('/api/ai', require('./routes/aiReview'));
+app.use('/api/ai', require('./routes/aiTriage'));
 app.use('/api/github', require('./routes/github'));
 app.use('/api/operational-support', require('./routes/operationalSupport'));
 app.use('/api/risk', require('./routes/riskEnrichment'));

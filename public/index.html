@@ -2039,6 +2039,7 @@ async function showIntakeDetail(id) {
       <button class="btn btn-sm" id="ai-review-btn" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.35)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ ${r.aiReview?'Regenerate':'Generate'} AI Review</button>
       <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
       <button class="btn btn-sm" id="iac-btn" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ ${r.iacCode?'Regenerate':'Generate'} IaC</button>
+      <button class="btn btn-sm" id="triage-btn" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" onclick="runAITriage('${r.id}','${r.reference_id}')">⚡ ${r.triageResult?'Re-run':'Run'} AI Triage</button>
       ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
     ${['Approved','Approved with Conditions'].includes(r.status)?renderIntakeSolutionBridge(r):''}
@@ -2080,6 +2081,7 @@ async function showIntakeDetail(id) {
   <div>
     <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
     <div id="iac-panel">${r.iacCode?renderIaCPanel(r.iacCode,'intake',r.id,r.reference_id):`<div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate production-grade Terraform code for this architecture — providers, resources, variables, outputs, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ Generate IaC</button></div>`}</div>
+    <div id="triage-panel">${r.triageResult?renderTriagePanel(r.triageResult,r.triageRoutingLane,r.triageCompositeScore,r.triageRiskTier,r.triageCompletedAt):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">⚡</div><div style="font-size:.82rem;font-weight:700;color:#fbbf24;margin-bottom:.3rem">AI Triage Pipeline</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Run the 7-stage LangChain triage pipeline — completeness check, classification, pattern matching, vendor analysis, risk scoring, routing decision, and executive summary.</p><button class="btn btn-sm" style="background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" onclick="runAITriage('${r.id}','${r.reference_id}')">⚡ Run AI Triage</button></div>`}</div>
     ${r.risk_tier&&r.riskBreakdown?renderRiskDeepDive(r):''}
     ${r.history&&r.history.length?`<div class="section-card mt-2"><h3>Audit History</h3><div class="history-list">${r.history.map(h2=>`<div class="history-item"><div class="history-dot"></div><div><div class="history-text font-bold">${h2.action}${h2.actor?' by '+h2.actor:''}</div>${h2.notes?`<div class="text-xs text-muted">${h2.notes}</div>`:''}<div class="history-time">${fmtDate(h2.created_at)}</div></div></div>`).join('')}</div></div>`:''}
   </div></div>`;
@@ -3619,6 +3621,208 @@ async function generateAIReview(intakeId, refId) {
     if (panel) panel.innerHTML = `<div class="alert alert-danger">AI review failed: ${e.error || e.message || 'Unknown error'}. Check that your ANTHROPIC_API_KEY is valid.</div>`;
     if (btn) { btn.textContent = '⊕ Generate AI Review'; btn.disabled = false; }
   }
+}
+
+// ─── AI Triage Pipeline ────────────────────────────────────────────────────────
+const TRIAGE_STAGE_LABELS = {
+  completeness: 'Completeness Check',
+  classification: 'Classification',
+  pattern_matching: 'Pattern Matching',
+  vendor_analysis: 'Vendor Analysis',
+  risk_scoring: 'Risk Scoring',
+  routing: 'Routing Decision',
+  executive_summary: 'Executive Summary',
+};
+
+async function runAITriage(intakeId, refId) {
+  const panel = document.getElementById('triage-panel');
+  const btn = document.getElementById('triage-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⟳ Running…'; }
+
+  const stages = Object.keys(TRIAGE_STAGE_LABELS);
+  const stageState = {};
+  stages.forEach(s => { stageState[s] = 'pending'; });
+
+  const renderProgress = () => {
+    let h = `<div class="ai-panel"><h3>⚡ AI Triage Pipeline <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">Running…</span></h3>`;
+    h += `<div style="margin-bottom:.9rem">`;
+    stages.forEach((s, i) => {
+      const st = stageState[s];
+      const color = st === 'complete' ? '#22c55e' : st === 'running' ? '#fbbf24' : st === 'error' ? '#f87171' : 'var(--muted)';
+      const icon = st === 'complete' ? '✓' : st === 'running' ? '⟳' : st === 'error' ? '✗' : '○';
+      h += `<div style="display:flex;align-items:center;gap:.5rem;padding:.28rem 0;font-size:.8rem">
+        <span style="color:${color};width:1rem;text-align:center;font-size:.75rem">${icon}</span>
+        <span style="color:${color}">${TRIAGE_STAGE_LABELS[s]}</span>
+      </div>`;
+    });
+    h += `</div></div>`;
+    if (panel) panel.innerHTML = h;
+  };
+
+  renderProgress();
+
+  let evtSource = null;
+  try {
+    evtSource = new EventSource(`/api/ai/triage/stream/${intakeId}`);
+    evtSource.onmessage = (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        if (data.stage && data.event === 'start') { stageState[data.stage] = 'running'; renderProgress(); }
+        else if (data.stage && data.event === 'complete') { stageState[data.stage] = 'complete'; renderProgress(); }
+      } catch {}
+    };
+    evtSource.onerror = () => { if (evtSource) evtSource.close(); };
+  } catch {}
+
+  try {
+    const result = await api.post('/api/ai/triage', { requestId: intakeId });
+    if (evtSource) evtSource.close();
+    if (panel) panel.innerHTML = renderTriagePanel(result.triage, result.triage?.routingLane, result.triage?.compositeScore, result.triage?.riskTier, new Date().toISOString());
+    if (btn) { btn.textContent = '↺ Re-run AI Triage'; btn.disabled = false; }
+    if (S.currentIntake) { S.currentIntake.triageResult = result.triage; S.currentIntake.triageRoutingLane = result.triage?.routingLane; }
+  } catch(e) {
+    if (evtSource) evtSource.close();
+    if (panel) panel.innerHTML = `<div class="ai-panel"><div class="alert alert-danger">Triage failed: ${e.error || e.message || 'Unknown error'}. Check ANTHROPIC_API_KEY.</div></div>`;
+    if (btn) { btn.textContent = '⚡ Run AI Triage'; btn.disabled = false; }
+  }
+}
+
+function renderTriagePanel(triage, routingLane, compositeScore, riskTier, completedAt) {
+  if (!triage) return '';
+  const halted = triage.halted;
+
+  const laneColors = {
+    'Fast Track': { bg: 'rgba(34,197,94,.15)', color: '#22c55e', border: 'rgba(34,197,94,.3)' },
+    'Standard': { bg: 'rgba(96,165,250,.15)', color: '#60a5fa', border: 'rgba(96,165,250,.3)' },
+    'Complex': { bg: 'rgba(251,191,36,.15)', color: '#fbbf24', border: 'rgba(251,191,36,.3)' },
+    'Exception': { bg: 'rgba(248,113,113,.15)', color: '#f87171', border: 'rgba(248,113,113,.3)' },
+  };
+  const verdictColors = {
+    'Proceed': 'badge-endorsed',
+    'Proceed with Conditions': 'ai-badge-conditions',
+    'Rework Required': 'ai-badge-rework',
+    'Escalate': 'ai-badge-major',
+  };
+
+  const lane = routingLane || triage.routingLane;
+  const lc = laneColors[lane] || laneColors['Standard'];
+  const execSum = triage.executiveSummary || triage.stages?.executive_summary;
+  const routing = triage.stages?.routing;
+  const riskScoring = triage.stages?.risk_scoring;
+  const patternMatch = triage.stages?.pattern_matching;
+  const vendorAnalysis = triage.stages?.vendor_analysis;
+  const classification = triage.stages?.classification;
+
+  let h = `<div class="ai-panel">
+    <h3>⚡ AI Triage Pipeline <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">${completedAt ? new Date(completedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</span></h3>`;
+
+  if (halted) {
+    const completeness = triage.stages?.completeness;
+    h += `<div class="alert alert-warning" style="margin-bottom:.8rem">
+      <strong>⚠ Triage Halted — Incomplete Submission</strong>
+      <p class="text-sm mt-1">Completeness score: ${Math.round((triage.completenessScore || 0) * 100)}% (minimum 60% required)</p>
+      ${triage.missingFields?.length ? `<div class="mt-1"><span class="text-xs font-bold text-muted">Missing fields:</span> <span class="text-xs">${triage.missingFields.join(', ')}</span></div>` : ''}
+      ${triage.unclearFields?.length ? `<div class="mt-1"><span class="text-xs font-bold text-muted">Needs clarification:</span> <span class="text-xs">${triage.unclearFields.join(', ')}</span></div>` : ''}
+    </div>`;
+    h += `</div>`;
+    return h;
+  }
+
+  h += `<div class="flex gap-2 items-center" style="margin-bottom:.9rem;flex-wrap:wrap">
+    ${lane ? `<span style="background:${lc.bg};color:${lc.color};border:1px solid ${lc.border};padding:.25rem .65rem;border-radius:6px;font-size:.78rem;font-weight:700">${lane}</span>` : ''}
+    ${compositeScore != null ? `<span class="badge" style="background:var(--surface2);color:var(--text)">Risk Score: ${compositeScore}/100</span>` : ''}
+    ${riskTier ? `<span class="badge badge-${(riskTier||'').toLowerCase()}">${riskTier} Risk</span>` : ''}
+    ${execSum?.overallVerdict ? `<span class="badge ${verdictColors[execSum.overallVerdict] || 'badge-dev'}">${execSum.overallVerdict}</span>` : ''}
+  </div>`;
+
+  if (execSum?.headline) {
+    h += `<div style="background:rgba(251,191,36,.07);border-radius:8px;padding:.7rem;margin-bottom:.8rem;font-size:.84rem;font-weight:600;border-left:3px solid #fbbf24">${execSum.headline}</div>`;
+  }
+
+  if (execSum?.executiveSummary) {
+    h += `<div style="background:var(--surface2);border-radius:8px;padding:.7rem;margin-bottom:.8rem;font-size:.82rem;line-height:1.6">${execSum.executiveSummary}</div>`;
+  }
+
+  const stages = Object.keys(TRIAGE_STAGE_LABELS);
+  h += `<div style="margin-bottom:.85rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Pipeline Stages</div>`;
+  h += `<div style="display:flex;flex-wrap:wrap;gap:.3rem">`;
+  stages.forEach(s => {
+    const completed = triage.stages && triage.stages[s];
+    h += `<span style="padding:.2rem .5rem;border-radius:4px;font-size:.67rem;background:${completed?'rgba(34,197,94,.12)':'var(--surface2)'};color:${completed?'#22c55e':'var(--muted)'};border:1px solid ${completed?'rgba(34,197,94,.25)':'var(--border)'}">${completed?'✓':''} ${TRIAGE_STAGE_LABELS[s]}</span>`;
+  });
+  h += `</div></div>`;
+
+  if (riskScoring?.dimensions) {
+    h += `<div style="margin-bottom:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">5-Dimension Risk Scores</div>`;
+    const dims = riskScoring.dimensions;
+    const dimLabels = { securityRisk:'Security', dataRisk:'Data', vendorRisk:'Vendor', complexityRisk:'Complexity', patternRisk:'Pattern' };
+    const dimColors = { securityRisk:'#f87171', dataRisk:'#fbbf24', vendorRisk:'#fb923c', complexityRisk:'#60a5fa', patternRisk:'#a78bfa' };
+    Object.entries(dimLabels).forEach(([k,label]) => {
+      const d = dims[k];
+      if (!d) return;
+      h += `<div class="ai-score-row"><div class="ai-score-label">${label}</div><div class="ai-score-track"><div class="ai-score-fill" style="width:${d.score}%;background:${dimColors[k]}"></div></div><div class="ai-score-val">${d.score}</div></div>`;
+    });
+    h += `</div>`;
+  }
+
+  if (patternMatch?.matchedPatterns?.length) {
+    h += `<div style="margin-bottom:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Matched Patterns</div>`;
+    h += `<div class="tag-list">`;
+    patternMatch.matchedPatterns.slice(0, 5).forEach(p => {
+      const pct = Math.round((p.relevanceScore || 0) * 100);
+      h += `<span class="badge badge-endorsed" style="font-size:.67rem" title="${p.matchReason||''}">${p.patternId}: ${p.patternName} (${pct}%)</span>`;
+    });
+    h += `</div></div>`;
+  }
+
+  if (vendorAnalysis?.registeredVendorFlags?.length || vendorAnalysis?.newVendorFlags?.length) {
+    h += `<div style="margin-bottom:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem">Vendor Status</div>`;
+    (vendorAnalysis.registeredVendorFlags||[]).forEach(v => {
+      if (v.concern) h += `<div class="text-xs" style="padding:.2rem 0"><span style="color:${v.approvalStatus==='Approved'?'var(--endorsed)':'#fbbf24'}">${v.approvalStatus === 'Approved' ? '✓' : '⚠'}</span> ${v.vendorName}: ${v.concern}</div>`;
+    });
+    (vendorAnalysis.newVendorFlags||[]).forEach(v => {
+      h += `<div class="text-xs" style="padding:.2rem 0;color:#f87171">⚠ New vendor: ${v.vendorName} — ${(v.riskFactors||[]).join(', ')}</div>`;
+    });
+    h += `</div>`;
+  }
+
+  if (routing) {
+    h += `<div style="margin-bottom:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem">Routing Decision</div>`;
+    h += `<div class="kv-grid" style="font-size:.78rem">`;
+    if (routing.reviewType) h += `<div class="kv-item"><label>Review Type</label><span>${routing.reviewType}</span></div>`;
+    if (routing.assignedTeam) h += `<div class="kv-item"><label>Assigned Team</label><span>${routing.assignedTeam}</span></div>`;
+    if (routing.estimatedReviewTime) h += `<div class="kv-item"><label>Est. Review Time</label><span>${routing.estimatedReviewTime}</span></div>`;
+    if (routing.priority) h += `<div class="kv-item"><label>Priority</label><span>${routing.priority}</span></div>`;
+    h += `</div>`;
+    if (routing.routingRationale) h += `<p class="text-xs text-muted mt-1" style="line-height:1.5">${routing.routingRationale}</p>`;
+    if (routing.prerequisites?.length) h += `<div class="mt-1"><span class="text-xs font-bold text-muted">Prerequisites:</span><ul style="margin:.2rem 0 0 1rem">${routing.prerequisites.map(p=>`<li class="text-xs text-muted" style="padding:.1rem 0">${p}</li>`).join('')}</ul></div>`;
+    h += `</div>`;
+  }
+
+  if (execSum?.keyRisks?.length) {
+    const sevOrder = ['Critical','High','Medium','Low'];
+    const sevColors = { Critical:'#f87171', High:'#fb923c', Medium:'#fbbf24', Low:'#60a5fa' };
+    const sorted = [...execSum.keyRisks].sort((a,b)=>sevOrder.indexOf(a.severity)-sevOrder.indexOf(b.severity));
+    h += `<div style="margin-bottom:.8rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.35rem">Key Risks</div>`;
+    sorted.slice(0,4).forEach(risk => {
+      h += `<div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;margin-bottom:.3rem;border-left:3px solid ${sevColors[risk.severity]||'var(--border)'}">
+        <div class="flex justify-between items-center"><span class="text-xs font-bold">${risk.risk}</span><span style="font-size:.65rem;color:${sevColors[risk.severity]||'var(--muted)'}">${risk.severity}</span></div>
+        ${risk.mitigation?`<div class="text-xs text-muted mt-1">${risk.mitigation}</div>`:''}
+      </div>`;
+    });
+    h += `</div>`;
+  }
+
+  if (execSum?.mustDoBeforeApproval?.length) {
+    h += `<div style="margin-bottom:.7rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Must Do Before Approval</div><ul style="margin:0 0 0 .8rem">${execSum.mustDoBeforeApproval.slice(0,5).map(a=>`<li class="text-xs" style="padding:.15rem 0;color:#fbbf24">${a}</li>`).join('')}</ul></div>`;
+  }
+
+  if (execSum?.shouldConsider?.length) {
+    h += `<div style="margin-bottom:.7rem"><div class="text-xs text-muted font-bold" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:.3rem">Recommendations</div><ul style="margin:0 0 0 .8rem">${execSum.shouldConsider.slice(0,4).map(a=>`<li class="text-xs text-muted" style="padding:.15rem 0">${a}</li>`).join('')}</ul></div>`;
+  }
+
+  h += `</div>`;
+  return h;
 }
 
 function renderAIPanel(review) {

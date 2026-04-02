@@ -235,6 +235,13 @@ async function initDb() {
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS iac_code TEXT`,
     `ALTER TABLE operational_support ADD COLUMN IF NOT EXISTS solution_id INTEGER`,
     `ALTER TABLE operational_support ADD COLUMN IF NOT EXISTS solution_reference TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_result TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_status TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_routing_lane TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_composite_score INTEGER`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_risk_tier TEXT`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_started_at TIMESTAMPTZ`,
+    `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS triage_completed_at TIMESTAMPTZ`,
   ];
   for (const sql of addCols) {
     try { await pool.query(sql); } catch {}
