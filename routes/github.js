@@ -122,7 +122,7 @@ router.post('/sync-patterns', async (req, res) => {
       }
     }
 
-    const solResult = await pool.query(`SELECT * FROM solution_designs WHERE status='Approved'`);
+    const solResult = await pool.query(`SELECT * FROM solution_designs WHERE status IN ('Approved','Published')`);
     const approvedSolutions = solResult.rows;
     const solutionCount = approvedSolutions.length;
 
@@ -152,10 +152,10 @@ router.post('/sync-patterns', async (req, res) => {
 
 router.post('/sync-solutions', async (req, res) => {
   try {
-    const solResult = await pool.query(`SELECT * FROM solution_designs WHERE status='Approved'`);
+    const solResult = await pool.query(`SELECT * FROM solution_designs WHERE status IN ('Approved','Published')`);
     const approvedSolutions = solResult.rows;
     if (!approvedSolutions.length) {
-      return res.status(400).json({ error: 'No approved solutions to sync' });
+      return res.status(400).json({ error: 'No approved or published solutions to sync' });
     }
 
     await ensureBranchExists();

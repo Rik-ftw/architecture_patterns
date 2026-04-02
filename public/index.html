@@ -200,6 +200,43 @@ select.form-control{cursor:pointer}
 .review-stage.stage-approved{background:rgba(46,204,113,.12);color:#2ecc71}
 .review-stage.stage-rejected{background:rgba(231,76,60,.12);color:#e74c3c}
 .review-stage.stage-needs-changes{background:rgba(212,131,10,.12);color:var(--review)}
+
+/* Solution pipeline bar */
+.sol-pipeline{display:flex;gap:0;border-radius:8px;overflow:hidden;border:1px solid var(--border);margin-bottom:1.2rem}
+.sol-stage{flex:1;padding:.48rem .3rem;text-align:center;font-size:.63rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);line-height:1.3}
+.sol-stage:last-child{border-right:none}
+.sol-stage.sol-done{background:rgba(46,204,113,.1);color:#2ecc71}
+.sol-stage.sol-active{background:var(--navy);color:#fff;font-weight:700}
+.sol-stage.sol-rejected{background:rgba(231,76,60,.1);color:#e74c3c}
+
+/* Pattern Alignment panel */
+.align-row{display:flex;align-items:flex-start;gap:.65rem;padding:.55rem .7rem;background:var(--surface2);border-radius:7px;margin-bottom:.4rem;border-left:3px solid var(--border)}
+.align-row.align-Aligned{border-left-color:#2ecc71}
+.align-row.align-Conditional{border-left-color:var(--review)}
+.align-row.align-Deviation{border-left-color:var(--risk-critical)}
+.align-row.align-Pending{border-left-color:var(--border)}
+.align-pill{display:inline-flex;align-items:center;font-size:.63rem;font-weight:700;padding:.12rem .45rem;border-radius:4px;white-space:nowrap}
+.align-Aligned{background:rgba(46,204,113,.15);color:#2ecc71}
+.align-Conditional{background:rgba(212,131,10,.15);color:var(--review)}
+.align-Deviation{background:rgba(231,76,60,.15);color:var(--risk-critical)}
+.align-Pending{background:var(--surface2);color:var(--muted)}
+
+/* Design iteration log */
+.iter-item{display:flex;gap:.65rem;align-items:flex-start;padding:.52rem .7rem;border-radius:7px;background:var(--surface2);margin-bottom:.35rem;border-left:3px solid var(--accent)}
+.iter-label{font-size:.75rem;font-weight:700;color:var(--accent)}
+.iter-meta{font-size:.67rem;color:var(--muted);margin-top:.12rem}
+.iter-summary{font-size:.78rem;margin-top:.1rem;line-height:1.5}
+
+/* Solution output tabs */
+.output-tab-bar{display:flex;gap:.12rem;margin-bottom:.8rem;border-bottom:1px solid var(--border)}
+.output-tab{padding:.42rem .9rem;cursor:pointer;font-size:.8rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
+.output-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.output-tab-panel{display:none}
+.output-tab-panel.active{display:block}
+
+/* Begin Solution Design button */
+.begin-solution-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:7px;font-size:.82rem;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,rgba(255,212,0,.25),rgba(255,212,0,.12));color:var(--accent);border:1px solid rgba(255,212,0,.45);transition:all .15s}
+.begin-solution-btn:hover{background:linear-gradient(135deg,rgba(255,212,0,.35),rgba(255,212,0,.18));transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,212,0,.15)}
 .review-artifact{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.55rem;border-left:3px solid var(--border)}
 .review-artifact.art-approved{border-left-color:#2ecc71}
 .review-artifact.art-rejected{border-left-color:#e74c3c}
@@ -937,7 +974,7 @@ function showSolutionsList(opts2) {
     <input class="search-bar" style="margin-bottom:0;flex:1;min-width:180px" placeholder="Search by title, reference, pattern ID, owner..." value="${fOpts.search||''}" oninput="showSolutionsList({...S._solutionFilters,search:this.value})"/>
     <select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,status:this.value})">
       <option value="All" ${fStatus==='All'?'selected':''}>All Statuses</option>
-      ${['Draft','In Review','Needs Changes','Approved','Rejected'].map(st=>`<option value="${st}" ${fStatus===st?'selected':''}>${st}</option>`).join('')}
+      ${['Draft','In Review','Needs Changes','Approved','Published','Rejected'].map(st=>`<option value="${st}" ${fStatus===st?'selected':''}>${st}</option>`).join('')}
     </select>
     <select class="filter-select" onchange="showSolutionsList({...S._solutionFilters,level:this.value})">
       <option value="All" ${fLevel==='All'?'selected':''}>All Levels</option>
@@ -993,10 +1030,32 @@ async function showSolutionDetail(id) {
   S.currentSolution=s;
   const pats=s.patterns||[];
   const reviews=s.reviews||[];
+  const alignments=s.alignments||[];
+  const iterations=s.iterations||[];
   const currentStage=s.currentStage;
-  const STAGES=['EA Review','Security Review','Architecture Board'];
+  const REVIEW_STAGES=['Pattern Alignment','EA Review','Security Review','Architecture Board'];
 
-  function stageClass(stage){
+  const SOL_PIPELINE_STAGES=[
+    {key:'Intake Approved',label:'Intake Approved',done:!!s.intake_reference},
+    {key:'Design Draft',label:'Design Draft',done:['In Review','Needs Changes','Published','Rejected'].includes(s.status)||currentStage==='EA Review'||currentStage==='Security Review'||currentStage==='Architecture Board'||currentStage==='Pattern Alignment'},
+    {key:'Pattern Alignment',label:'Pattern Alignment',done:reviews.some(r=>r.stage==='Pattern Alignment'&&r.decision==='Approved')},
+    {key:'EA Review',label:'EA Review',done:reviews.some(r=>r.stage==='EA Review'&&r.decision==='Approved')},
+    {key:'Security Review',label:'Security Review',done:reviews.some(r=>r.stage==='Security Review'&&r.decision==='Approved')},
+    {key:'Architecture Board',label:'Arch Board',done:reviews.some(r=>r.stage==='Architecture Board'&&r.decision==='Approved')},
+    {key:'Published',label:'Published',done:s.status==='Published'},
+  ];
+
+  function solPipelineClass(stage){
+    if(s.status==='Rejected') return stage.done?'sol-done':'';
+    if(stage.key==='Published') return s.status==='Published'?'sol-done':'';
+    if(stage.done) return 'sol-done';
+    const stageReviewKey=stage.key;
+    if(currentStage===stageReviewKey) return 'sol-active';
+    if(stage.key==='Design Draft'&&['Draft','In Review','Needs Changes'].includes(s.status)&&!reviews.length) return 'sol-active';
+    return '';
+  }
+
+  function reviewStageClass(stage){
     const r=reviews.filter(rv=>rv.stage===stage);
     const last=r[r.length-1];
     if(!last){
@@ -1007,7 +1066,7 @@ async function showSolutionDetail(id) {
     if(last.decision==='Rejected') return 'stage-rejected';
     return 'stage-needs-changes';
   }
-  function stageLabel(stage){
+  function reviewStageLabel(stage){
     const r=reviews.filter(rv=>rv.stage===stage);
     const last=r[r.length-1];
     if(!last && stage===currentStage) return `▶ ${stage}`;
@@ -1017,23 +1076,26 @@ async function showSolutionDetail(id) {
   }
 
   const canReview = currentStage && ['Draft','In Review','Needs Changes'].includes(s.status);
-  const isApproved = s.status === 'Approved';
+  const isPublished = s.status === 'Published';
+  const isApproved = s.status === 'Approved' || isPublished;
+
+  const opsSupportForSolution = S.opSupport.find(o=>o.solution_reference===s.reference_id);
 
   let h=`<button class="back-btn" onclick="showSolutionsList()">← Back to Solutions</button>
-  <div class="review-pipeline">
-    ${STAGES.map(st=>`<div class="review-stage ${stageClass(st)}">${stageLabel(st)}</div>`).join('')}
-    <div class="review-stage ${s.status==='Approved'?'stage-approved':''}" style="font-weight:${s.status==='Approved'?700:400}">${s.status==='Approved'?'✓ ':''} Approved</div>
+  <div class="sol-pipeline">
+    ${SOL_PIPELINE_STAGES.map(st=>`<div class="sol-stage ${solPipelineClass(st)}" title="${st.key}">${solPipelineClass(st)==='sol-done'?'✓ ':''}${st.label}</div>`).join('')}
   </div>
   <div class="two-col">
   <div>
   <div class="detail-header">
     <div class="font-mono text-xs text-muted">${s.reference_id}</div>
     <h2>${s.title}</h2>
-    <div class="detail-meta">${s.business_unit||''}</div>
+    <div class="detail-meta">${s.business_unit||''}${s.intake_reference?` · Intake: <span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:''}</div>
     <div class="detail-badges mt-1">
       ${solutionStatusBadge(s.status)}
       ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--text)">${s.complexity}</span>`:''}
       ${s.estimated_cost_band?`<span class="badge" style="background:var(--surface2);color:var(--muted)">Cost: ${s.estimated_cost_band}</span>`:''}
+      ${s.risk_tier?`<span class="badge badge-${s.risk_tier.toLowerCase()}">Risk: ${s.risk_tier}</span>`:''}
     </div>
     <div class="flex gap-2 mt-2" style="flex-wrap:wrap">
       ${canReview?`<button class="btn btn-primary btn-sm" onclick="openSolutionReviewPanel(${s.id})">✓ Submit Review — ${currentStage}</button>`:''}
@@ -1051,6 +1113,10 @@ async function showSolutionDetail(id) {
       <div class="flex gap-1">${p.level?levelBadge(p.level):''}<span class="badge badge-${p.status.toLowerCase().replace(/\s+/g,'-')}">${p.status}</span></div>
     </div>`).join('')}
   </div>`:''}
+
+  ${renderPatternAlignmentPanel(s, pats, alignments)}
+  ${renderDesignIterationsPanel(s, iterations)}
+
   ${reviews.length?`<div class="section-card"><h3>Review Trail</h3>
     ${reviews.map(rv=>{const cls={Approved:'art-approved',Rejected:'art-rejected','Needs Changes':'art-needs-changes'}[rv.decision]||'';return`<div class="review-artifact ${cls}">
       <div class="review-artifact-header"><div><span class="review-artifact-stage">${rv.stage}</span> · <span class="review-artifact-reviewer">${rv.reviewer_name}</span></div><span class="review-artifact-date">${fmtDate(rv.reviewed_at)}</span></div>
@@ -1059,7 +1125,9 @@ async function showSolutionDetail(id) {
     </div>`;}).join('')}
   </div>`:''}
   <div id="solution-review-panel"></div>
-  ${s.jiraEpics?renderJiraEpicsPanel(s.jiraEpics,s.id):''}
+
+  ${isPublished ? renderSolutionOutputSection(s, opsSupportForSolution) : ''}
+  ${!isPublished&&s.jiraEpics?renderJiraEpicsPanel(s.jiraEpics,s.id):''}
   </div>
   <div class="section-card">
     <h3>Solution Details</h3>
@@ -1071,7 +1139,7 @@ async function showSolutionDetail(id) {
       <div class="kv-item"><label>Complexity</label><span>${s.complexity||'–'}</span></div>
       <div class="kv-item"><label>Est. Cost Band</label><span>${s.estimated_cost_band||'–'}</span></div>
       <div class="kv-item"><label>Patterns</label><span>${(s.patternIds||[]).length}</span></div>
-      <div class="kv-item"><label>Intake Ref</label><span>${s.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.id);else alert('Intake not found');})()">${s.intake_reference}</span>`:'–'}</span></div>
+      <div class="kv-item"><label>Intake Ref</label><span>${s.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:'–'}</span></div>
       <div class="kv-item"><label>Created</label><span>${fmtDate(s.created_at)}</span></div>
       <div class="kv-item"><label>Review Stage</label><span>${currentStage||'–'}</span></div>
     </div>
@@ -1082,6 +1150,209 @@ async function showSolutionDetail(id) {
   <div id="solution-iac-panel">${s.iacCode?renderIaCPanel(s.iacCode,'solution',s.id,s.reference_id):`<div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate a multi-module Terraform root configuration for this solution with per-pattern module stubs, providers, variables, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateSolutionIaC(${s.id},'${s.reference_id}')">⬡ Generate IaC</button></div>`}</div>
   </div>`;
   setMain(h);
+}
+
+function renderPatternAlignmentPanel(s, pats, alignments) {
+  const alignMap = {};
+  (alignments||[]).forEach(a => { alignMap[a.pattern_id] = a; });
+  const allMarked = pats.length > 0 && pats.every(p => alignMap[p.patternId] && alignMap[p.patternId].status !== 'Pending');
+  const isPatternAlignStage = s.currentStage === 'Pattern Alignment';
+
+  if (!pats.length) return '';
+
+  let h = `<div class="section-card" id="pattern-alignment-panel">
+    <h3>Pattern Alignment Review
+      ${allMarked ? `<span class="badge badge-approved" style="margin-left:.5rem;font-size:.63rem">✓ All Marked</span>` : ''}
+    </h3>
+    <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.6">Compare the solution's patterns against the endorsed library. Mark each as Aligned, Conditionally Aligned, or Deviation Noted.</p>`;
+
+  pats.forEach(p => {
+    const a = alignMap[p.patternId] || { status: 'Pending' };
+    const statusClass = `align-${a.status}`;
+    const endorsedBadge = p.status === 'Endorsed' ? `<span class="badge badge-endorsed" style="font-size:.6rem">✓ Endorsed</span>` : `<span class="badge badge-review" style="font-size:.6rem">⚠ ${p.status}</span>`;
+    h += `<div class="align-row ${statusClass}" id="align-row-${p.patternId.replace('-','_')}">
+      <div style="flex:1">
+        <div class="flex items-center gap-2" style="flex-wrap:wrap">
+          <span class="font-mono text-xs text-muted">${p.patternId}</span>
+          <span class="text-sm font-bold">${p.name}</span>
+          ${endorsedBadge}
+          <span class="align-pill align-${a.status}">${a.status}</span>
+        </div>
+        ${a.note ? `<div class="text-xs text-muted mt-1">Note: ${a.note}</div>` : ''}
+        ${a.reviewer ? `<div class="text-xs text-muted">By: ${a.reviewer}</div>` : ''}
+      </div>
+      <div class="flex gap-1" style="flex-shrink:0">
+        <button class="btn btn-sm btn-ghost" style="font-size:.62rem;padding:.2rem .5rem" onclick="openAlignmentModal(${s.id},'${p.patternId}','${p.name.replace(/'/g,"\\'")}','${a.status}','${(a.note||'').replace(/'/g,"\\'")}')">✎ Mark</button>
+      </div>
+    </div>`;
+  });
+
+  if (isPatternAlignStage && allMarked) {
+    h += `<div class="alert alert-success mt-2" style="margin-bottom:0">✓ All patterns marked. You can now submit the Pattern Alignment review.</div>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
+function renderDesignIterationsPanel(s, iterations) {
+  const latest = iterations && iterations.length ? iterations[0] : null;
+  let h = `<div class="section-card" id="design-iterations-panel">
+    <div class="flex justify-between items-center" style="margin-bottom:.6rem">
+      <h3 style="margin-bottom:0">Design Iterations ${latest ? `<span class="text-xs text-muted font-bold" style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:.4rem">Current: ${latest.version_label}</span>` : ''}</h3>
+      <button class="btn btn-sm btn-ghost" onclick="openIterationModal(${s.id})">＋ Log Iteration</button>
+    </div>`;
+
+  if (!iterations || !iterations.length) {
+    h += `<div class="empty" style="padding:1rem;text-align:center;color:var(--muted);font-size:.82rem">No iterations logged yet. Click "+ Log Iteration" to record the first design iteration.</div>`;
+  } else {
+    iterations.forEach(it => {
+      h += `<div class="iter-item">
+        <div style="flex-shrink:0;margin-top:.1rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></div></div>
+        <div style="flex:1">
+          <div class="iter-label">${it.version_label}</div>
+          ${it.author||it.created_at ? `<div class="iter-meta">${it.author?it.author+' · ':''}${fmtDate(it.created_at)}</div>` : ''}
+          ${it.change_summary ? `<div class="iter-summary">${it.change_summary}</div>` : ''}
+        </div>
+      </div>`;
+    });
+  }
+  h += `</div>`;
+  return h;
+}
+
+function renderSolutionOutputSection(s, opsRecord) {
+  let h = `<div class="section-card" style="border-color:rgba(255,212,0,.3);background:linear-gradient(135deg,var(--surface) 92%,rgba(255,212,0,.04))">
+    <h3 style="color:var(--accent)">Solution Output</h3>
+    <div class="output-tab-bar">
+      <button class="output-tab active" onclick="switchOutputTab(this,'sol-output-engineer')">⬡ Engineer View</button>
+      <button class="output-tab" onclick="switchOutputTab(this,'sol-output-operator')">⚙ Operator View</button>
+    </div>
+    <div id="sol-output-engineer" class="output-tab-panel active">
+      <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.6">All generation tools for engineers in one place — architecture diagram, Terraform IaC, and Jira Epics & Stories.</p>
+      <div class="flex gap-2" style="flex-wrap:wrap;margin-bottom:.9rem">
+        ${s.intake_reference?`<button class="btn btn-sm" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir){showIntakeDetail(ir.reference_id);}else{alert('Linked intake not found.');}})()">⬡ Architecture Diagram (via Intake)</button>`:`<span class="text-xs text-muted" style="display:flex;align-items:center;padding:.3rem .5rem">No linked intake for diagram generation</span>`}
+        <button class="btn btn-sm" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateSolutionIaC(${s.id},'${s.reference_id}')">⬡ ${s.iacCode?'Regenerate':'Generate'} Terraform IaC</button>
+        <button class="btn btn-sm jira-epic-btn" onclick="generateJiraEpics(${s.id})">⬡ ${s.jiraEpics?'Regenerate':'Generate'} Jira Epics</button>
+        <button class="btn btn-success btn-sm" onclick="syncSolutionToGitHub(${s.id},'${s.reference_id}')">⇅ Sync to GitHub</button>
+      </div>
+      ${s.jiraEpics ? renderJiraEpicsPanel(s.jiraEpics, s.id) : `<div class="alert alert-info" style="margin-bottom:0">Generate Jira Epics to create a full set of implementation stories for this solution.</div>`}
+    </div>
+    <div id="sol-output-operator" class="output-tab-panel">
+      <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.6">Operational support details for this solution — owner, SLAs, runbooks, and licence renewals.</p>
+      ${opsRecord ? renderOpsInlinePanel(opsRecord) : `<div class="alert alert-warning" style="margin-bottom:.8rem">No Operational Support record is linked to this solution yet.</div><button class="btn btn-primary btn-sm" onclick="startNewOpSupportFromSolution('${s.reference_id}','${(s.title||'').replace(/'/g,"\\'")}','${s.intake_reference||''}')">＋ Register Operational Support</button>`}
+    </div>
+  </div>`;
+  return h;
+}
+
+function renderOpsInlinePanel(r) {
+  const nearestExpiry = (r.licenses||[]).filter(l=>l.renewalDate).sort((a,b)=>new Date(a.renewalDate)-new Date(b.renewalDate))[0];
+  let h = `<div class="kv-grid" style="margin-bottom:.7rem">
+    <div class="kv-item"><label>Reference</label><span class="font-mono text-xs">${r.reference_id}</span></div>
+    <div class="kv-item"><label>Owner</label><span>${r.owner_name||'–'}</span></div>
+    <div class="kv-item"><label>Team</label><span>${r.owner_team||'–'}</span></div>
+    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent)">${r.owner_email}</a>`:'–'}</span></div>
+    <div class="kv-item"><label>Support Tier</label><span>${r.support_tier||'–'}</span></div>
+    <div class="kv-item"><label>SLA</label><span>${r.sla||'–'}</span></div>
+    <div class="kv-item"><label>Support Channel</label><span>${r.support_channel||'–'}</span></div>
+    <div class="kv-item"><label>Status</label><span>${r.status||'Active'}</span></div>
+  </div>`;
+  if ((r.runbookUrls||[]).length) {
+    h += `<div style="margin-bottom:.6rem"><label class="text-xs text-muted" style="text-transform:uppercase">Runbooks</label><div class="tag-list mt-1">${r.runbookUrls.map(u=>`<a href="${u}" target="_blank" class="badge badge-dev" style="text-decoration:none">${u}</a>`).join('')}</div></div>`;
+  }
+  if ((r.licenses||[]).length) {
+    h += `<div style="margin-bottom:.6rem"><label class="text-xs text-muted" style="text-transform:uppercase">Licences</label>`;
+    r.licenses.forEach(l => {
+      const expiring = l.renewalDate && (new Date(l.renewalDate) - new Date()) / (1000*60*60*24) <= 90;
+      h += `<div style="padding:.38rem .55rem;background:var(--surface2);border-radius:6px;margin-top:.3rem;font-size:.8rem;border-left:3px solid ${expiring?'var(--risk-high)':'var(--border)'}">
+        <strong>${l.vendor||'–'}</strong>${l.licenseType?' — '+l.licenseType:''}${l.renewalDate?` · Renewal: <span style="color:${expiring?'var(--risk-high)':'inherit'}">${fmtDate(l.renewalDate)}</span>`:''}
+      </div>`;
+    });
+    h += `</div>`;
+  }
+  h += `<button class="btn btn-secondary btn-sm" onclick="showOpSupportDetail(${r.id})">View Full Record →</button>`;
+  return h;
+}
+
+function switchOutputTab(btn, panelId) {
+  const card = btn.closest('.section-card');
+  if (!card) return;
+  card.querySelectorAll('.output-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  card.querySelectorAll('.output-tab-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(panelId);
+  if (panel) panel.classList.add('active');
+}
+
+function openAlignmentModal(solutionId, patternId, patternName, currentStatus, currentNote) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'alignment-modal-overlay';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `<div class="modal" style="max-width:460px">
+    <div class="modal-header"><h3>Pattern Alignment — ${patternId}</h3><button class="modal-close" onclick="document.getElementById('alignment-modal-overlay').remove()">✕</button></div>
+    <div class="modal-body">
+      <p class="text-sm text-muted" style="margin-bottom:.9rem">${patternName}</p>
+      <div class="form-group"><label>Alignment Status *</label>
+        <div class="flex gap-2" style="margin-top:.3rem">
+          <button class="btn btn-sm btn-success" style="flex:1;${currentStatus==='Aligned'?'box-shadow:0 0 0 2px #2ecc71':''}" onclick="submitAlignment(${solutionId},'${patternId}','${patternName.replace(/'/g,"\\'")}','Aligned')">✓ Aligned</button>
+          <button class="btn btn-sm btn-warning" style="flex:1;${currentStatus==='Conditional'?'box-shadow:0 0 0 2px var(--review)':''}" onclick="submitAlignment(${solutionId},'${patternId}','${patternName.replace(/'/g,"\\'")}','Conditional')">◈ Conditional</button>
+          <button class="btn btn-sm btn-danger" style="flex:1;${currentStatus==='Deviation'?'box-shadow:0 0 0 2px var(--risk-critical)':''}" onclick="submitAlignment(${solutionId},'${patternId}','${patternName.replace(/'/g,"\\'")}','Deviation')">⚠ Deviation</button>
+        </div>
+      </div>
+      <div class="form-group"><label>Reviewer Name</label><input class="form-control" id="align_reviewer" placeholder="Your name" /></div>
+      <div class="form-group"><label>Note (optional)</label><textarea class="form-control" id="align_note" placeholder="Explain any condition or deviation..." style="min-height:70px">${currentNote||''}</textarea></div>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+async function submitAlignment(solutionId, patternId, patternName, status) {
+  const reviewer = (document.getElementById('align_reviewer')||{}).value||'';
+  const note = (document.getElementById('align_note')||{}).value||'';
+  try {
+    await api.post(`/api/solutions/${solutionId}/pattern-alignments`, { patternId, patternName, status, note, reviewer });
+    document.getElementById('alignment-modal-overlay').remove();
+    await loadSolutions();
+    showSolutionDetail(solutionId);
+  } catch(e) {
+    alert('Failed to save alignment: ' + (e.error || e.message || 'Unknown error'));
+  }
+}
+
+function openIterationModal(solutionId) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.id = 'iteration-modal-overlay';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:1rem';
+  modal.innerHTML = `<div class="modal" style="max-width:460px">
+    <div class="modal-header"><h3>Log Design Iteration</h3><button class="modal-close" onclick="document.getElementById('iteration-modal-overlay').remove()">✕</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Version Label *</label><input class="form-control" id="iter_label" placeholder="e.g. v0.1 – Initial Draft" /></div>
+      <div class="form-group"><label>Author</label><input class="form-control" id="iter_author" placeholder="Your name" /></div>
+      <div class="form-group"><label>Change Summary</label><textarea class="form-control" id="iter_summary" placeholder="Brief description of what changed in this iteration..." style="min-height:80px"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="document.getElementById('iteration-modal-overlay').remove()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitIteration(${solutionId})">Log Iteration</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+
+async function submitIteration(solutionId) {
+  const label = (document.getElementById('iter_label')||{}).value||'';
+  if (!label.trim()) { alert('Version label is required.'); return; }
+  const author = (document.getElementById('iter_author')||{}).value||'';
+  const summary = (document.getElementById('iter_summary')||{}).value||'';
+  try {
+    await api.post(`/api/solutions/${solutionId}/iterations`, { versionLabel: label.trim(), author, changeSummary: summary });
+    document.getElementById('iteration-modal-overlay').remove();
+    await loadSolutions();
+    showSolutionDetail(solutionId);
+  } catch(e) {
+    alert('Failed to save iteration: ' + (e.error || e.message || 'Unknown error'));
+  }
 }
 
 function openSolutionReviewPanel(solutionId) {
@@ -1267,10 +1538,77 @@ async function submitJiraPush() {
   }
 }
 
+function renderIntakeSolutionBridge(intake) {
+  const linkedSolutions = (S.solutions||[]).filter(s=>s.intake_reference===intake.reference_id);
+  let h = `<div class="section-card" style="border-color:rgba(255,212,0,.3);background:linear-gradient(135deg,var(--surface) 92%,rgba(255,212,0,.04));margin-top:.8rem">
+    <div class="flex justify-between items-center" style="margin-bottom:${linkedSolutions.length?'.7rem':'.35rem'}">
+      <h3 style="color:var(--accent);margin-bottom:0">Solution Design</h3>
+      <button class="begin-solution-btn" id="begin-sol-btn-${intake.reference_id.replace(/-/g,'_')}" onclick="beginSolutionDesign(this,'${intake.reference_id}')">⬡ Begin Solution Design</button>
+    </div>`;
+
+  if (linkedSolutions.length) {
+    linkedSolutions.forEach(s => {
+      const stages=['Pattern Alignment','EA Review','Security Review','Architecture Board'];
+      const approvedStages=(s.reviews||[]).filter(r=>r.decision==='Approved').map(r=>r.stage);
+      const activeStageName = s.status==='Published'?null:(approvedStages.length<stages.length?stages[approvedStages.length]:null);
+      const progress=stages.filter(st=>approvedStages.includes(st)).length;
+      const total=stages.length;
+      const pct=Math.round((progress/total)*100);
+      let stageLabel='';
+      if(s.status==='Published') stageLabel='All stages complete';
+      else if(s.status==='Rejected') stageLabel='Rejected';
+      else if(activeStageName) stageLabel=`Current: ${activeStageName}`;
+      else stageLabel=pct+'% through review';
+      h += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.55rem .7rem;background:var(--surface2);border-radius:7px;margin-bottom:.35rem;cursor:pointer;border-left:3px solid var(--accent)" onclick="showSolutionDetail(${s.id})">
+        <div>
+          <div class="font-mono text-xs text-muted">${s.reference_id}</div>
+          <div class="text-sm font-bold" style="margin-top:.1rem">${s.title}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;margin-left:.8rem">
+          ${solutionStatusBadge(s.status)}
+          <div style="margin-top:.3rem;font-size:.65rem;color:${activeStageName?'var(--accent)':'var(--muted)'}">${stageLabel}</div>
+        </div>
+      </div>`;
+    });
+  } else {
+    h += `<p class="text-xs text-muted" style="line-height:1.6">No solution design yet. Click <strong>Begin Solution Design</strong> to auto-create one from this intake.</p>`;
+  }
+  h += `</div>`;
+  return h;
+}
+
+async function beginSolutionDesign(btnEl, intakeReference) {
+  if(btnEl){btnEl.disabled=true;btnEl.textContent='⟳ Creating...';}
+  try {
+    const intake = await api.get(`/api/intake/${intakeReference}`);
+    const payload = {
+      title: `Solution: ${intake.title||intakeReference}`,
+      description: intake.description||'',
+      businessContext: intake.strategic_objective||'',
+      owner: intake.requestor_name||'',
+      businessUnit: intake.business_unit||'',
+      intakeReference: intake.reference_id,
+      riskTier: intake.risk_tier||'',
+      patternIds: intake.relatedPatternIds||[],
+      vendorIds: intake.vendorIds||[],
+      deploymentRegions: [],
+      status: 'Draft',
+    };
+    const sol = await api.post('/api/solutions', payload);
+    await loadSolutions();
+    renderSidebar();
+    showSolutionDetail(sol.id);
+  } catch(e) {
+    if(btnEl){btnEl.disabled=false;btnEl.textContent='⬡ Begin Solution Design';}
+    alert('Failed to create solution: '+(e.error||e.message||'Unknown error'));
+  }
+}
+
 function startNewSolution() {
   S.view='new-solution'; renderSidebar();
   S._sdData={patternIds:[],vendorIds:[],deploymentRegions:[]};
   S._sdPatternLevelFilter='All';
+  S._sdPreFill = null;
   renderNewSolutionForm();
 }
 
@@ -1278,12 +1616,15 @@ function renderNewSolutionForm() {
   const regions=['Australia East','Australia Southeast','Canada Central','East US','East US 2','North Europe','South Africa North','Southeast Asia','UK South','West Europe'];
   const lvf=S._sdPatternLevelFilter||'All';
   const visiblePatterns=S.patterns.filter(p=>lvf==='All'||p.level===lvf);
-  let h=`<div class="page-title"><h2>New Solution Design</h2></div>
+  const pf=S._sdPreFill||{};
+  const fromIntake=!!pf.intakeReference;
+  let h=`<div class="page-title"><h2>${fromIntake?'Begin Solution Design':'New Solution Design'}</h2>${fromIntake?`<div class="text-xs text-muted" style="margin-top:.2rem">Pre-populated from intake <span class="font-mono" style="color:var(--accent)">${pf.intakeReference}</span></div>`:''}</div>
+  ${fromIntake?`<div class="alert alert-info" style="margin-bottom:.9rem">You are creating a solution design for approved intake <strong>${pf.intakeReference}</strong>. Key fields have been pre-filled. Adjust as needed before saving.</div>`:''}
   <div class="two-col">
   <div>
   <div class="form-row">
-    <div class="form-group"><label>Solution Title *</label><input class="form-control" id="sd_title" placeholder="e.g. OT Telemetry Pipeline to Azure"/></div>
-    <div class="form-group"><label>Intake Reference (optional)</label><input class="form-control" id="sd_intakeRef" placeholder="e.g. EAR-2026-0001"/></div>
+    <div class="form-group"><label>Solution Title *</label><input class="form-control" id="sd_title" placeholder="e.g. OT Telemetry Pipeline to Azure" value="${pf.title||''}"/></div>
+    <div class="form-group"><label>Intake Reference (optional)</label><input class="form-control" id="sd_intakeRef" placeholder="e.g. EAR-2026-0001" value="${pf.intakeReference||''}"/></div>
   </div>
   <div class="form-group"><label>Description</label><textarea class="form-control" id="sd_description" placeholder="Describe the solution and what it achieves..."></textarea></div>
   <div class="form-group"><label>Business Context</label><textarea class="form-control" id="sd_businessContext" placeholder="The business problem this solution addresses..."></textarea></div>
@@ -1333,10 +1674,11 @@ function renderNewSolutionForm() {
   <div class="section-card mt-2"><h3>Review Pipeline</h3>
     <p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.7rem">After creation, solutions move through:</p>
     <div style="display:flex;flex-direction:column;gap:.3rem">
-      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">1. EA Review</div>
-      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">2. Security Review</div>
-      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">3. Architecture Board</div>
-      <div style="padding:.4rem .6rem;background:rgba(46,204,113,.1);border-radius:6px;font-size:.78rem;color:#2ecc71">✓ Approved → Sync to GitHub</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">1. Pattern Alignment</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">2. EA Review</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">3. Security Review</div>
+      <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">4. Architecture Board</div>
+      <div style="padding:.4rem .6rem;background:rgba(255,212,0,.1);border-radius:6px;font-size:.78rem;color:var(--accent)">✓ Published → Full output unlocked</div>
     </div>
   </div>
   </div>
@@ -1355,6 +1697,7 @@ function toggleSDArr(field,val) {
 async function submitSolution() {
   const t=document.getElementById('sd_title');
   if(!t||!t.value.trim()){alert('Please enter a solution title.');return;}
+  const pf=S._sdPreFill||{};
   const payload={
     title:t.value.trim(),
     description:(document.getElementById('sd_description')||{}).value||'',
@@ -1364,6 +1707,7 @@ async function submitSolution() {
     complexity:(document.getElementById('sd_complexity')||{}).value||'',
     estimatedCostBand:(document.getElementById('sd_costBand')||{}).value||'',
     intakeReference:(document.getElementById('sd_intakeRef')||{}).value||'',
+    riskTier:pf.riskTier||'',
     status:'Draft',
     patternIds:S._sdData.patternIds||[], vendorIds:S._sdData.vendorIds||[],
     deploymentRegions:S._sdData.deploymentRegions||[],
@@ -1482,6 +1826,7 @@ async function showIntakeDetail(id) {
       <button class="btn btn-sm" id="iac-btn" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ ${r.iacCode?'Regenerate':'Generate'} IaC</button>
       ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
+    ${['Approved','Approved with Conditions'].includes(r.status)?renderIntakeSolutionBridge(r):''}
   </div>
   ${r.description?`<div class="section-card"><h3>Description</h3><p class="text-sm" style="line-height:1.65">${r.description}</p></div>`:''}
   ${r.strategic_objective?`<div class="section-card"><h3>Strategic Objective</h3><p class="text-sm" style="line-height:1.65">${r.strategic_objective}</p></div>`:''}
@@ -2088,7 +2433,7 @@ async function inspectSslFromIntel(vendorId) {
 // ─── GitHub Sync ──────────────────────────────────────────────────────────────
 async function showGitHubSync() {
   S.view = 'github-sync'; renderSidebar();
-  const approvedSolutions = S.solutions.filter(s => s.status === 'Approved');
+  const approvedSolutions = S.solutions.filter(s => ['Approved','Published'].includes(s.status));
   let h = `<div class="page-title"><h2>⇅ GitHub Sync</h2></div>
   <div class="two-col" style="gap:1.4rem">
     <div>
@@ -2098,12 +2443,12 @@ async function showGitHubSync() {
           <div class="kv-item"><label>Repo</label><span><a href="https://github.com/Rik-ftw/architecture_patterns" target="_blank" style="color:var(--accent-light)">Rik-ftw/architecture_patterns</a></span></div>
           <div class="kv-item"><label>Branch</label><span style="font-family:monospace">dev</span></div>
           <div class="kv-item"><label>Local Patterns</label><span>${S.patterns.length} JSON files + SVG diagrams</span></div>
-          <div class="kv-item"><label>Approved Solutions</label><span>${approvedSolutions.length} to sync</span></div>
+          <div class="kv-item"><label>Approved / Published Solutions</label><span>${approvedSolutions.length} to sync</span></div>
         </div>
         <p class="text-xs text-muted" style="margin-top:.8rem;line-height:1.6">Syncing pushes all pattern JSON files and SVG diagrams to the <code>dev</code> branch. Existing files are updated in-place; new files are created. A README is also generated automatically.</p>
         <div style="margin-top:1rem;display:flex;gap:.6rem;flex-wrap:wrap">
           <button class="btn btn-primary" id="sync-btn" onclick="runGitHubSync()">⇅ Sync Patterns to GitHub</button>
-          ${approvedSolutions.length?`<button class="btn btn-success" id="sync-solutions-btn" onclick="runGitHubSolutionsSync()">⇅ Sync ${approvedSolutions.length} Approved Solution${approvedSolutions.length!==1?'s':''}</button>`:'<button class="btn btn-secondary" disabled title="No approved solutions yet">⇅ Sync Solutions (none approved)</button>'}
+          ${approvedSolutions.length?`<button class="btn btn-success" id="sync-solutions-btn" onclick="runGitHubSolutionsSync()">⇅ Sync ${approvedSolutions.length} Solution${approvedSolutions.length!==1?'s':''}</button>`:'<button class="btn btn-secondary" disabled title="No approved or published solutions yet">⇅ Sync Solutions (none ready)</button>'}
           <button class="btn btn-secondary" id="status-btn" onclick="checkGitHubStatus()">⟳ Check Status</button>
         </div>
       </div>
@@ -2115,9 +2460,9 @@ async function showGitHubSync() {
           ${S.patterns.map(p => `<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-${p.status==='Endorsed'?'endorsed':'dev'}" style="min-width:80px;text-align:center">${p.status}</span>${p.level?levelBadge(p.level):''}<span class="font-mono" style="color:var(--muted);min-width:58px">${p.patternId}</span><span>${p.name}</span></li>`).join('')}
         </ul>
       </div>
-      ${approvedSolutions.length?`<div class="section-card mt-2"><h3>Approved Solutions to Sync</h3>
+      ${approvedSolutions.length?`<div class="section-card mt-2"><h3>Solutions to Sync</h3>
         <ul style="list-style:none;padding:0;margin:0">
-          ${approvedSolutions.map(s=>`<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge badge-approved" style="min-width:70px;text-align:center">Approved</span><span class="font-mono" style="color:var(--muted)">${s.reference_id}</span><span style="flex:1">${s.title}</span></li>`).join('')}
+          ${approvedSolutions.map(s=>`<li style="display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid var(--border);font-size:.8rem"><span class="badge ${s.status==='Published'?'badge-endorsed':'badge-approved'}" style="min-width:70px;text-align:center">${s.status}</span><span class="font-mono" style="color:var(--muted)">${s.reference_id}</span><span style="flex:1">${s.title}</span></li>`).join('')}
         </ul>
       </div>`:''}
     </div>
@@ -2180,7 +2525,7 @@ async function runGitHubSolutionsSync() {
   }catch(e){
     if(el)el.innerHTML=`<div class="section-card mt-2" style="border-left:3px solid var(--danger)"><h4>✗ Solutions Sync Failed</h4><p class="text-sm text-muted">${e.error||'Check your GITHUB_PAT and ensure solutions are in Approved status.'}</p></div>`;
   }
-  if(btn){btn.disabled=false;const n=S.solutions.filter(s=>s.status==='Approved').length;btn.textContent=`⇅ Sync ${n} Approved Solution${n!==1?'s':''}`;}
+  if(btn){btn.disabled=false;const n=S.solutions.filter(s=>['Approved','Published'].includes(s.status)).length;btn.textContent=`⇅ Sync ${n} Solution${n!==1?'s':''}`;}
 }
 
 // ─── Team Portal ──────────────────────────────────────────────────────────────
@@ -2346,6 +2691,18 @@ function startNewOpSupport(prefillIntakeRef) {
   S._opsEditId = null;
   S._opsPrefillIntake = prefillIntakeRef || '';
   S._opsPrefillSolution = '';
+  renderOpSupportForm();
+}
+
+function startNewOpSupportFromSolution(solutionReference, solutionTitle, intakeReference) {
+  S.view = 'ops-new'; renderSidebar();
+  S._opsLicenses = [];
+  S._opsRunbooks = [];
+  S._opsDashboards = [];
+  S._opsEscalations = [];
+  S._opsEditId = null;
+  S._opsPrefillIntake = intakeReference || '';
+  S._opsPrefillSolution = solutionReference || '';
   renderOpSupportForm();
 }
 
@@ -3261,7 +3618,7 @@ function statusBadge(s){const m={Draft:'draft',Submitted:'submitted','Under Revi
 function tierBadge(tier,score){return`<span class="badge badge-${tier.toLowerCase()}">${tier} (${score})</span>`;}
 function critBadge(c){const m={Critical:'badge-critical',High:'badge-high',Medium:'badge-medium',Low:'badge-low'};return`<span class="badge ${m[c]||''}">${c||'–'}</span>`;}
 function levelBadge(lvl){if(!lvl)return'';const m={Conceptual:'badge-conceptual',Logical:'badge-logical',Component:'badge-component'};return`<span class="badge ${m[lvl]||''}" style="font-size:.63rem">${lvl}</span>`;}
-function solutionStatusBadge(s){const m={Draft:'draft',Approved:'approved','In Review':'in-review','Needs Changes':'needs-changes',Rejected:'rejected'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
+function solutionStatusBadge(s){const m={Draft:'draft',Approved:'approved',Published:'endorsed','In Review':'in-review','Needs Changes':'needs-changes',Rejected:'rejected'};return`<span class="badge badge-${m[s]||'draft'}">${s}</span>`;}
 
 init();
 </script>

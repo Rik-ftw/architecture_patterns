@@ -4,8 +4,18 @@ const { pool, parseJson, generateSolutionRefId } = require('../db');
 const fs = require('fs');
 const path = require('path');
 
-const REVIEW_STAGES = ['EA Review', 'Security Review', 'Architecture Board'];
+const REVIEW_STAGES = ['Pattern Alignment', 'EA Review', 'Security Review', 'Architecture Board'];
 const REVIEW_DECISIONS = ['Approved', 'Rejected', 'Needs Changes'];
+const ALIGNMENT_STATUSES = ['Aligned', 'Conditional', 'Deviation'];
+
+async function findSolution(idOrRef) {
+  const numId = parseInt(idOrRef, 10);
+  if (!isNaN(numId)) {
+    const r = await pool.query('SELECT * FROM solution_designs WHERE id=$1', [numId]);
+    if (r.rows.length) return r;
+  }
+  return pool.query('SELECT * FROM solution_designs WHERE reference_id=$1', [idOrRef]);
+}
 
 function loadPatterns() {
   const dir = path.join(__dirname, '..', 'patterns');
@@ -34,8 +44,24 @@ async function getReviews(solutionId) {
   return result.rows;
 }
 
+async function getAlignments(solutionId) {
+  const result = await pool.query(
+    'SELECT * FROM solution_pattern_alignments WHERE solution_id=$1 ORDER BY created_at ASC',
+    [solutionId]
+  );
+  return result.rows;
+}
+
+async function getIterations(solutionId) {
+  const result = await pool.query(
+    'SELECT * FROM solution_iterations WHERE solution_id=$1 ORDER BY created_at DESC',
+    [solutionId]
+  );
+  return result.rows;
+}
+
 function getCurrentStage(solution, reviews) {
-  if (solution.status === 'Approved') return null;
+  if (solution.status === 'Approved' || solution.status === 'Published') return null;
   if (solution.status === 'Rejected') return null;
   const completedStages = reviews.filter(r => r.decision === 'Approved').map(r => r.stage);
   for (const stage of REVIEW_STAGES) {
@@ -47,7 +73,21 @@ function getCurrentStage(solution, reviews) {
 router.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM solution_designs ORDER BY created_at DESC');
-    res.json(result.rows.map(serialize));
+    const solutions = result.rows.map(serialize);
+    const reviewsResult = await pool.query(
+      'SELECT * FROM solution_reviews ORDER BY created_at ASC'
+    );
+    const reviewsBySolution = {};
+    reviewsResult.rows.forEach(r => {
+      if (!reviewsBySolution[r.solution_id]) reviewsBySolution[r.solution_id] = [];
+      reviewsBySolution[r.solution_id].push(r);
+    });
+    solutions.forEach(s => {
+      const reviews = reviewsBySolution[s.id] || [];
+      s.reviews = reviews;
+      s.currentStage = getCurrentStage(s, reviews);
+    });
+    res.json(solutions);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -56,7 +96,7 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const result = await findSolution(req.params.id);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     const patterns = loadPatterns();
     const parsed = serialize(result.rows[0]);
@@ -64,6 +104,14 @@ router.get('/:id', async (req, res) => {
     const reviews = await getReviews(result.rows[0].id);
     parsed.reviews = reviews;
     parsed.currentStage = getCurrentStage(parsed, reviews);
+    parsed.alignments = await getAlignments(result.rows[0].id);
+    parsed.iterations = await getIterations(result.rows[0].id);
+    if (parsed.intake_reference) {
+      try {
+        const intakeRes = await pool.query('SELECT reference_id, status, title FROM intake_requests WHERE reference_id=$1', [parsed.intake_reference]);
+        if (intakeRes.rows.length) parsed.intakeRecord = intakeRes.rows[0];
+      } catch {}
+    }
     res.json(parsed);
   } catch (err) {
     console.error(err);
@@ -76,13 +124,13 @@ router.post('/', async (req, res) => {
     const d = req.body;
     const refId = await generateSolutionRefId();
     const result = await pool.query(`INSERT INTO solution_designs
-      (reference_id, title, description, business_context, pattern_ids, vendor_ids, deployment_regions, estimated_cost_band, complexity, owner, business_unit, status, intake_reference)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
+      (reference_id, title, description, business_context, pattern_ids, vendor_ids, deployment_regions, estimated_cost_band, complexity, owner, business_unit, status, intake_reference, risk_tier)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
       [refId, d.title, d.description, d.businessContext,
        JSON.stringify(d.patternIds || []), JSON.stringify(d.vendorIds || []),
        JSON.stringify(d.deploymentRegions || []),
        d.estimatedCostBand, d.complexity, d.owner, d.businessUnit,
-       d.status || 'Draft', d.intakeReference || null]
+       d.status || 'Draft', d.intakeReference || null, d.riskTier || null]
     );
     res.status(201).json(serialize(result.rows[0]));
   } catch (err) {
@@ -93,7 +141,7 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const existingResult = await findSolution(req.params.id);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const existing = serialize(existingResult.rows[0]);
     const d = req.body;
@@ -118,10 +166,12 @@ router.patch('/:id', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const existingResult = await findSolution(req.params.id);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const id = existingResult.rows[0].id;
     await pool.query('DELETE FROM solution_reviews WHERE solution_id=$1', [id]);
+    await pool.query('DELETE FROM solution_pattern_alignments WHERE solution_id=$1', [id]);
+    await pool.query('DELETE FROM solution_iterations WHERE solution_id=$1', [id]);
     await pool.query('DELETE FROM solution_designs WHERE id=$1', [id]);
     res.json({ success: true });
   } catch (err) {
@@ -132,7 +182,7 @@ router.delete('/:id', async (req, res) => {
 
 router.post('/:id/review', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const existingResult = await findSolution(req.params.id);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const existing = serialize(existingResult.rows[0]);
 
@@ -153,6 +203,20 @@ router.post('/:id/review', async (req, res) => {
       return res.status(400).json({ error: `Current review stage is: ${currentStage || 'none (solution is already resolved)'}` });
     }
 
+    if (stage === 'Pattern Alignment' && decision === 'Approved') {
+      const patternIds = existing.patternIds || [];
+      if (patternIds.length > 0) {
+        const alignments = await getAlignments(existing.id);
+        const alignedPatterns = new Set(alignments.filter(a => a.status !== 'Pending').map(a => a.pattern_id));
+        const unreviewed = patternIds.filter(pid => !alignedPatterns.has(pid));
+        if (unreviewed.length > 0) {
+          return res.status(400).json({
+            error: `Pattern Alignment stage cannot be approved: ${unreviewed.length} pattern(s) have not been reviewed yet (${unreviewed.join(', ')}). Mark each pattern as Aligned, Conditional, or Deviation before approving.`
+          });
+        }
+      }
+    }
+
     await pool.query(
       `INSERT INTO solution_reviews (solution_id, stage, reviewer_name, decision, comments) VALUES ($1,$2,$3,$4,$5)`,
       [existing.id, stage, reviewerName, decision, comments || null]
@@ -165,7 +229,7 @@ router.post('/:id/review', async (req, res) => {
       const allReviews = await getReviews(existing.id);
       const approvedStages = allReviews.filter(r => r.decision === 'Approved').map(r => r.stage);
       const allPassed = REVIEW_STAGES.every(s => approvedStages.includes(s));
-      newStatus = allPassed ? 'Approved' : 'In Review';
+      newStatus = allPassed ? 'Published' : 'In Review';
     } else {
       newStatus = 'Needs Changes';
     }
@@ -176,7 +240,57 @@ router.post('/:id/review', async (req, res) => {
     const parsed = serialize(updatedResult.rows[0]);
     parsed.reviews = await getReviews(existing.id);
     parsed.currentStage = getCurrentStage(parsed, parsed.reviews);
+    parsed.alignments = await getAlignments(existing.id);
+    parsed.iterations = await getIterations(existing.id);
     res.json(parsed);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/:id/pattern-alignments', async (req, res) => {
+  try {
+    const existingResult = await findSolution(req.params.id);
+    if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
+    const solutionId = existingResult.rows[0].id;
+
+    const { patternId, patternName, status, note, reviewer } = req.body;
+    if (!patternId || !status) return res.status(400).json({ error: 'patternId and status are required' });
+    if (!ALIGNMENT_STATUSES.includes(status)) {
+      return res.status(400).json({ error: `status must be one of: ${ALIGNMENT_STATUSES.join(', ')}` });
+    }
+
+    await pool.query(`
+      INSERT INTO solution_pattern_alignments (solution_id, pattern_id, pattern_name, status, note, reviewer)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      ON CONFLICT (solution_id, pattern_id) DO UPDATE SET status=$4, note=$5, reviewer=$6, updated_at=NOW()
+    `, [solutionId, patternId, patternName || null, status, note || null, reviewer || null]);
+
+    const alignments = await getAlignments(solutionId);
+    res.json({ alignments });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/:id/iterations', async (req, res) => {
+  try {
+    const existingResult = await findSolution(req.params.id);
+    if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
+    const solutionId = existingResult.rows[0].id;
+
+    const { versionLabel, changeSummary, author } = req.body;
+    if (!versionLabel) return res.status(400).json({ error: 'versionLabel is required' });
+
+    await pool.query(
+      `INSERT INTO solution_iterations (solution_id, version_label, change_summary, author) VALUES ($1,$2,$3,$4)`,
+      [solutionId, versionLabel, changeSummary || null, author || null]
+    );
+
+    const iterations = await getIterations(solutionId);
+    res.json({ iterations });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
@@ -185,7 +299,7 @@ router.post('/:id/review', async (req, res) => {
 
 router.post('/:id/jira-epics', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const existingResult = await findSolution(req.params.id);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const { jiraEpics } = req.body;
     await pool.query(`UPDATE solution_designs SET jira_epics=$1, updated_at=NOW() WHERE id=$2`,

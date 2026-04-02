@@ -200,11 +200,36 @@ async function initDb() {
     );
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS solution_pattern_alignments (
+      id SERIAL PRIMARY KEY,
+      solution_id INTEGER NOT NULL REFERENCES solution_designs(id),
+      pattern_id TEXT NOT NULL,
+      pattern_name TEXT,
+      status TEXT NOT NULL DEFAULT 'Pending',
+      note TEXT,
+      reviewer TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(solution_id, pattern_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS solution_iterations (
+      id SERIAL PRIMARY KEY,
+      solution_id INTEGER NOT NULL REFERENCES solution_designs(id),
+      version_label TEXT NOT NULL,
+      change_summary TEXT,
+      author TEXT,
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
   const addCols = [
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS jira_epics TEXT`,
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS intake_id INTEGER`,
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS intake_reference TEXT`,
     `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS iac_code TEXT`,
+    `ALTER TABLE solution_designs ADD COLUMN IF NOT EXISTS risk_tier TEXT`,
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS ai_review TEXT`,
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS ai_diagram TEXT`,
     `ALTER TABLE intake_requests ADD COLUMN IF NOT EXISTS iac_code TEXT`,

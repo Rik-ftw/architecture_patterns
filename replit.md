@@ -61,7 +61,14 @@ Architecture-Pattern-Hub/ — Original monorepo spec/config (reference only)
 - Compose multiple architecture patterns into a named solution design
 - Reference IDs: ESD-YYYY-NNNN format
 - Fields: title, description, business context, owner, business unit, complexity, cost band, deployment regions
-- Status lifecycle: Draft → Published
+- **7-stage pipeline status bar**: Intake Approved → Design Draft → Pattern Alignment → EA Review → Security Review → Architecture Board → Published
+- **Status lifecycle:** Draft → In Review → Needs Changes → Published (or Rejected)
+- **"Begin Solution Design" button** on approved intakes — pre-populates new solution with intake reference and title
+- **Pattern Alignment review stage** with side-by-side comparison UI: mark each pattern as Aligned / Conditional / Deviation with notes and reviewer attribution. Stored in `solution_pattern_alignments` table
+- **Design Iterations log** with version labels, change summaries, and author tracking. Stored in `solution_iterations` table
+- **Solution Output section** (Published solutions only) with tabbed Engineer / Operator views
+  - Engineer tab: one-click access to all generation tools (IaC, Jira Epics, GitHub sync, Diagram)
+  - Operator tab: inline Operational Support record panel (SLAs, runbooks, licences, owner)
 - Pattern chip display showing which patterns compose the solution
 
 ### Jira Epics & Stories Generator
@@ -164,10 +171,14 @@ Tracks ongoing ownership, support team details, and licensing for approved solut
 - `POST /api/intake/:id/comments` — Add a comment
 - `DELETE /api/intake/:id` — Delete Draft/Withdrawn requests
 - `GET /api/solutions` — All solution designs
-- `GET /api/solutions/:id` — Single solution with composed pattern details (includes `jiraEpics` field)
-- `POST /api/solutions` — Create solution design
+- `GET /api/solutions/:id` — Single solution with composed pattern details, reviews, alignments, iterations
+- `POST /api/solutions` — Create solution design (supports `intakeReference`, `riskTier`)
 - `PATCH /api/solutions/:id` — Update solution design
-- `DELETE /api/solutions/:id` — Delete solution design
+- `DELETE /api/solutions/:id` — Delete solution design (cascades to reviews, alignments, iterations)
+- `POST /api/solutions/:id/review` — Submit stage review (stage, reviewerName, decision, comments)
+- `POST /api/solutions/:id/pattern-alignments` — Mark pattern alignment (patternId, status, note, reviewer)
+- `POST /api/solutions/:id/iterations` — Log design iteration (versionLabel, changeSummary, author)
+- `POST /api/solutions/:id/jira-epics` — Store Jira Epics JSON on solution
 - `POST /api/solutions/:id/generate-epics` — Generate Jira Epics & Stories via Claude (Published only)
 - `POST /api/solutions/:id/push-to-jira` — Push generated Epics & Stories to Jira REST API
 - `GET /api/solutions/jira-settings/config` — Get saved Jira settings (without API token)
