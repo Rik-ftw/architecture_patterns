@@ -376,7 +376,7 @@ async function getAnthropicClient() {
 
 router.post('/review/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM intake_requests WHERE id::text=$1 OR reference_id=$1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
     const row = result.rows[0];
 
@@ -453,7 +453,7 @@ router.post('/quick-assess', async (req, res) => {
 
 router.post('/diagram/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM intake_requests WHERE id::text=$1 OR reference_id=$1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
     const row = result.rows[0];
 
@@ -501,7 +501,7 @@ router.post('/diagram/:id', async (req, res) => {
 
 router.get('/diagram/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT ai_diagram FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const result = await pool.query('SELECT ai_diagram FROM intake_requests WHERE id::text=$1 OR reference_id=$1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     const diagram = parseJson(result.rows[0].ai_diagram, null);
     if (!diagram) return res.status(404).json({ error: 'No diagram generated yet' });
@@ -514,7 +514,7 @@ router.get('/diagram/:id', async (req, res) => {
 
 router.get('/review/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT ai_review FROM intake_requests WHERE id=$1 OR reference_id=$1', [req.params.id]);
+    const result = await pool.query('SELECT ai_review FROM intake_requests WHERE id::text=$1 OR reference_id=$1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     const review = parseJson(result.rows[0].ai_review, null);
     if (!review) return res.status(404).json({ error: 'No AI review generated yet' });

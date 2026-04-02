@@ -11,7 +11,7 @@ router.post('/triage', async (req, res) => {
     if (!requestId) return res.status(400).json({ error: 'requestId is required' });
 
     const result = await pool.query(
-      'SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1',
+      'SELECT * FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
       [requestId]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
@@ -82,7 +82,7 @@ router.post('/triage', async (req, res) => {
     if (req.body && req.body.requestId) {
       try {
         const r = await pool.query(
-          'SELECT id FROM intake_requests WHERE id=$1 OR reference_id=$1',
+          'SELECT id FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
           [req.body.requestId]
         );
         if (r.rows.length) {
@@ -105,7 +105,7 @@ router.get('/triage/stream/:requestId', (req, res) => {
   res.flushHeaders();
 
   pool.query(
-    'SELECT id FROM intake_requests WHERE id=$1 OR reference_id=$1',
+    'SELECT id FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
     [req.params.requestId]
   ).then(result => {
     if (!result.rows.length) {
@@ -135,7 +135,7 @@ router.get('/triage/stream/:requestId', (req, res) => {
 router.get('/triage/:requestId', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, reference_id, triage_result, triage_status, triage_routing_lane, triage_composite_score, triage_risk_tier, triage_started_at, triage_completed_at FROM intake_requests WHERE id=$1 OR reference_id=$1',
+      'SELECT id, reference_id, triage_result, triage_status, triage_routing_lane, triage_composite_score, triage_risk_tier, triage_started_at, triage_completed_at FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
       [req.params.requestId]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
@@ -173,7 +173,7 @@ router.post('/triage/stage/:stageName', async (req, res) => {
 
     if (requestId && !intakeData) {
       const result = await pool.query(
-        'SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1',
+        'SELECT * FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
         [requestId]
       );
       if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
