@@ -6,9 +6,9 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#1a0a2e;--surface:#2a1045;--surface2:#3a1a5e;--surface3:#4a2478;
-  --border:#4a2478;--accent:#FFD400;--accent-light:#ffe033;--text:#dde4f0;
-  --muted:#9b87c0;--navy:#2a1045;--risk-low:#2ecc71;--risk-medium:#f39c12;
+  --bg:#f8f5ff;--surface:#ffffff;--surface2:#f0ebff;--surface3:#e2d9f3;
+  --border:#e2d9f3;--accent:#FFD400;--accent-light:#c9a600;--text:#1a0a2e;
+  --muted:#6b5a9e;--navy:#4a2478;--risk-low:#2ecc71;--risk-medium:#f39c12;
   --risk-high:#e67e22;--risk-critical:#e74c3c;--success:#2ecc71;
 }
 body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh}
@@ -27,7 +27,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .login-error{font-size:.78rem;color:var(--risk-critical);margin-top:.5rem;display:none}
 /* ─── Layout ─────────────────────────────────────────────────────────────────── */
 #app{display:none;min-height:100vh;flex-direction:column}
-header{background:var(--navy);border-bottom:1px solid rgba(255,255,255,.08);padding:.7rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
+header{background:#ffffff;border-bottom:1px solid var(--border);padding:.7rem 1.5rem;display:flex;align-items:center;gap:1rem;position:sticky;top:0;z-index:100}
 .logo{display:flex;align-items:center;gap:.6rem}
 .logo-mark{width:30px;height:30px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:.82rem;color:#1a0a2e}
 header h1{font-size:1rem;font-weight:700}
