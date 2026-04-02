@@ -710,7 +710,8 @@ async function init() {
   S.patterns.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
   await Promise.all([loadIntakes(), loadSolutions(), loadOpSupport()]);
   renderSidebar();
-  showDashboard();
+  if (location.hash === '#wizard') { startNewIntake(); }
+  else { showDashboard(); }
 }
 
 async function loadIntakes() {
