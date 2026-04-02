@@ -328,7 +328,7 @@ router.get('/policies', async (req, res) => {
 
 router.get('/policies/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM policies WHERE id=$1 OR policy_key=$1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM policies WHERE id::text=$1 OR policy_key=$1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(result.rows[0]);
   } catch (err) {
@@ -360,7 +360,7 @@ router.put('/policies/:id', async (req, res) => {
     const result = await pool.query(`
       UPDATE policies SET name=$1, category=$2, source=$3, description=$4, version=$5, url=$6,
         rules=$7, active=$8, updated_at=NOW()
-      WHERE id=$9 OR policy_key=$9 RETURNING *`,
+      WHERE id::text=$9 OR policy_key=$9 RETURNING *`,
       [name, category, source || null, description || null, version || null, url || null,
        JSON.stringify(rules || []), active !== false, req.params.id]
     );
@@ -375,7 +375,7 @@ router.put('/policies/:id', async (req, res) => {
 router.patch('/policies/:id/toggle', async (req, res) => {
   try {
     const result = await pool.query(
-      `UPDATE policies SET active = NOT active, updated_at=NOW() WHERE id=$1 OR policy_key=$1 RETURNING *`,
+      `UPDATE policies SET active = NOT active, updated_at=NOW() WHERE id::text=$1 OR policy_key=$1 RETURNING *`,
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
@@ -388,7 +388,7 @@ router.patch('/policies/:id/toggle', async (req, res) => {
 
 router.delete('/policies/:id', async (req, res) => {
   try {
-    await pool.query('DELETE FROM policies WHERE id=$1 OR policy_key=$1', [req.params.id]);
+    await pool.query('DELETE FROM policies WHERE id::text=$1 OR policy_key=$1', [req.params.id]);
     invalidateCache('policies');
     res.json({ success: true });
   } catch (err) {
