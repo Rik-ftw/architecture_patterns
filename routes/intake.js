@@ -120,6 +120,227 @@ router.get('/stats', async (req, res) => {
   }
 });
 
+router.get('/risk-dashboard', async (req, res) => {
+  try {
+    const allRows = await pool.query(
+      `SELECT reference_id, title, status, risk_tier, risk_score, risk_breakdown, risk_flags, programme_domain, created_at, hosting_model, architecture_type, components, tech_stack_notes FROM intake_requests WHERE status NOT IN ('Draft','Withdrawn') ORDER BY created_at ASC`
+    );
+    const rows = allRows.rows;
+
+    const pillarTotals = { dataRisk: 0, vendorRisk: 0, securityRisk: 0, complexityRisk: 0 };
+    const pillarCounts = { dataRisk: 0, vendorRisk: 0, securityRisk: 0, complexityRisk: 0 };
+    const flagFreq = {};
+    const domainRisk = {};
+    const DOMAINS = ['Application & Integration', 'Data & Analytics', 'Security & Compliance', 'Infrastructure & Cloud', 'OT/ICS'];
+
+    DOMAINS.forEach(d => { domainRisk[d] = { high: 0, critical: 0 }; });
+
+    rows.forEach(row => {
+      const breakdown = parseJson(row.risk_breakdown, {});
+      ['dataRisk', 'vendorRisk', 'securityRisk', 'complexityRisk'].forEach(k => {
+        if (breakdown[k] && typeof breakdown[k].score === 'number') {
+          pillarTotals[k] += breakdown[k].score;
+          pillarCounts[k]++;
+        }
+      });
+
+      const flags = parseJson(row.risk_flags, []);
+      flags.forEach(f => {
+        if (typeof f === 'string') { flagFreq[f] = (flagFreq[f] || 0) + 1; }
+      });
+
+      const tier = row.risk_tier;
+      if (tier === 'High' || tier === 'Critical') {
+        const pd = (row.programme_domain || '').toLowerCase();
+        let domainKey = null;
+        if (pd.includes('ot') || pd.includes('ics') || pd.includes('scada') || pd.includes('operational')) domainKey = 'OT/ICS';
+        else if (pd.includes('security') || pd.includes('compliance') || pd.includes('iam')) domainKey = 'Security & Compliance';
+        else if (pd.includes('data') || pd.includes('analytics') || pd.includes('log') || pd.includes('lake')) domainKey = 'Data & Analytics';
+        else if (pd.includes('infra') || pd.includes('cloud') || pd.includes('network') || pd.includes('storage')) domainKey = 'Infrastructure & Cloud';
+        else domainKey = 'Application & Integration';
+        if (domainRisk[domainKey]) {
+          if (tier === 'Critical') domainRisk[domainKey].critical++;
+          else domainRisk[domainKey].high++;
+        }
+      }
+    });
+
+    const pillarAverages = {
+      'Data Risk': pillarCounts.dataRisk ? Math.round(pillarTotals.dataRisk / pillarCounts.dataRisk * 10) / 10 : 0,
+      'Vendor Risk': pillarCounts.vendorRisk ? Math.round(pillarTotals.vendorRisk / pillarCounts.vendorRisk * 10) / 10 : 0,
+      'Security Risk': pillarCounts.securityRisk ? Math.round(pillarTotals.securityRisk / pillarCounts.securityRisk * 10) / 10 : 0,
+      'Complexity Risk': pillarCounts.complexityRisk ? Math.round(pillarTotals.complexityRisk / pillarCounts.complexityRisk * 10) / 10 : 0,
+    };
+
+    const topRisky = rows
+      .filter(r => r.risk_score != null)
+      .sort((a, b) => parseFloat(b.risk_score) - parseFloat(a.risk_score))
+      .slice(0, 5)
+      .map(r => {
+        const breakdown = parseJson(r.risk_breakdown, {});
+        let primaryPillar = 'N/A';
+        let primaryScore = -1;
+        const pillarMap = { dataRisk: 'Data Risk', vendorRisk: 'Vendor Risk', securityRisk: 'Security Risk', complexityRisk: 'Complexity Risk' };
+        Object.entries(pillarMap).forEach(([k, label]) => {
+          if (breakdown[k] && breakdown[k].score > primaryScore) {
+            primaryScore = breakdown[k].score;
+            primaryPillar = label;
+          }
+        });
+        return { referenceId: r.reference_id, title: r.title, tier: r.risk_tier, score: parseFloat(r.risk_score) || 0, primaryPillar };
+      });
+
+    const topFlags = Object.entries(flagFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([flag, count]) => ({ flag, count }));
+
+    const now = Date.now();
+    const weekMs = 7 * 24 * 60 * 60 * 1000;
+    const thisWeekRows = rows.filter(r => new Date(r.created_at).getTime() >= now - weekMs);
+    const lastWeekRows = rows.filter(r => {
+      const t = new Date(r.created_at).getTime();
+      return t >= now - 2 * weekMs && t < now - weekMs;
+    });
+    const avgScore = arr => arr.length ? arr.reduce((s, r) => s + (parseFloat(r.risk_score) || 0), 0) / arr.length : null;
+    const thisAvg = avgScore(thisWeekRows);
+    const lastAvg = avgScore(lastWeekRows);
+    let trend = 'stable';
+    if (thisAvg !== null && lastAvg !== null) {
+      if (thisAvg > lastAvg + 2) trend = 'degrading';
+      else if (thisAvg < lastAvg - 2) trend = 'improving';
+    } else if (thisAvg !== null && lastAvg === null) {
+      trend = 'stable';
+    }
+    const overallAvg = rows.length ? Math.round(rows.reduce((s, r) => s + (parseFloat(r.risk_score) || 0), 0) / rows.length * 10) / 10 : 0;
+
+    const supplyChain = computeSupplyChainSignals(rows);
+
+    res.json({
+      pillarAverages,
+      topRisky,
+      domainRisk,
+      topFlags,
+      trend: { direction: trend, thisWeekAvg: thisAvg !== null ? Math.round(thisAvg * 10) / 10 : null, lastWeekAvg: lastAvg !== null ? Math.round(lastAvg * 10) / 10 : null, overallAvg },
+      supplyChain,
+      submissionCount: rows.length
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+function extractTechKeywordsFromRow(row) {
+  const techs = new Set();
+  const hm = (row.hosting_model || '').toLowerCase();
+  if (hm.includes('azure')) techs.add('microsoft azure');
+  if (hm.includes('aws')) techs.add('aws');
+  const at = (row.architecture_type || '').toLowerCase();
+  if (at.includes('ot')) { techs.add('scada'); techs.add('modbus'); techs.add('opc-ua'); }
+  if (at.includes('api')) techs.add('api gateway');
+  const components = parseJson(row.components, []);
+  components.forEach(c => { if (c && c.trim()) techs.add(c.trim().toLowerCase()); });
+  const notes = (row.tech_stack_notes || '').toLowerCase();
+  ['node.js','python','java','azure','kubernetes','docker','terraform','nginx','redis','postgresql','mongodb'].forEach(t => {
+    if (notes.includes(t)) techs.add(t);
+  });
+  return [...techs];
+}
+
+function computeSupplyChainSignals(submissionRows) {
+  const cacheStatus = { vendors: false, ssl: false, radar: false, nvd: false, mitre: false };
+
+  let vendors = [];
+  try { vendors = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'vendors', 'registry.json'), 'utf8')); cacheStatus.vendors = true; } catch {}
+
+  let sslCache = {};
+  try { sslCache = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'sslCache.json'), 'utf8')); if (Object.keys(sslCache).length > 0) cacheStatus.ssl = true; } catch {}
+
+  let radarCache = {};
+  try { radarCache = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'radarCache.json'), 'utf8')); if (Object.keys(radarCache).length > 0) cacheStatus.radar = true; } catch {}
+
+  let nvdCache = {};
+  try { nvdCache = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'nvdCache.json'), 'utf8')); if (Object.keys(nvdCache).length > 0) cacheStatus.nvd = true; } catch {}
+
+  let mitreMapping = { tactics: [], ics_tactics: [] };
+  try { mitreMapping = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mitreMapping.json'), 'utf8')); cacheStatus.mitre = true; } catch {}
+
+  const today = new Date();
+  const criticalCerts = ['SOC2 Type II', 'ISO 27001'];
+  let certGapCount = 0;
+  let lowSslCount = 0;
+  let radarFlaggedCount = 0;
+  const seenDomains = new Set();
+
+  vendors.forEach(v => {
+    if (v.criticality === 'Critical' || v.criticality === 'High') {
+      const certs = v.certifications || [];
+      const hasCritCerts = criticalCerts.every(cn =>
+        certs.some(c => c.name === cn && c.validUntil && new Date(c.validUntil) >= today)
+      );
+      if (!hasCritCerts) certGapCount++;
+    }
+
+    if (v.domain) {
+      const domain = v.domain.toLowerCase();
+      if (!seenDomains.has(domain)) {
+        seenDomains.add(domain);
+
+        const sslEntry = sslCache[domain] || (v.sslCache || null);
+        if (sslEntry && sslEntry.grade) {
+          const grade = sslEntry.grade;
+          if (!['A+', 'A', 'B', 'Unknown'].includes(grade)) {
+            lowSslCount++;
+          }
+        }
+
+        const radarEntry = radarCache[domain];
+        if (radarEntry && radarEntry.data && radarEntry.data.threat) {
+          const t = radarEntry.data.threat;
+          if (t.malicious || t.phishing || t.botnet) radarFlaggedCount++;
+        }
+      }
+    }
+  });
+
+  let totalCriticalHighCves = 0;
+  if (submissionRows && submissionRows.length > 0) {
+    const allTechKeys = new Set();
+    submissionRows.forEach(row => {
+      extractTechKeywordsFromRow(row).forEach(k => allTechKeys.add(k));
+    });
+    allTechKeys.forEach(key => {
+      const entry = nvdCache[key];
+      if (entry && entry.data) {
+        if (entry.data.severity === 'Critical' || entry.data.severity === 'High') {
+          totalCriticalHighCves += entry.data.cveCount || 0;
+        }
+      }
+    });
+  }
+
+  let t1195Count = 0;
+  const allTactics = [...(mitreMapping.tactics || []), ...(mitreMapping.ics_tactics || [])];
+  allTactics.forEach(tactic => {
+    (tactic.techniques || []).forEach(tech => {
+      if (tech.id === 'T1195' || (tech.id && tech.id.startsWith('T1195.'))) t1195Count++;
+    });
+  });
+
+  const cacheAvailable = cacheStatus.vendors && (cacheStatus.nvd || cacheStatus.ssl || cacheStatus.radar);
+
+  return {
+    criticalHighCves: totalCriticalHighCves,
+    certGapVendors: certGapCount,
+    lowSslVendors: lowSslCount,
+    radarFlaggedVendors: radarFlaggedCount,
+    supplyChainTechniqueCount: t1195Count,
+    cacheAvailable,
+    cacheStatus
+  };
+}
+
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);

@@ -664,7 +664,7 @@ async function showDashboard() {
   const critical=S.vendors.filter(v=>v.criticality==='Critical').length;
   const pending=(byStat['Submitted']||0)+(byStat['Under Review']||0);
 
-  let h=`<div class="page-title"><h2>Executive Dashboard</h2><button class="btn btn-primary btn-sm" onclick="startNewIntake()">＋ New Architecture Request</button></div>`;
+  let h=`<div class="page-title"><h2>Executive Dashboard</h2><button class="btn btn-primary btn-sm" onclick="startNewIntake()">&#xff0b; New Architecture Request</button></div>`;
 
   h+=`<div class="stats-grid">
     <div class="stat-card" style="--accent-color:var(--text)"><div class="stat-val">${S.patterns.length}</div><div class="stat-label">Total Patterns</div></div>
@@ -693,7 +693,7 @@ async function showDashboard() {
   domains.forEach(d=>{
     const n=domainCounts[d];
     const pct3=Math.round(n/maxDomain*100);
-    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label" title="${d}">${d}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct3}%;background:var(--navy)"></div></div><div class="kpi-bar-val">${n}</div></div>`;
+    h+=`<div class="kpi-bar-row"><div class="kpi-bar-label" title="${d}">${d}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct3}%;background:var(--accent2)"></div></div><div class="kpi-bar-val">${n}</div></div>`;
   });
   h+=`</div></div>
   <div class="section-card" style="grid-column:span 1"><h3>Risk Distribution</h3><div class="kpi-bar-chart">`;
@@ -727,7 +727,152 @@ async function showDashboard() {
   if(!S.solutions.length) h+=`<p class="text-sm text-muted">No solutions yet. <button class="btn btn-sm btn-primary" onclick="startNewSolution()">Create first</button></p>`;
   else S.solutions.slice(0,4).forEach(s=>{h+=`<div onclick="showSolutionDetail(${s.id})" style="cursor:pointer;padding:.4rem;border-radius:6px;margin-bottom:.3rem;background:var(--surface2)"><div class="text-sm font-bold">${s.title}</div><div class="flex gap-1 mt-1"><span class="badge badge-${s.status==='Published'?'published':'draft'}">${s.status}</span><span class="text-xs text-muted">${(s.patternIds||[]).length} patterns</span></div></div>`;});
   h+=`</div></div></div>`;
+
+  // Risk widget placeholder — loads async so rest of dashboard isn't blocked
+  h+=`<div id="risk-widget-section"><div class="section-card" style="opacity:.6;padding:1.5rem;text-align:center;color:var(--muted);font-size:.82rem">Loading risk intelligence...</div></div>`;
   setMain(h);
+
+  // Load risk dashboard data asynchronously
+  try {
+    const rd = await api.get('/api/intake/risk-dashboard');
+    renderRiskWidget(rd);
+  } catch(e) {
+    document.getElementById('risk-widget-section').innerHTML=`<div class="alert alert-warning">Risk intelligence data unavailable — ${e.message||'unknown error'}</div>`;
+  }
+}
+
+function renderRiskWidget(rd) {
+  const el=document.getElementById('risk-widget-section');
+  if(!el) return;
+
+  const pillarColors={'Data Risk':'var(--dev)','Vendor Risk':'var(--risk-high)','Security Risk':'var(--risk-critical)','Complexity Risk':'var(--review)'};
+  const MAX_PILLAR=25;
+
+  // Panel 1: Risk Pillar Breakdown
+  let pillarHtml=`<div class="section-card"><h3>Risk Pillar Breakdown <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">avg score / 25 across all submissions</span></h3><div class="kpi-bar-chart">`;
+  Object.entries(rd.pillarAverages||{}).forEach(([label,avg])=>{
+    const pct=Math.round((avg/MAX_PILLAR)*100);
+    const col=pillarColors[label]||'var(--accent)';
+    pillarHtml+=`<div class="kpi-bar-row"><div class="kpi-bar-label">${label}</div><div class="kpi-bar-track"><div class="kpi-bar-fill" style="width:${pct}%;background:${col}"></div></div><div class="kpi-bar-val" style="color:${col}">${avg}</div></div>`;
+  });
+  pillarHtml+=`</div></div>`;
+
+  // Panel 2: Top Risky Solutions
+  let topRiskyHtml=`<div class="section-card"><h3>Top Risky Submissions</h3>`;
+  if(!(rd.topRisky||[]).length){topRiskyHtml+=`<p class="text-sm text-muted">No scored submissions yet.</p>`;}
+  else{
+    topRiskyHtml+=`<div style="display:flex;flex-direction:column;gap:.38rem">`;
+    (rd.topRisky||[]).forEach((item,i)=>{
+      const badgeClass='badge-'+(item.tier||'low').toLowerCase();
+      topRiskyHtml+=`<div onclick="showIntakeDetail('${item.referenceId}')" style="cursor:pointer;display:flex;align-items:center;gap:.55rem;padding:.42rem .55rem;background:var(--surface2);border-radius:7px;border:1px solid var(--border)">
+        <span style="font-size:.7rem;font-weight:800;color:var(--muted);width:16px;text-align:right;flex-shrink:0">${i+1}</span>
+        <span style="flex:1;font-size:.8rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.title}">${item.title}</span>
+        <span class="badge ${badgeClass}" style="flex-shrink:0">${item.tier}</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);flex-shrink:0">${item.score}</span>
+        <span style="font-size:.65rem;color:var(--muted);flex-shrink:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${item.primaryPillar}">${item.primaryPillar}</span>
+      </div>`;
+    });
+    topRiskyHtml+=`</div>`;
+  }
+  topRiskyHtml+=`</div>`;
+
+  // Panel 3: Risk by Architecture Domain
+  const domainOrder=['Application & Integration','Data & Analytics','Security & Compliance','Infrastructure & Cloud','OT/ICS'];
+  let domainHtml=`<div class="section-card"><h3>Risk by Architecture Domain <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">High + Critical submissions</span></h3><div style="display:flex;flex-direction:column;gap:.38rem">`;
+  domainOrder.forEach(d=>{
+    const dr=(rd.domainRisk||{})[d]||{high:0,critical:0};
+    const total=dr.high+dr.critical;
+    domainHtml+=`<div style="display:flex;align-items:center;gap:.55rem">
+      <div style="font-size:.73rem;color:var(--muted);width:175px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${d}">${d}</div>
+      <div style="display:flex;gap:.25rem;flex:1">
+        ${dr.critical?`<span style="font-size:.67rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;background:rgba(231,76,60,.2);color:var(--risk-critical)">${dr.critical} Crit</span>`:''}
+        ${dr.high?`<span style="font-size:.67rem;font-weight:700;padding:.1rem .4rem;border-radius:4px;background:rgba(230,126,34,.15);color:var(--risk-high)">${dr.high} High</span>`:''}
+        ${!total?`<span style="font-size:.67rem;color:var(--muted)">None</span>`:''}
+      </div>
+    </div>`;
+  });
+  domainHtml+=`</div></div>`;
+
+  // Panel 4: Common Risk Flags
+  let flagsHtml=`<div class="section-card"><h3>Common Risk Flags</h3>`;
+  if(!(rd.topFlags||[]).length){flagsHtml+=`<p class="text-sm text-muted">No risk flags recorded yet.</p>`;}
+  else{
+    flagsHtml+=`<div style="display:flex;flex-direction:column;gap:.3rem">`;
+    (rd.topFlags||[]).forEach(f=>{
+      flagsHtml+=`<div style="display:flex;align-items:flex-start;gap:.5rem;padding:.35rem .5rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--risk-high)">
+        <span style="font-size:.77rem;flex:1;line-height:1.4">${f.flag}</span>
+        <span style="font-size:.7rem;font-weight:800;color:var(--risk-high);flex-shrink:0;white-space:nowrap">${f.count}x</span>
+      </div>`;
+    });
+    flagsHtml+=`</div>`;
+  }
+  flagsHtml+=`</div>`;
+
+  // Panel 5: Supply Chain Risk
+  const sc=rd.supplyChain||{};
+  const scItems=[
+    {label:'Critical/High CVEs detected',val:sc.criticalHighCves||0,col:'var(--risk-critical)'},
+    {label:'Vendors missing SOC2/ISO27001',val:sc.certGapVendors||0,col:'var(--risk-high)'},
+    {label:'Vendor domains with low SSL grade',val:sc.lowSslVendors||0,col:'var(--review)'},
+    {label:'Radar-flagged vendor domains',val:sc.radarFlaggedVendors||0,col:'var(--risk-critical)'},
+    {label:'Supply chain MITRE techniques mapped',val:sc.supplyChainTechniqueCount||0,col:'var(--review)'},
+  ];
+  let scHtml=`<div class="section-card" style="border-color:rgba(230,120,0,.4);background:linear-gradient(135deg,var(--surface) 85%,rgba(200,90,0,.06))">
+    <h3 style="color:#e67e22">Supply Chain Risk <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">aggregated from cached signals</span></h3>
+    ${!sc.cacheAvailable?`<div class="alert alert-warning" style="margin-bottom:.6rem;font-size:.75rem">Cache cold — signals based on available data only</div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem">`;
+  scItems.forEach(si=>{
+    scHtml+=`<div style="display:flex;align-items:center;gap:.55rem;padding:.5rem .65rem;background:rgba(230,120,0,.07);border:1px solid rgba(230,120,0,.2);border-radius:7px">
+      <span style="font-size:1.25rem;font-weight:900;color:${si.col};line-height:1;flex-shrink:0">${si.val}</span>
+      <span style="font-size:.7rem;color:var(--muted);line-height:1.35">${si.label}</span>
+    </div>`;
+  });
+  scHtml+=`</div></div>`;
+
+  // Panel 6: Risk Trend
+  const trend=rd.trend||{};
+  const trendIcon={improving:'↑',stable:'→',degrading:'↓'}[trend.direction]||'→';
+  const trendColor={improving:'var(--risk-low)',stable:'var(--muted)',degrading:'var(--risk-critical)'}[trend.direction]||'var(--muted)';
+  const trendLabel={improving:'Improving',stable:'Stable',degrading:'Degrading'}[trend.direction]||'Stable';
+  let trendHtml=`<div class="section-card"><h3>Risk Trend <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">week-over-week</span></h3>
+    <div style="display:flex;align-items:center;gap:1rem;margin-bottom:.7rem">
+      <span style="font-size:2.2rem;font-weight:900;color:${trendColor};line-height:1">${trendIcon}</span>
+      <div>
+        <div style="font-size:1rem;font-weight:700;color:${trendColor}">${trendLabel}</div>
+        <div style="font-size:.72rem;color:var(--muted)">Avg risk score across all submissions</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.7rem">
+      <div style="flex:1;padding:.45rem .65rem;background:var(--surface2);border-radius:7px">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">This Week</div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text)">${trend.thisWeekAvg!==null&&trend.thisWeekAvg!==undefined?trend.thisWeekAvg:'—'}</div>
+      </div>
+      <div style="flex:1;padding:.45rem .65rem;background:var(--surface2);border-radius:7px">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Last Week</div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text)">${trend.lastWeekAvg!==null&&trend.lastWeekAvg!==undefined?trend.lastWeekAvg:'—'}</div>
+      </div>
+      <div style="flex:1;padding:.45rem .65rem;background:var(--surface2);border-radius:7px">
+        <div style="font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em">Overall Avg</div>
+        <div style="font-size:1.05rem;font-weight:800;color:var(--text)">${trend.overallAvg||'—'}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Compose the full risk widget
+  el.innerHTML=`
+    <div style="margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem">
+      <h3 style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0">Risk Intelligence</h3>
+      <span style="font-size:.68rem;color:var(--muted)">${rd.submissionCount||0} active submission${(rd.submissionCount||0)===1?'':'s'} analysed</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem">
+      ${pillarHtml}${topRiskyHtml}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem">
+      ${domainHtml}${flagsHtml}
+    </div>
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:.9rem">
+      ${scHtml}${trendHtml}
+    </div>`;
 }
 
 // ─── Kanban Board ─────────────────────────────────────────────────────────────
