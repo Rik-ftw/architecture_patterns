@@ -631,6 +631,63 @@ server.tool(
   }
 );
 
+// Tool 10: Run Triage Pipeline (LangChain)
+server.tool(
+  "run_triage",
+  "Run the full 7-stage AI triage pipeline (LangChain) on an intake request. Requires ANTHROPIC_API_KEY. Returns completeness, classification, pattern matches, vendor analysis, risk scores, routing, and executive summary.",
+  {
+    title: z.string().describe("Request title"),
+    description: z.string().describe("Detailed description of the proposed solution"),
+    requestType: z.string().optional().describe("Request type: new_application, solution_change, pattern_exception, vendor_onboarding, architecture_review, security_assessment, decommission, proof_of_concept"),
+    priority: z.string().optional().describe("Priority: critical, high, medium, low"),
+    targetDomain: z.string().optional().describe("Primary domain"),
+    technologies: z.array(z.string()).optional().describe("Proposed technologies"),
+    dataClassification: z.string().optional().describe("Data classification: public, internal, confidential, restricted"),
+    piiInvolved: z.boolean().optional().describe("Whether PII is involved"),
+  },
+  async (args) => {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return {
+        content: [{
+          type: "text",
+          text: "Error: ANTHROPIC_API_KEY environment variable is required to run the triage pipeline. Set it and restart the MCP server.",
+        }],
+      };
+    }
+
+    try {
+      const { runTriagePipeline } = await import("./pipeline/triage-pipeline.js");
+
+      const request = {
+        requestType: args.requestType || "new_application",
+        title: args.title,
+        description: args.description,
+        priority: args.priority || "medium",
+        targetDomain: args.targetDomain || "cross_domain",
+        technicalContext: {
+          proposedTechnologies: args.technologies || [],
+          dataRequirements: {
+            dataClassification: args.dataClassification || "internal",
+            piiInvolved: args.piiInvolved || false,
+          },
+        },
+      };
+
+      const result = await runTriagePipeline(request, {
+        haltOnIncomplete: false, // MCP calls may be minimal
+      });
+
+      return {
+        content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+      };
+    } catch (err) {
+      return {
+        content: [{ type: "text", text: `Pipeline error: ${err.message}` }],
+      };
+    }
+  }
+);
+
 // --- Resources ---
 
 server.resource(
