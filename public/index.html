@@ -12,13 +12,14 @@
   --surface3:#e2d9f3;
   --border:#e2d9f3;
   --accent:#FFD400;
-  --accent-light:#c9a600;
+  --accent-light:#4a2478;
   --accent2:#4a2478;
+  --accent-text:#4a2478;
   --text:#1a0a2e;
   --muted:#6b5a9e;
   --navy:#ffffff;
-  --teal:#c9a600;
-  --endorsed:#c9a600;
+  --teal:#4a2478;
+  --endorsed:#4a2478;
   --review:#d4830a;
   --dev:#2980b9;
   --deprecated:#4a5568;
@@ -38,7 +39,7 @@ header h1{font-size:.95rem;font-weight:700;letter-spacing:-.01em;white-space:now
 .top-nav-items{display:flex;gap:0;align-items:stretch;height:50px;overflow-x:auto;flex:1;min-width:0}
 .top-nav-item{background:none;border:none;color:var(--muted);padding:0 13px;height:50px;cursor:pointer;font-size:.78rem;font-weight:500;border-bottom:2px solid transparent;display:flex;align-items:center;gap:5px;white-space:nowrap;transition:color .12s;flex-shrink:0}
 .top-nav-item:hover{color:var(--text)}
-.top-nav-item.active{background:rgba(255,212,0,.08);color:var(--accent);font-weight:700;border-bottom-color:var(--accent)}
+.top-nav-item.active{background:rgba(255,212,0,.08);color:var(--accent-text);font-weight:700;border-bottom-color:var(--accent)}
 
 /* KPI strip */
 .kpi-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 24px;display:flex;gap:0;flex-shrink:0;overflow-x:auto}
@@ -52,7 +53,7 @@ header h1{font-size:.95rem;font-weight:700;letter-spacing:-.01em;white-space:now
 .filter-panel{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;transition:min-width .2s,width .2s}
 .filter-panel.collapsed{width:42px;min-width:42px;overflow:hidden}
 .filter-panel-hdr{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:1}
-.filter-panel-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);white-space:nowrap}
+.filter-panel-title{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);white-space:nowrap}
 .fp-collapse-btn{background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;color:var(--muted);font-size:.75rem;cursor:pointer;line-height:1;flex-shrink:0}
 .filter-section{padding:7px 10px;border-bottom:1px solid var(--border)}
 .filter-section-title{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
@@ -60,12 +61,12 @@ header h1{font-size:.95rem;font-weight:700;letter-spacing:-.01em;white-space:now
 .filter-row:hover{background:var(--surface2)}
 .filter-row.active{background:rgba(255,212,0,.08)}
 .filter-row .fl{font-size:.72rem;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.filter-row .fl.fa{color:var(--accent)}
+.filter-row .fl.fa{color:var(--accent-text)}
 .filter-row .fc{font-size:.65rem;opacity:.7;flex-shrink:0}
 .filter-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .pinned-btn{display:flex;width:100%;align-items:center;gap:6px;background:none;border:1px solid transparent;border-radius:6px;padding:4px 7px;color:var(--muted);font-size:.75rem;cursor:pointer;margin-bottom:2px;text-align:left;transition:background .12s}
 .pinned-btn:hover{background:var(--surface2)}
-.pinned-btn.active-pin{background:rgba(255,212,0,.08);border-color:rgba(255,212,0,.2);color:var(--accent)}
+.pinned-btn.active-pin{background:rgba(255,212,0,.08);border-color:rgba(255,212,0,.2);color:var(--accent-text)}
 .pinned-badge{margin-left:auto;background:#e74c3c;color:#fff;border-radius:99px;padding:1px 5px;font-size:.55rem;font-weight:700}
 
 /* Bento grid */
@@ -79,9 +80,9 @@ nav{width:225px;min-width:200px;background:var(--surface);border-right:1px solid
 .nav-section{font-size:.62rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:.7rem 1rem .25rem;font-weight:700}
 nav button{display:flex;width:100%;text-align:left;background:none;border:none;color:var(--muted);padding:.4rem 1rem;cursor:pointer;font-size:.81rem;transition:background .12s,color .12s;border-left:3px solid transparent;align-items:center;gap:.5rem;line-height:1.3}
 nav button:hover{background:var(--surface2);color:var(--text)}
-nav button.active{background:rgba(255,212,0,.1);border-left-color:var(--accent);color:var(--accent)}
+nav button.active{background:rgba(255,212,0,.1);border-left-color:var(--accent);color:var(--accent-text)}
 nav button .ni{font-size:.65rem;color:var(--muted);font-family:monospace;margin-left:auto;background:var(--surface2);border-radius:4px;padding:.05rem .3rem}
-nav button.active .ni{color:var(--accent)}
+nav button.active .ni{color:var(--accent-text)}
 .divider{height:1px;background:var(--border);margin:.4rem .8rem}
 
 body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
@@ -107,7 +108,7 @@ main.wiz-mode{padding:0;display:flex;flex-direction:column;overflow:hidden}
 .overview-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:.9rem}
 
 .badge{display:inline-flex;align-items:center;font-size:.67rem;padding:.17rem .5rem;border-radius:999px;font-weight:700;white-space:nowrap}
-.badge-endorsed,.badge-approved,.badge-published{background:rgba(255,212,0,.2);color:#c9a600;border:1px solid rgba(255,212,0,.4)}
+.badge-endorsed,.badge-approved,.badge-published{background:rgba(255,212,0,.2);color:#4a2478;border:1px solid rgba(255,212,0,.4)}
 .badge-review,.badge-under-review{background:rgba(212,131,10,.15);color:var(--review);border:1px solid rgba(212,131,10,.25)}
 .badge-dev,.badge-submitted,.badge-in-development{background:rgba(41,128,185,.15);color:var(--dev);border:1px solid rgba(41,128,185,.25)}
 .badge-draft,.badge-withdrawn,.badge-deprecated{background:rgba(74,85,104,.2);color:var(--muted);border:1px solid var(--border)}
@@ -178,11 +179,11 @@ select.form-control{cursor:pointer}
 .wiz-step-title{font-size:1rem;font-weight:800;margin-bottom:.2rem}
 .wiz-step-desc{font-size:.77rem;color:var(--muted);line-height:1.6}
 .wiz-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:.85rem}
-.wiz-card-title{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.75rem}
+.wiz-card-title{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);margin-bottom:.75rem}
 .wiz-ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a78bfa;margin-bottom:.65rem}
 .wiz-ai-score-row{display:flex;gap:7px;margin-bottom:.75rem}
 .wiz-ai-score-box{background:var(--surface2);border:1px solid rgba(255,212,0,.2);border-radius:7px;padding:5px 10px;text-align:center;flex:1}
-.wiz-ai-score-val{font-size:1.2rem;font-weight:900;color:var(--accent);line-height:1}
+.wiz-ai-score-val{font-size:1.2rem;font-weight:900;color:var(--accent-text);line-height:1}
 .wiz-ai-score-lbl{font-size:.6rem;color:var(--muted)}
 .wiz-suggestion{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;gap:7px;margin-bottom:6px}
 .wiz-sug-tag{font-size:.58rem;font-weight:900;padding:2px 5px;border-radius:3px;flex-shrink:0;margin-top:1px}
@@ -195,7 +196,7 @@ select.form-control{cursor:pointer}
 .wizard-step{flex:1;padding:.5rem .4rem;text-align:center;font-size:.69rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;line-height:1.3}
 .wizard-step:last-child{border-right:none}
 .wizard-step.active{background:#4a2478;color:#fff;font-weight:700}
-.wizard-step.done{background:rgba(255,212,0,.12);color:var(--accent)}
+.wizard-step.done{background:rgba(255,212,0,.12);color:var(--accent-text)}
 .wizard-step .step-num{display:block;font-size:.62rem;margin-bottom:.08rem;opacity:.7}
 .wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
 
@@ -217,10 +218,10 @@ select.form-control{cursor:pointer}
 .flags-list li{display:flex;gap:.45rem;font-size:.78rem;padding:.38rem .55rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--risk-high)}
 .recs-list li{display:flex;gap:.45rem;font-size:.78rem;padding:.38rem .55rem;background:var(--surface2);border-radius:6px;border-left:3px solid var(--accent)}
 .flags-list li::before{content:'⚠';flex-shrink:0;font-size:.8rem}
-.recs-list li::before{content:'→';flex-shrink:0;color:var(--accent)}
+.recs-list li::before{content:'→';flex-shrink:0;color:var(--accent-text)}
 
 .section-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:.9rem}
-.section-card h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
+.section-card h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem}
 .kv-grid{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
 .kv-item label{font-size:.67rem;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;display:block}
 .kv-item span{font-size:.84rem}
@@ -297,19 +298,19 @@ select.form-control{cursor:pointer}
 
 /* Design iteration log */
 .iter-item{display:flex;gap:.65rem;align-items:flex-start;padding:.52rem .7rem;border-radius:7px;background:var(--surface2);margin-bottom:.35rem;border-left:3px solid var(--accent)}
-.iter-label{font-size:.75rem;font-weight:700;color:var(--accent)}
+.iter-label{font-size:.75rem;font-weight:700;color:var(--accent-text)}
 .iter-meta{font-size:.67rem;color:var(--muted);margin-top:.12rem}
 .iter-summary{font-size:.78rem;margin-top:.1rem;line-height:1.5}
 
 /* Solution output tabs */
 .output-tab-bar{display:flex;gap:.12rem;margin-bottom:.8rem;border-bottom:1px solid var(--border)}
 .output-tab{padding:.42rem .9rem;cursor:pointer;font-size:.8rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
-.output-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.output-tab.active{color:var(--accent-text);border-bottom-color:var(--accent)}
 .output-tab-panel{display:none}
 .output-tab-panel.active{display:block}
 
 /* Begin Solution Design button */
-.begin-solution-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:7px;font-size:.82rem;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,rgba(255,212,0,.25),rgba(255,212,0,.12));color:var(--accent);border:1px solid rgba(255,212,0,.45);transition:all .15s}
+.begin-solution-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:7px;font-size:.82rem;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,rgba(255,212,0,.25),rgba(255,212,0,.12));color:var(--accent-text);border:1px solid rgba(255,212,0,.45);transition:all .15s}
 .begin-solution-btn:hover{background:linear-gradient(135deg,rgba(255,212,0,.35),rgba(255,212,0,.18));transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,212,0,.15)}
 .review-artifact{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.55rem;border-left:3px solid var(--border)}
 .review-artifact.art-approved{border-left-color:#2ecc71}
@@ -353,7 +354,7 @@ select.form-control{cursor:pointer}
 .alert{padding:.7rem .9rem;border-radius:8px;font-size:.8rem;margin-bottom:.9rem;display:flex;gap:.45rem;align-items:flex-start}
 .alert-warning{background:rgba(212,131,10,.1);border:1px solid rgba(212,131,10,.25);color:var(--review)}
 .alert-info{background:rgba(41,128,185,.1);border:1px solid rgba(41,128,185,.25);color:var(--dev)}
-.alert-success{background:rgba(255,212,0,.1);border:1px solid rgba(255,212,0,.25);color:#c9a600}
+.alert-success{background:rgba(255,212,0,.1);border:1px solid rgba(255,212,0,.25);color:#4a2478}
 .alert-danger{background:rgba(231,76,60,.1);border:1px solid rgba(231,76,60,.25);color:var(--risk-critical)}
 
 /* Team portal */
@@ -369,9 +370,9 @@ select.form-control{cursor:pointer}
 .search-bar:focus{outline:none;border-color:var(--accent)}
 .tabs{display:flex;gap:.15rem;margin-bottom:.9rem;border-bottom:1px solid var(--border)}
 .tab{padding:.42rem .9rem;cursor:pointer;font-size:.8rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;transition:color .15s}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab.active{color:var(--accent-text);border-bottom-color:var(--accent)}
 .empty{text-align:center;padding:2.5rem;color:var(--muted);font-size:.88rem}
-.back-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.8rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.3rem;padding:0}
+.back-btn{background:none;border:none;color:var(--accent-text);cursor:pointer;font-size:.8rem;margin-bottom:.9rem;display:flex;align-items:center;gap:.3rem;padding:0}
 .back-btn:hover{text-decoration:underline}
 .two-col{display:grid;grid-template-columns:2fr 1fr;gap:1.4rem;align-items:start}
 .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.9rem}
@@ -384,7 +385,7 @@ select.form-control{cursor:pointer}
 .svg-container img{max-width:100%}
 ul.arrow-list{list-style:none;display:flex;flex-direction:column;gap:.28rem}
 ul.arrow-list li{padding:.3rem 0;font-size:.82rem;border-bottom:1px solid var(--border);display:flex;gap:.45rem}
-ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
+ul.arrow-list li::before{content:'→';color:var(--accent-text);flex-shrink:0}
 .guardrails-table{width:100%;border-collapse:collapse;font-size:.8rem}
 .guardrails-table th{text-align:left;padding:.42rem .65rem;background:var(--surface2);color:var(--muted);font-size:.68rem;text-transform:uppercase}
 .guardrails-table td{padding:.42rem .65rem;border-bottom:1px solid var(--border)}
@@ -452,14 +453,14 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .doc-parse-progress{display:flex;align-items:center;gap:.6rem;color:var(--accent-light);font-size:.82rem;padding:.8rem;background:rgba(255,212,0,.06);border-radius:8px;margin-top:.8rem}
 .doc-parse-spin{width:16px;height:16px;border:2px solid rgba(255,212,0,.3);border-top-color:var(--accent-light);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .doc-prefill-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:8px;background:rgba(255,212,0,.1);border:1px solid rgba(255,212,0,.25);color:var(--accent-light);font-size:.8rem;margin-top:.8rem}
-.doc-prefill-banner-close{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.85rem;margin-left:auto;padding:0;line-height:1;flex-shrink:0}
+.doc-prefill-banner-close{background:none;border:none;color:var(--accent-text);cursor:pointer;font-size:.85rem;margin-left:auto;padding:0;line-height:1;flex-shrink:0}
 .doc-error-banner{display:flex;align-items:flex-start;gap:.6rem;padding:.7rem .9rem;border-radius:8px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.25);color:var(--risk-critical);font-size:.8rem;margin-top:.8rem}
 
 /* ─── Risk Deep-Dive Tabs ─── */
 .risk-tabs{display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--border);margin-top:.8rem}
 .risk-tab{padding:.45rem 1.05rem;cursor:pointer;font-size:.79rem;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s;font-weight:600}
 .risk-tab:hover{color:var(--text)}
-.risk-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.risk-tab.active{color:var(--accent-text);border-bottom-color:var(--accent)}
 .risk-tab-panel{display:none}.risk-tab-panel.active{display:block}
 .risk-deepdive-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.1rem;margin-bottom:.9rem}
 .sca-summary-bar{display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.9rem;padding:.7rem .9rem;background:var(--surface2);border-radius:8px;border-left:3px solid var(--accent)}
@@ -473,7 +474,7 @@ ul.arrow-list li::before{content:'→';color:var(--accent);flex-shrink:0}
 .cve-link{color:var(--accent-light);text-decoration:none;font-family:monospace;font-size:.72rem}
 .cve-link:hover{text-decoration:underline}
 .mitre-tactic{background:var(--surface2);border-radius:8px;padding:.75rem .9rem;margin-bottom:.7rem;border-left:3px solid #4a2478}
-.mitre-tactic-header{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem}
+.mitre-tactic-header{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent-text);margin-bottom:.55rem;display:flex;align-items:center;gap:.45rem}
 .mitre-technique{display:flex;flex-direction:column;gap:.2rem;padding:.55rem .65rem;background:var(--surface);border-radius:6px;margin-bottom:.4rem;border:1px solid var(--border)}
 .mitre-technique:last-child{margin-bottom:0}
 .mitre-technique-id{font-family:monospace;font-size:.68rem;color:var(--muted);margin-right:.3rem}
@@ -934,7 +935,7 @@ async function showDashboard() {
     patHtml+=`<div onclick="showPattern('${p.patternId}')" style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:6px;padding:5px 9px;cursor:pointer">
       <span style="font-family:monospace;font-size:.65rem;color:var(--muted);width:52px;flex-shrink:0">${p.patternId}</span>
       <span style="flex:1;font-size:.78rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.name}</span>
-      <span style="font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,212,0,.15);color:var(--accent)">${p.status}</span>
+      <span style="font-size:.65rem;padding:2px 6px;border-radius:999px;background:rgba(255,212,0,.15);color:var(--accent-text)">${p.status}</span>
     </div>`;
   });
   if(!topPatterns.length) patHtml+=`<p class="text-sm text-muted">No endorsed patterns yet.</p>`;
@@ -1124,7 +1125,7 @@ function renderRiskWidget(rd) {
   // Compose the full risk widget
   el.innerHTML=`
     <div style="margin-bottom:.55rem;display:flex;align-items:center;gap:.5rem">
-      <h3 style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin:0">Risk Intelligence</h3>
+      <h3 style="font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent-text);margin:0">Risk Intelligence</h3>
       <span style="font-size:.68rem;color:var(--muted)">${rd.submissionCount||0} active submission${(rd.submissionCount||0)===1?'':'s'} analysed</span>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.9rem;margin-bottom:.9rem">
@@ -1353,7 +1354,7 @@ async function showSolutionDetail(id) {
   <div class="detail-header">
     <div class="font-mono text-xs text-muted">${s.reference_id}</div>
     <h2>${s.title}</h2>
-    <div class="detail-meta">${s.business_unit||''}${s.intake_reference?` · Intake: <span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:''}</div>
+    <div class="detail-meta">${s.business_unit||''}${s.intake_reference?` · Intake: <span style="cursor:pointer;color:var(--accent-text)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:''}</div>
     <div class="detail-badges mt-1">
       ${solutionStatusBadge(s.status)}
       ${s.complexity?`<span class="badge" style="background:var(--surface2);color:var(--text)">${s.complexity}</span>`:''}
@@ -1402,7 +1403,7 @@ async function showSolutionDetail(id) {
       <div class="kv-item"><label>Complexity</label><span>${s.complexity||'–'}</span></div>
       <div class="kv-item"><label>Est. Cost Band</label><span>${s.estimated_cost_band||'–'}</span></div>
       <div class="kv-item"><label>Patterns</label><span>${(s.patternIds||[]).length}</span></div>
-      <div class="kv-item"><label>Intake Ref</label><span>${s.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:'–'}</span></div>
+      <div class="kv-item"><label>Intake Ref</label><span>${s.intake_reference?`<span style="cursor:pointer;color:var(--accent-text)" onclick="(function(){const ir=S.intakes.find(i=>i.reference_id==='${s.intake_reference}');if(ir)showIntakeDetail(ir.reference_id);else alert('Intake not found');})()">${s.intake_reference}</span>`:'–'}</span></div>
       <div class="kv-item"><label>Created</label><span>${fmtDate(s.created_at)}</span></div>
       <div class="kv-item"><label>Review Stage</label><span>${currentStage||'–'}</span></div>
     </div>
@@ -1485,7 +1486,7 @@ function renderDesignIterationsPanel(s, iterations) {
 
 function renderSolutionOutputSection(s, opsRecord) {
   let h = `<div class="section-card" style="border-color:rgba(255,212,0,.3);background:linear-gradient(135deg,var(--surface) 92%,rgba(255,212,0,.04))">
-    <h3 style="color:var(--accent)">Solution Output</h3>
+    <h3 style="color:var(--accent-text)">Solution Output</h3>
     <div class="output-tab-bar">
       <button class="output-tab active" onclick="switchOutputTab(this,'sol-output-engineer')">⬡ Engineer View</button>
       <button class="output-tab" onclick="switchOutputTab(this,'sol-output-operator')">⚙ Operator View</button>
@@ -1514,7 +1515,7 @@ function renderOpsInlinePanel(r) {
     <div class="kv-item"><label>Reference</label><span class="font-mono text-xs">${r.reference_id}</span></div>
     <div class="kv-item"><label>Owner</label><span>${r.owner_name||'–'}</span></div>
     <div class="kv-item"><label>Team</label><span>${r.owner_team||'–'}</span></div>
-    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent)">${r.owner_email}</a>`:'–'}</span></div>
+    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent-text)">${r.owner_email}</a>`:'–'}</span></div>
     <div class="kv-item"><label>Support Tier</label><span>${r.support_tier||'–'}</span></div>
     <div class="kv-item"><label>SLA</label><span>${r.sla||'–'}</span></div>
     <div class="kv-item"><label>Support Channel</label><span>${r.support_channel||'–'}</span></div>
@@ -1805,7 +1806,7 @@ function renderIntakeSolutionBridge(intake) {
   const linkedSolutions = (S.solutions||[]).filter(s=>s.intake_reference===intake.reference_id);
   let h = `<div class="section-card" style="border-color:rgba(255,212,0,.3);background:linear-gradient(135deg,var(--surface) 92%,rgba(255,212,0,.04));margin-top:.8rem">
     <div class="flex justify-between items-center" style="margin-bottom:${linkedSolutions.length?'.7rem':'.35rem'}">
-      <h3 style="color:var(--accent);margin-bottom:0">Solution Design</h3>
+      <h3 style="color:var(--accent-text);margin-bottom:0">Solution Design</h3>
       <button class="begin-solution-btn" id="begin-sol-btn-${intake.reference_id.replace(/-/g,'_')}" onclick="beginSolutionDesign(this,'${intake.reference_id}')">⬡ Begin Solution Design</button>
     </div>`;
 
@@ -1881,7 +1882,7 @@ function renderNewSolutionForm() {
   const visiblePatterns=S.patterns.filter(p=>lvf==='All'||p.level===lvf);
   const pf=S._sdPreFill||{};
   const fromIntake=!!pf.intakeReference;
-  let h=`<div class="page-title"><h2>${fromIntake?'Begin Solution Design':'New Solution Design'}</h2>${fromIntake?`<div class="text-xs text-muted" style="margin-top:.2rem">Pre-populated from intake <span class="font-mono" style="color:var(--accent)">${pf.intakeReference}</span></div>`:''}</div>
+  let h=`<div class="page-title"><h2>${fromIntake?'Begin Solution Design':'New Solution Design'}</h2>${fromIntake?`<div class="text-xs text-muted" style="margin-top:.2rem">Pre-populated from intake <span class="font-mono" style="color:var(--accent-text)">${pf.intakeReference}</span></div>`:''}</div>
   ${fromIntake?`<div class="alert alert-info" style="margin-bottom:.9rem">You are creating a solution design for approved intake <strong>${pf.intakeReference}</strong>. Key fields have been pre-filled. Adjust as needed before saving.</div>`:''}
   <div class="two-col">
   <div>
@@ -1941,7 +1942,7 @@ function renderNewSolutionForm() {
       <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">2. EA Review</div>
       <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">3. Security Review</div>
       <div style="padding:.4rem .6rem;background:var(--surface2);border-radius:6px;font-size:.78rem">4. Architecture Board</div>
-      <div style="padding:.4rem .6rem;background:rgba(255,212,0,.1);border-radius:6px;font-size:.78rem;color:var(--accent)">✓ Published → Full output unlocked</div>
+      <div style="padding:.4rem .6rem;background:rgba(255,212,0,.1);border-radius:6px;font-size:.78rem;color:var(--accent-text)">✓ Published → Full output unlocked</div>
     </div>
   </div>
   </div>
@@ -2088,7 +2089,7 @@ async function showIntakeDetail(id) {
       <button class="btn btn-sm" id="diagram-btn" style="background:rgba(96,165,250,.12);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ ${r.aiDiagram?'Regenerate':'Generate'} Diagram</button>
       <button class="btn btn-sm" id="iac-btn" style="background:rgba(74,222,128,.1);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ ${r.iacCode?'Regenerate':'Generate'} IaC</button>
       <button class="btn btn-sm" id="triage-btn" style="background:rgba(251,191,36,.12);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" onclick="runAITriage('${r.id}','${r.reference_id}')">⚡ ${r.triageResult?'Re-run':'Run'} AI Triage</button>
-      ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
+      ${['Approved','Approved with Conditions'].includes(r.status)?(opsRecord?`<button class="btn btn-sm btn-secondary" onclick="showOpSupportDetail(${opsRecord.id})">⚙ View Support Record</button>`:`<button class="btn btn-sm" style="background:rgba(16,153,119,.15);color:var(--accent-text);border:1px solid rgba(16,153,119,.3)" onclick="startNewOpSupport('${r.reference_id}')">＋ Register Operational Support</button>`):''}
     </div>
     ${['Approved','Approved with Conditions'].includes(r.status)?renderIntakeSolutionBridge(r):''}
   </div>
@@ -2246,7 +2247,7 @@ function renderWizAISidebar() {
 
   h+=`<div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:10px 0 6px">Applicable Policies</div>`;
   h+=`<div class="wiz-card" style="padding:.6rem .8rem">`;
-  policies.forEach(p=>{h+=`<div class="wiz-policy-row"><span style="color:var(--accent);font-size:.6rem">→</span>${p}</div>`;});
+  policies.forEach(p=>{h+=`<div class="wiz-policy-row"><span style="color:var(--accent-text);font-size:.6rem">→</span>${p}</div>`;});
   h+=`</div>`;
   return h;
 }
@@ -2523,7 +2524,7 @@ function showPattern(id){
   ${p._svgFile?`<div class="section-card"><h3>Architecture Diagram</h3><div class="svg-container"><img src="/api/patterns/${p._svgFile}" alt="Diagram"/></div></div>`:''}
   </div><div>
   ${p.owner?`<div class="section-card"><h3>Ownership</h3><div class="kv-grid"><div class="kv-item"><label>Owner</label><span>${p.owner}</span></div><div class="kv-item"><label>Approvers</label><span>${p.approvers||'–'}</span></div></div></div>`:''}
-  ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.38rem;background:var(--surface2);border-radius:6px;margin-bottom:.3rem;cursor:pointer" onclick="showPattern('${c.patternId}')"><span class="font-mono text-xs" style="color:var(--accent)">${c.patternId}</span><span class="text-xs text-muted">${c.relationship}</span></div>`).join('')}</div>`:''}
+  ${p.composition&&p.composition.length?`<div class="section-card"><h3>Pattern Composition</h3>${p.composition.map(c=>`<div class="flex justify-between items-center text-sm" style="padding:.38rem;background:var(--surface2);border-radius:6px;margin-bottom:.3rem;cursor:pointer" onclick="showPattern('${c.patternId}')"><span class="font-mono text-xs" style="color:var(--accent-text)">${c.patternId}</span><span class="text-xs text-muted">${c.relationship}</span></div>`).join('')}</div>`:''}
   ${p.implementationAssets?`<div class="section-card"><h3>Implementation Assets</h3>${Object.entries(p.implementationAssets).map(([k,v])=>`<div class="kv-item" style="margin-bottom:.45rem"><label>${k}</label><span class="font-mono text-xs">${v}</span></div>`).join('')}</div>`:''}
   ${p.exceptionProcess?`<div class="section-card"><h3>Exception Process</h3><p class="text-sm" style="line-height:1.65">${p.exceptionProcess}</p></div>`:''}
   <div id="pattern-iac-panel"><div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate Terraform code for this pattern — Azure resource definitions, variables, outputs, provider config, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generatePatternIaC('${p.patternId}')">⬡ Generate IaC</button></div></div>
@@ -2980,7 +2981,7 @@ async function showOpSupportList(filter) {
         <td class="text-sm">${r.owner_name||'–'}</td>
         <td class="text-sm text-muted">${r.owner_team||'–'}</td>
         <td>${r.support_tier?`<span class="badge badge-dev">${r.support_tier}</span>`:'<span class="text-muted text-xs">–</span>'}</td>
-        <td class="font-mono text-xs">${r.intake_reference?`<span style="cursor:pointer;color:var(--accent)" onclick="event.stopPropagation();showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:'–'}</td>
+        <td class="font-mono text-xs">${r.intake_reference?`<span style="cursor:pointer;color:var(--accent-text)" onclick="event.stopPropagation();showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:'–'}</td>
         <td>${expiryBadge}</td>
         <td class="text-xs text-muted">${fmtDate(r.created_at)}</td>
       </tr>`;
@@ -3004,7 +3005,7 @@ async function showOpSupportDetail(id) {
   <div class="detail-header">
     <div class="font-mono text-xs text-muted">${r.reference_id}</div>
     <h2>${r.solution_name}</h2>
-    ${r.intake_reference||r.solution_reference?`<div class="detail-meta">${r.intake_reference?`Intake: <span style="cursor:pointer;color:var(--accent)" onclick="showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:''}${r.intake_reference&&r.solution_reference?' · ':''}${r.solution_reference?`Solution: <span style="cursor:pointer;color:var(--accent)" onclick="showSolutionDetail(${r.solution_id})">${r.solution_reference}</span>`:''}</div>`:''}
+    ${r.intake_reference||r.solution_reference?`<div class="detail-meta">${r.intake_reference?`Intake: <span style="cursor:pointer;color:var(--accent-text)" onclick="showIntakeDetail('${r.intake_reference}')">${r.intake_reference}</span>`:''}${r.intake_reference&&r.solution_reference?' · ':''}${r.solution_reference?`Solution: <span style="cursor:pointer;color:var(--accent-text)" onclick="showSolutionDetail(${r.solution_id})">${r.solution_reference}</span>`:''}</div>`:''}
     <div class="detail-badges mt-1">
       ${r.support_tier?`<span class="badge badge-dev">${r.support_tier}</span>`:''}
       ${r.hasExpiringLicense?`<span class="badge badge-high">⚠ Licence Expiring Soon</span>`:''}
@@ -3019,7 +3020,7 @@ async function showOpSupportDetail(id) {
 
   <div class="section-card"><h3>Ownership</h3><div class="kv-grid">
     <div class="kv-item"><label>Owner</label><span>${r.owner_name||'–'}</span></div>
-    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent)">${r.owner_email}</a>`:'–'}</span></div>
+    <div class="kv-item"><label>Email</label><span>${r.owner_email?`<a href="mailto:${r.owner_email}" style="color:var(--accent-text)">${r.owner_email}</a>`:'–'}</span></div>
     <div class="kv-item"><label>Team</label><span>${r.owner_team||'–'}</span></div>
     <div class="kv-item"><label>Review Cadence</label><span>${r.review_cadence||'–'}</span></div>
   </div></div>
@@ -3031,7 +3032,7 @@ async function showOpSupportDetail(id) {
     <div class="kv-item"><label>Channel Detail</label><span>${r.support_channel_detail||'–'}</span></div>
   </div>
   ${r.escalationContacts&&r.escalationContacts.length?`<div class="mt-2"><label class="text-xs text-muted" style="text-transform:uppercase">Escalation Contacts</label>
-    ${r.escalationContacts.map(c=>`<div style="padding:.38rem .55rem;background:var(--surface2);border-radius:6px;margin-top:.3rem;font-size:.8rem"><strong>${c.name||'–'}</strong>${c.role?' · '+c.role:''} ${c.email?`<a href="mailto:${c.email}" style="color:var(--accent);margin-left:.35rem">${c.email}</a>`:''}</div>`).join('')}
+    ${r.escalationContacts.map(c=>`<div style="padding:.38rem .55rem;background:var(--surface2);border-radius:6px;margin-top:.3rem;font-size:.8rem"><strong>${c.name||'–'}</strong>${c.role?' · '+c.role:''} ${c.email?`<a href="mailto:${c.email}" style="color:var(--accent-text);margin-left:.35rem">${c.email}</a>`:''}</div>`).join('')}
   </div>`:''}
   </div>
 
@@ -3503,7 +3504,7 @@ async function loadMitrePanel(r) {
           <div class="mitre-tactic-header">
             <span class="font-mono text-xs" style="color:var(--muted)">${tactic.tacticId}</span>
             ${tactic.tacticName}
-            <span class="badge" style="background:rgba(16,153,119,.1);color:var(--accent);border:1px solid rgba(16,153,119,.2);margin-left:auto">${tactic.techniques.length} technique${tactic.techniques.length!==1?'s':''}</span>
+            <span class="badge" style="background:rgba(16,153,119,.1);color:var(--accent-text);border:1px solid rgba(16,153,119,.2);margin-left:auto">${tactic.techniques.length} technique${tactic.techniques.length!==1?'s':''}</span>
           </div>`;
         tactic.techniques.forEach(t => {
           h += `<div class="mitre-technique">
