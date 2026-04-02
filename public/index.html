@@ -86,6 +86,7 @@ nav button.active .ni{color:var(--accent)}
 
 body{display:flex;flex-direction:column;height:100vh;overflow:hidden}
 main{flex:1;overflow-y:auto;padding:1.4rem 1.8rem}
+main.wiz-mode{padding:0;display:flex;flex-direction:column;overflow:hidden}
 
 .stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:.8rem;margin-bottom:1.4rem}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;position:relative;overflow:hidden}
@@ -156,13 +157,47 @@ select.form-control{cursor:pointer}
 .tag-remove:hover{color:var(--risk-critical)}
 .tag-input{background:none;border:none;color:var(--text);font-size:.8rem;min-width:120px;outline:none;flex:1}
 
+/* ── Guided Stepper Progress Track ────────────────────────────────────────── */
+.wiz-track{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;flex-shrink:0}
+.wiz-step{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;position:relative;border-bottom:2px solid transparent;cursor:pointer;transition:border-color .15s;overflow:visible}
+.wiz-step.ws-active{border-bottom-color:var(--accent)}
+.wiz-step.ws-done{border-bottom-color:rgba(46,204,113,.45)}
+.wiz-circle{width:26px;height:26px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:900;color:var(--muted);margin-bottom:5px;position:relative;z-index:1}
+.ws-active .wiz-circle{background:var(--accent);border-color:var(--accent);color:#1a0a2e}
+.ws-done .wiz-circle{background:rgba(46,204,113,.15);border-color:rgba(46,204,113,.4);color:#2ecc71}
+.wiz-label{font-size:.72rem;color:var(--muted);font-weight:500}
+.ws-active .wiz-label{color:var(--text);font-weight:700}
+.wiz-sublabel{font-size:.59rem;color:var(--muted);opacity:.7}
+.wiz-connector{position:absolute;top:23px;left:calc(50% + 13px);right:calc(-50% + 13px);height:1px;background:var(--border)}
+.ws-done .wiz-connector{background:rgba(46,204,113,.3)}
+/* ── Wizard Layout ─────────────────────────────────────────────────────────── */
+.wiz-body{display:flex;flex:1;overflow:hidden;min-height:0}
+.wiz-form{flex:1;overflow-y:auto;padding:1.3rem 1.6rem}
+.wiz-ai-sidebar{width:290px;border-left:1px solid var(--border);overflow-y:auto;padding:1.1rem 1rem;background:rgba(124,92,191,.04);flex-shrink:0}
+.wiz-step-hdr{margin-bottom:1rem}
+.wiz-step-title{font-size:1rem;font-weight:800;margin-bottom:.2rem}
+.wiz-step-desc{font-size:.77rem;color:var(--muted);line-height:1.6}
+.wiz-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:.85rem}
+.wiz-card-title{font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.75rem}
+.wiz-ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#a78bfa;margin-bottom:.65rem}
+.wiz-ai-score-row{display:flex;gap:7px;margin-bottom:.75rem}
+.wiz-ai-score-box{background:var(--surface2);border:1px solid rgba(255,212,0,.2);border-radius:7px;padding:5px 10px;text-align:center;flex:1}
+.wiz-ai-score-val{font-size:1.2rem;font-weight:900;color:var(--accent);line-height:1}
+.wiz-ai-score-lbl{font-size:.6rem;color:var(--muted)}
+.wiz-suggestion{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 10px;display:flex;gap:7px;margin-bottom:6px}
+.wiz-sug-tag{font-size:.58rem;font-weight:900;padding:2px 5px;border-radius:3px;flex-shrink:0;margin-top:1px}
+.sug-must{background:rgba(231,76,60,.2);color:#e74c3c}
+.sug-should{background:rgba(212,131,10,.2);color:#f0a830}
+.sug-consider{background:rgba(41,128,185,.2);color:#5dade2}
+.wiz-policy-row{display:flex;align-items:center;gap:5px;padding:4px 0;border-bottom:1px solid var(--border);font-size:.72rem;color:var(--muted)}
+/* Legacy compat */
 .wizard-steps{display:flex;gap:0;margin-bottom:1.75rem;overflow:hidden;border-radius:8px;border:1px solid var(--border)}
 .wizard-step{flex:1;padding:.5rem .4rem;text-align:center;font-size:.69rem;background:var(--surface2);color:var(--muted);border-right:1px solid var(--border);cursor:pointer;transition:background .15s;line-height:1.3}
 .wizard-step:last-child{border-right:none}
 .wizard-step.active{background:var(--navy);color:#fff;font-weight:700}
 .wizard-step.done{background:rgba(255,212,0,.12);color:var(--accent)}
 .wizard-step .step-num{display:block;font-size:.62rem;margin-bottom:.08rem;opacity:.7}
-.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid var(--border)}
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.2rem;padding-top:1rem;border-top:1px solid var(--border)}
 
 .risk-gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:1.2rem;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
 .risk-circle{position:relative;width:120px;height:120px}
@@ -690,7 +725,7 @@ async function loadOpSupport() {
   catch { S.opSupport=[]; S.opSupportStats=null; }
 }
 
-function setMain(h){ document.getElementById('main').innerHTML=h; }
+function setMain(h){ const m=document.getElementById('main'); m.className=''; m.innerHTML=h; }
 
 // ─── Top Nav ──────────────────────────────────────────────────────────────────
 function renderTopNav() {
@@ -2068,14 +2103,102 @@ function renderVendorSection(r) {
 function startNewIntake() {
   S.view='new-intake'; S.wizardStep=1; S.wizardData={}; S.wizardRisk=null; S._docFiles=[]; S._docPrefilled=false; renderSidebar(); renderWizard();
 }
+
 function renderWizard() {
-  const steps=['Overview','Technology','Vendors','Security & Data','Dependencies','Risk & Submit'];
-  let h=`<div class="page-title"><h2>New Architecture Request</h2></div>`;
-  h+=renderDocUploadPanel();
-  h+=`<div class="wizard-steps">${steps.map((s,i)=>{const n=i+1;const cls=n===S.wizardStep?'active':n<S.wizardStep?'done':'';return`<div class="wizard-step ${cls}" onclick="gotoStep(${n})"><span class="step-num">${n}</span>${s}</div>`;}).join('')}</div>`;
-  h+=`<div id="wizard-body">${renderWizardStep(S.wizardStep)}</div>`;
-  setMain(h);
+  const STEPS=[
+    {label:'Overview',      sub:'Name & ownership'},
+    {label:'Technology',    sub:'Stack & components'},
+    {label:'Vendors',       sub:'Third-party vendors'},
+    {label:'Security & Data', sub:'Controls & classification'},
+    {label:'Dependencies',  sub:'Patterns & dependencies'},
+    {label:'Risk & Submit', sub:'Review & confirm'},
+  ];
+  const cur=S.wizardStep;
+
+  /* ── Progress track ── */
+  let track=`<div class="wiz-track">`;
+  STEPS.forEach((s,i)=>{
+    const n=i+1;
+    const cls=n===cur?'ws-active':n<cur?'ws-done':'';
+    const circle=n<cur?'✓':n;
+    track+=`<div class="wiz-step ${cls}" onclick="gotoStep(${n})">`;
+    if(n<STEPS.length) track+=`<div class="wiz-connector"></div>`;
+    track+=`<div class="wiz-circle">${circle}</div><div class="wiz-label">${s.label}</div><div class="wiz-sublabel">${s.sub}</div></div>`;
+  });
+  track+=`</div>`;
+
+  /* ── Sidebar visibility: show on steps 2+ ── */
+  const showSidebar=cur>=2&&cur<6;
+
+  /* Build shell — setMain sets main.className='', so we re-add wiz-mode below */
+  const html=`${track}<div class="wiz-body"><div class="wiz-form">${cur===1?renderDocUploadPanel():''}<div id="wizard-body">${renderWizardStep(cur)}</div></div>${showSidebar?`<div class="wiz-ai-sidebar">${renderWizAISidebar()}</div>`:''}</div>`;
+
+  /* Set wiz-mode BEFORE setMain (which clears className) so we set it after */
+  const main=document.getElementById('main');
+  main.innerHTML=html;
+  main.className='wiz-mode';
+
   initDocDropZone();
+}
+
+function renderWizAISidebar() {
+  const d=S.wizardData;
+  /* Derive a live rough risk estimate */
+  let est=30;
+  if(d.dataClassification==='Restricted') est+=25;
+  else if(d.dataClassification==='Confidential') est+=15;
+  else if(d.dataClassification==='Internal') est+=5;
+  if(d.isPublicFacing) est+=10;
+  if(d.externalDataSharing) est+=10;
+  if(!d.encryptionAtRest) est+=5;
+  if(!d.hasMfa) est+=5;
+  if(d.deviatesFromPatterns) est+=10;
+  if((d.integrationPoints||0)>5) est+=10;
+  est=Math.min(est,99);
+  const tier=est>=70?'Critical':est>=50?'High':est>=30?'Medium':'Low';
+  const tierColor=est>=70?'#e74c3c':est>=50?'#e67e22':est>=30?'#f39c12':'#2ecc71';
+  const route=est>=70?'ARB + CISO':est>=50?'ARB':'EA Lite';
+
+  /* Contextual suggestions */
+  const sugs=[];
+  if(!d.encryptionAtRest&&!d.encryptionInTransit) sugs.push({p:'MUST',t:'Confirm encryption at rest and in transit for this solution.'});
+  if(d.dataClassification==='Restricted'||d.dataClassification==='Confidential') sugs.push({p:'MUST',t:'A Data Privacy Impact Assessment is required for Confidential/Restricted data.'});
+  if(d.isPublicFacing&&!d.hasWaf) sugs.push({p:'SHOULD',t:'Enable WAF protection for any public-facing endpoint.'});
+  if((d.complianceRequirements||[]).includes('GDPR')) sugs.push({p:'SHOULD',t:'Document data residency and DPA references for GDPR scope.'});
+  if(d.deviatesFromPatterns) sugs.push({p:'SHOULD',t:'Document technical rationale for pattern deviation before ARB.'});
+  if((d.integrationPoints||0)>5) sugs.push({p:'CONSIDER',t:'High integration count — consider an integration pattern or middleware bus.'});
+  if(sugs.length===0) sugs.push({p:'CONSIDER',t:'Continue filling out each step; AI guidance will update as you go.'});
+
+  const policies=[
+    'EA Governance Policy v3.1',
+    ...(d.dataClassification==='Restricted'?['Data Privacy Standard v3.0']:d.dataClassification==='Confidential'?['Data Classification Policy']:[] ),
+    ...((d.complianceRequirements||[]).includes('GDPR')?['GDPR Controls v2']:[] ),
+    'Architecture Review Policy v2.4',
+  ];
+
+  let h=`<div style="position:relative;background:var(--surface);border:1px solid rgba(124,92,191,.35);border-radius:10px;padding:12px 13px;margin-bottom:10px;overflow:hidden">`;
+  h+=`<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#7c5cbf,#a78bfa,#6366f1)"></div>`;
+  h+=`<div class="wiz-ai-badge">✦ AI Risk Preview</div>`;
+  h+=`<div class="wiz-ai-score-row">
+    <div class="wiz-ai-score-box"><div class="wiz-ai-score-val" style="color:${tierColor}">${est}</div><div class="wiz-ai-score-lbl">Est. Score</div></div>
+    <div class="wiz-ai-score-box"><div class="wiz-ai-score-val" style="font-size:.8rem;color:${tierColor}">${tier}</div><div class="wiz-ai-score-lbl">Risk Tier</div></div>
+    <div class="wiz-ai-score-box"><div class="wiz-ai-score-val" style="font-size:.72rem;color:#d4830a">${route}</div><div class="wiz-ai-score-lbl">Likely Route</div></div>
+  </div>
+  <div style="font-size:.7rem;color:var(--muted);line-height:1.5">Live estimate — updates as you fill in each step. Full calculation on Step 6.</div></div>`;
+
+  if(sugs.length){
+    h+=`<div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px">AI Suggestions</div>`;
+    sugs.slice(0,5).forEach(s=>{
+      const cls=s.p==='MUST'?'sug-must':s.p==='SHOULD'?'sug-should':'sug-consider';
+      h+=`<div class="wiz-suggestion"><span class="wiz-sug-tag ${cls}">${s.p}</span><span style="font-size:.72rem;color:var(--text);line-height:1.45">${s.t}</span></div>`;
+    });
+  }
+
+  h+=`<div style="font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:10px 0 6px">Applicable Policies</div>`;
+  h+=`<div class="wiz-card" style="padding:.6rem .8rem">`;
+  policies.forEach(p=>{h+=`<div class="wiz-policy-row"><span style="color:var(--accent);font-size:.6rem">→</span>${p}</div>`;});
+  h+=`</div>`;
+  return h;
 }
 
 function renderDocUploadPanel() {
@@ -2193,34 +2316,70 @@ async function docParseFiles() {
 }
 function renderWizardStep(step){
   const d=S.wizardData;
-  let h='';
-  if(step===1){h+=`<div class="form-row"><div class="form-group"><label>Request Title *</label><input class="form-control" id="w_title" value="${d.title||''}" placeholder="e.g. Azure Event Hub Integration for OT Telemetry"/></div><div class="form-group"><label>Architecture Type *</label><select class="form-control" id="w_architectureType"><option value="">Select...</option>${opts(['API & Integration','Data Platform','Infrastructure & Cloud','Security & Identity','Application Modernisation','OT / IoT','Network & Connectivity','Other'],d.architectureType)}</select></div></div>
-    <div class="form-group"><label>Description *</label><textarea class="form-control" id="w_description" placeholder="Describe what you are building and why...">${d.description||''}</textarea></div>
-    <div class="form-group"><label>Strategic Objective</label><textarea class="form-control" id="w_strategicObjective" placeholder="How does this align to strategic priorities?">${d.strategicObjective||''}</textarea></div>
-    <div class="form-row-3"><div class="form-group"><label>Requestor Name *</label><input class="form-control" id="w_requestorName" value="${d.requestorName||''}"/></div><div class="form-group"><label>Requestor Email</label><input class="form-control" id="w_requestorEmail" value="${d.requestorEmail||''}" type="email"/></div><div class="form-group"><label>Role</label><input class="form-control" id="w_requestorRole" value="${d.requestorRole||''}" placeholder="e.g. Solution Architect"/></div></div>
-    <div class="form-row"><div class="form-group"><label>Business Unit *</label><input class="form-control" id="w_businessUnit" value="${d.businessUnit||''}" placeholder="e.g. Supply Chain"/></div><div class="form-group"><label>Programme Domain</label><input class="form-control" id="w_programmeDomain" value="${d.programmeDomain||''}" placeholder="e.g. OT Operations / Analytics"/></div></div>
-    <div class="form-group"><label>Project Timeline</label><select class="form-control" id="w_projectTimeline"><option value="">Select...</option>${opts(['Immediate (< 4 weeks)','Short-term (1-3 months)','Medium-term (3-6 months)','Long-term (6-12 months)','Strategic (12+ months)'],d.projectTimeline)}</select></div>`;}
-  else if(step===2){h+=`<div class="form-group"><label>Key Components</label><p class="text-xs text-muted" style="margin-bottom:.4rem">Press Enter to add each component.</p><div class="tag-input-wrap" id="components-wrap" onclick="document.getElementById('comp-input').focus()">${(d.components||[]).map(c=>`<span class="tag">${c}<span class="tag-remove" onclick="removeTag('components','${encodeURIComponent(c)}')">✕</span></span>`).join('')}<input class="tag-input" id="comp-input" placeholder="e.g. Azure Event Hubs" onkeydown="addTag(event,'components','comp-input')"/></div></div>
-    <div class="form-row"><div class="form-group"><label>Hosting Model</label><select class="form-control" id="w_hostingModel"><option value="">Select...</option>${opts(['Public Cloud (Azure)','Public Cloud (AWS)','Private Cloud','On-Premises','Hybrid','SaaS','PaaS'],d.hostingModel)}</select></div><div class="form-group"><label>Deployment Target</label><select class="form-control" id="w_deploymentTarget"><option value="">Select...</option>${opts(['Production','Non-Production','Both','DR'],d.deploymentTarget)}</select></div></div>
-    <div class="form-row"><div class="form-group"><label>Integration Points</label><input class="form-control" id="w_integrationPoints" type="number" min="0" value="${d.integrationPoints||0}"/></div><div class="form-group"><label>Public-Facing Endpoint?</label><select class="form-control" id="w_isPublicFacing"><option value="">Select...</option><option value="true" ${d.isPublicFacing?'selected':''}>Yes</option><option value="false" ${d.isPublicFacing===false?'selected':''}>No</option></select></div></div>
-    <div class="form-group"><label>Technology Stack Notes</label><textarea class="form-control" id="w_techStackNotes" placeholder="Any additional notes...">${d.techStackNotes||''}</textarea></div>`;}
-  else if(step===3){h+=`<div class="form-group"><label>Select from Vendor Registry</label><div class="checkbox-grid">`;
+  const HDRS=[
+    {title:'Overview — Project Identity',       desc:'Give this request a clear name, purpose, and owner so the review team can route it correctly.'},
+    {title:'Technology — Stack & Architecture', desc:'Tell us what technologies, hosting model, and integration approach you are using.'},
+    {title:'Vendors — Third-party Services',    desc:'List any registered or new vendors involved in this solution.'},
+    {title:'Security & Data — Controls',        desc:'Identify data types, security controls, and compliance requirements in scope.'},
+    {title:'Dependencies — Patterns & Legacy',  desc:'Confirm which EA patterns apply and flag any deviations or legacy dependencies.'},
+    {title:'Risk & Submit — Final Review',      desc:'Your automated risk score has been calculated. Review the findings and submit.'},
+  ];
+  const hdr=HDRS[step-1];
+  let h=`<div class="wiz-step-hdr"><div class="wiz-step-title">${hdr.title}</div><div class="wiz-step-desc">${hdr.desc}</div></div>`;
+
+  if(step===1){
+    h+=`<div class="wiz-card"><div class="wiz-card-title">Request Details</div>
+      <div class="form-row"><div class="form-group"><label>Request Title *</label><input class="form-control" id="w_title" value="${d.title||''}" placeholder="e.g. Azure Event Hub Integration for OT Telemetry"/></div><div class="form-group"><label>Architecture Type *</label><select class="form-control" id="w_architectureType"><option value="">Select...</option>${opts(['API & Integration','Data Platform','Infrastructure & Cloud','Security & Identity','Application Modernisation','OT / IoT','Network & Connectivity','Other'],d.architectureType)}</select></div></div>
+      <div class="form-group"><label>Description *</label><textarea class="form-control" id="w_description" placeholder="Describe what you are building and why...">${d.description||''}</textarea></div>
+      <div class="form-group"><label>Strategic Objective</label><textarea class="form-control" id="w_strategicObjective" placeholder="How does this align to strategic priorities?">${d.strategicObjective||''}</textarea></div>
+    </div>
+    <div class="wiz-card"><div class="wiz-card-title">Ownership & Timeline</div>
+      <div class="form-row-3"><div class="form-group"><label>Requestor Name *</label><input class="form-control" id="w_requestorName" value="${d.requestorName||''}"/></div><div class="form-group"><label>Requestor Email</label><input class="form-control" id="w_requestorEmail" value="${d.requestorEmail||''}" type="email"/></div><div class="form-group"><label>Role</label><input class="form-control" id="w_requestorRole" value="${d.requestorRole||''}" placeholder="e.g. Solution Architect"/></div></div>
+      <div class="form-row"><div class="form-group"><label>Business Unit *</label><input class="form-control" id="w_businessUnit" value="${d.businessUnit||''}" placeholder="e.g. Supply Chain"/></div><div class="form-group"><label>Programme Domain</label><input class="form-control" id="w_programmeDomain" value="${d.programmeDomain||''}" placeholder="e.g. OT Operations / Analytics"/></div></div>
+      <div class="form-group"><label>Project Timeline</label><select class="form-control" id="w_projectTimeline"><option value="">Select...</option>${opts(['Immediate (< 4 weeks)','Short-term (1-3 months)','Medium-term (3-6 months)','Long-term (6-12 months)','Strategic (12+ months)'],d.projectTimeline)}</select></div>
+    </div>`;}
+  else if(step===2){
+    h+=`<div class="wiz-card"><div class="wiz-card-title">Key Components</div>
+      <p class="text-xs text-muted" style="margin-bottom:.5rem">Press Enter to add each component.</p>
+      <div class="tag-input-wrap" id="components-wrap" onclick="document.getElementById('comp-input').focus()">${(d.components||[]).map(c=>`<span class="tag">${c}<span class="tag-remove" onclick="removeTag('components','${encodeURIComponent(c)}')">✕</span></span>`).join('')}<input class="tag-input" id="comp-input" placeholder="e.g. Azure Event Hubs" onkeydown="addTag(event,'components','comp-input')"/></div>
+    </div>
+    <div class="wiz-card"><div class="wiz-card-title">Deployment & Connectivity</div>
+      <div class="form-row"><div class="form-group"><label>Hosting Model</label><select class="form-control" id="w_hostingModel"><option value="">Select...</option>${opts(['Public Cloud (Azure)','Public Cloud (AWS)','Private Cloud','On-Premises','Hybrid','SaaS','PaaS'],d.hostingModel)}</select></div><div class="form-group"><label>Deployment Target</label><select class="form-control" id="w_deploymentTarget"><option value="">Select...</option>${opts(['Production','Non-Production','Both','DR'],d.deploymentTarget)}</select></div></div>
+      <div class="form-row"><div class="form-group"><label>Integration Points</label><input class="form-control" id="w_integrationPoints" type="number" min="0" value="${d.integrationPoints||0}"/></div><div class="form-group"><label>Public-Facing Endpoint?</label><select class="form-control" id="w_isPublicFacing"><option value="">Select...</option><option value="true" ${d.isPublicFacing?'selected':''}>Yes</option><option value="false" ${d.isPublicFacing===false?'selected':''}>No</option></select></div></div>
+      <div class="form-group"><label>Technology Stack Notes</label><textarea class="form-control" id="w_techStackNotes" placeholder="Any additional notes...">${d.techStackNotes||''}</textarea></div>
+    </div>`;}
+  else if(step===3){
+    h+=`<div class="wiz-card"><div class="wiz-card-title">Vendor Registry</div><div class="checkbox-grid">`;
     S.vendors.sort((a,b)=>a.vendorCompany.localeCompare(b.vendorCompany)).forEach(v=>{h+=`<label class="checkbox-item"><input type="checkbox" value="${v.id}" ${(d.vendorIds||[]).includes(v.id)?'checked':''} onchange="toggleVendor(${v.id})"/>${v.vendorCompany} — <span class="text-muted text-xs">${v.productService}</span> ${critBadge(v.criticality)}</label>`;});
-    h+=`</div></div><div class="form-group"><label>New / Unvetted Vendors</label><div class="tag-input-wrap" id="newvendors-wrap" onclick="document.getElementById('nv-input').focus()">${(d.newVendors||[]).map(v=>`<span class="tag">${v}<span class="tag-remove" onclick="removeTag('newVendors','${encodeURIComponent(v)}')">✕</span></span>`).join('')}<input class="tag-input" id="nv-input" placeholder="e.g. Confluent Cloud" onkeydown="addTag(event,'newVendors','nv-input')"/></div></div>`;}
-  else if(step===4){h+=`<div class="form-row"><div class="form-group"><label>Data Classification *</label><select class="form-control" id="w_dataClassification"><option value="">Select...</option>${opts(['Public','Internal','Confidential','Restricted'],d.dataClassification)}</select></div><div class="form-group"><label>External Data Sharing?</label><select class="form-control" id="w_externalDataSharing"><option value="">Select...</option><option value="true" ${d.externalDataSharing?'selected':''}>Yes</option><option value="false" ${d.externalDataSharing===false?'selected':''}>No</option></select></div></div>
-    <div class="form-group"><label>Data Types in Scope</label><div class="checkbox-grid">${['PII','PHI','Financial','OT/SCADA Data','Credentials/Secrets','Operational Metrics','Configuration Data','Log Data','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.dataTypes||[]).includes(t)?'checked':''} onchange="toggleCheck('dataTypes','${t}')"/>${t}</label>`).join('')}</div></div>
-    <div class="form-group"><label>Authentication Methods</label><div class="checkbox-grid">${['OAuth2/OIDC','SAML','API Key','Certificate/mTLS','Windows Integrated (Kerberos)','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.authMethods||[]).includes(t)?'checked':''} onchange="toggleCheck('authMethods','${t}')"/>${t}</label>`).join('')}</div></div>
-    <div class="form-group"><label>Security Controls</label><div class="checkbox-grid">
-      ${[['encryptionAtRest','Encryption at Rest'],['encryptionInTransit','Encryption in Transit'],['hasMfa','Multi-Factor Authentication'],['hasWaf','WAF Protection'],['hasMonitoring','Monitoring & Alerting'],['isZeroTrustAligned','Zero Trust Aligned']].map(([k,l])=>`<label class="checkbox-item"><input type="checkbox" ${d[k]?'checked':''} onchange="S.wizardData['${k}']=this.checked"/>${l}</label>`).join('')}
-    </div></div>
-    <div class="form-group"><label>Compliance Requirements</label><div class="checkbox-grid">${['GDPR','SOX','ISO 27001','IEC 62443','HIPAA','PCI-DSS','NIST CSF','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.complianceRequirements||[]).includes(t)?'checked':''} onchange="toggleCheck('complianceRequirements','${t}')"/>${t}</label>`).join('')}</div></div>`;}
-  else if(step===5){h+=`<div class="form-group"><label>Related Architecture Patterns</label><div class="checkbox-grid">`;
+    h+=`</div></div>
+    <div class="wiz-card"><div class="wiz-card-title">New / Unvetted Vendors</div>
+      <p class="text-xs text-muted" style="margin-bottom:.5rem">Add vendors not yet in the registry. These will trigger a vetting workflow.</p>
+      <div class="tag-input-wrap" id="newvendors-wrap" onclick="document.getElementById('nv-input').focus()">${(d.newVendors||[]).map(v=>`<span class="tag">${v}<span class="tag-remove" onclick="removeTag('newVendors','${encodeURIComponent(v)}')">✕</span></span>`).join('')}<input class="tag-input" id="nv-input" placeholder="e.g. Confluent Cloud" onkeydown="addTag(event,'newVendors','nv-input')"/></div>
+    </div>`;}
+  else if(step===4){
+    h+=`<div class="wiz-card"><div class="wiz-card-title">Data Classification</div>
+      <div class="form-row"><div class="form-group"><label>Data Classification *</label><select class="form-control" id="w_dataClassification"><option value="">Select...</option>${opts(['Public','Internal','Confidential','Restricted'],d.dataClassification)}</select></div><div class="form-group"><label>External Data Sharing?</label><select class="form-control" id="w_externalDataSharing"><option value="">Select...</option><option value="true" ${d.externalDataSharing?'selected':''}>Yes</option><option value="false" ${d.externalDataSharing===false?'selected':''}>No</option></select></div></div>
+      <div class="form-group"><label>Data Types in Scope</label><div class="checkbox-grid">${['PII','PHI','Financial','OT/SCADA Data','Credentials/Secrets','Operational Metrics','Configuration Data','Log Data','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.dataTypes||[]).includes(t)?'checked':''} onchange="toggleCheck('dataTypes','${t}')"/>${t}</label>`).join('')}</div></div>
+    </div>
+    <div class="wiz-card"><div class="wiz-card-title">Authentication & Security Controls</div>
+      <div class="form-group"><label>Authentication Methods</label><div class="checkbox-grid">${['OAuth2/OIDC','SAML','API Key','Certificate/mTLS','Windows Integrated (Kerberos)','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.authMethods||[]).includes(t)?'checked':''} onchange="toggleCheck('authMethods','${t}')"/>${t}</label>`).join('')}</div></div>
+      <div class="form-group"><label>Security Controls Confirmed</label><div class="checkbox-grid">
+        ${[['encryptionAtRest','Encryption at Rest'],['encryptionInTransit','Encryption in Transit'],['hasMfa','Multi-Factor Authentication'],['hasWaf','WAF Protection'],['hasMonitoring','Monitoring & Alerting'],['isZeroTrustAligned','Zero Trust Aligned']].map(([k,l])=>`<label class="checkbox-item"><input type="checkbox" ${d[k]?'checked':''} onchange="S.wizardData['${k}']=this.checked"/>${l}</label>`).join('')}
+      </div></div>
+    </div>
+    <div class="wiz-card"><div class="wiz-card-title">Compliance Requirements</div>
+      <div class="checkbox-grid">${['GDPR','SOX','ISO 27001','IEC 62443','HIPAA','PCI-DSS','NIST CSF','None'].map(t=>`<label class="checkbox-item"><input type="checkbox" value="${t}" ${(d.complianceRequirements||[]).includes(t)?'checked':''} onchange="toggleCheck('complianceRequirements','${t}')"/>${t}</label>`).join('')}</div>
+    </div>`;}
+  else if(step===5){
+    h+=`<div class="wiz-card"><div class="wiz-card-title">Related Architecture Patterns</div><div class="checkbox-grid">`;
     S.patterns.forEach(p=>{h+=`<label class="checkbox-item"><input type="checkbox" value="${p.patternId}" ${(d.relatedPatternIds||[]).includes(p.patternId)?'checked':''} onchange="toggleCheck('relatedPatternIds','${p.patternId}')"/><span class="font-mono text-xs" style="color:var(--muted)">${p.patternId}</span> ${p.name} ${p.status==='Endorsed'?'<span class="badge badge-endorsed text-xs" style="margin-left:auto">✓</span>':''}</label>`;});
     h+=`</div></div>
-    <div class="form-row"><div class="form-group"><label>Deviates from Patterns?</label><select class="form-control" id="w_deviatesFromPatterns"><option value="">Select...</option><option value="true" ${d.deviatesFromPatterns?'selected':''}>Yes — exception required</option><option value="false" ${d.deviatesFromPatterns===false?'selected':''}>No</option></select></div><div class="form-group"><label>Legacy Dependencies?</label><select class="form-control" id="w_hasLegacyDependencies"><option value="">Select...</option><option value="true" ${d.hasLegacyDependencies?'selected':''}>Yes</option><option value="false" ${d.hasLegacyDependencies===false?'selected':''}>No</option></select></div></div>
-    <div class="form-group"><label>Legacy Systems</label><input class="form-control" id="w_legacySystems" value="${d.legacySystems||''}" placeholder="e.g. SAP ECC, FactoryTalk SE"/></div>
-    <div class="form-group"><label>Deviation Justification</label><textarea class="form-control" id="w_deviationJustification" placeholder="Technical rationale for any pattern deviation...">${d.deviationJustification||''}</textarea></div>
-    <div class="form-group"><label>External Dependencies</label><textarea class="form-control" id="w_externalDependencies" placeholder="Other systems, services, or teams...">${d.externalDependencies||''}</textarea></div>`;}
+    <div class="wiz-card"><div class="wiz-card-title">Deviations & Legacy</div>
+      <div class="form-row"><div class="form-group"><label>Deviates from Patterns?</label><select class="form-control" id="w_deviatesFromPatterns"><option value="">Select...</option><option value="true" ${d.deviatesFromPatterns?'selected':''}>Yes — exception required</option><option value="false" ${d.deviatesFromPatterns===false?'selected':''}>No</option></select></div><div class="form-group"><label>Legacy Dependencies?</label><select class="form-control" id="w_hasLegacyDependencies"><option value="">Select...</option><option value="true" ${d.hasLegacyDependencies?'selected':''}>Yes</option><option value="false" ${d.hasLegacyDependencies===false?'selected':''}>No</option></select></div></div>
+      <div class="form-group"><label>Legacy Systems</label><input class="form-control" id="w_legacySystems" value="${d.legacySystems||''}" placeholder="e.g. SAP ECC, FactoryTalk SE"/></div>
+      <div class="form-group"><label>Deviation Justification</label><textarea class="form-control" id="w_deviationJustification" placeholder="Technical rationale for any pattern deviation...">${d.deviationJustification||''}</textarea></div>
+      <div class="form-group"><label>External Dependencies</label><textarea class="form-control" id="w_externalDependencies" placeholder="Other systems, services, or teams...">${d.externalDependencies||''}</textarea></div>
+    </div>`;}
   else if(step===6){
     if(!S.wizardRisk){h+=`<div class="alert alert-info">Calculating automated risk assessment...</div>`;setTimeout(()=>calculateAndShowRisk(),80);}
     else{

@@ -88,8 +88,13 @@ Architecture-Pattern-Hub/ — Original monorepo spec/config (reference only)
 - 31 vendors with criticality, data sharing, and hosting model info
 - Searchable table with criticality badges and data-sharing flags
 
-### Architecture Intake Workflow
-- **Multi-step wizard** (6 steps): Overview → Technology → Vendors → Security & Data → Dependencies → Risk Review
+### Architecture Intake Workflow — Guided Stepper (Workflow A)
+- **Multi-step wizard** (6 steps): Overview → Technology → Vendors → Security & Data → Dependencies → Risk & Submit
+- **Horizontal progress track** — circle step indicators with sublabels and coloured connecting lines (active=gold, done=green)
+- **Card-based form layout** — each step's fields grouped into `.wiz-card` sections with accent-coloured section headers
+- **AI Risk Sidebar** — visible on steps 2–5; shows a live risk estimate (score, tier, routing), contextual MUST/SHOULD/CONSIDER suggestions derived from current field values, and applicable policy references
+- **`main.wiz-mode`** — wizard takes full height of the main area (no padding, flex column) with the form area scrolling independently of the sidebar
+- **Doc upload panel** — shown only on Step 1 (auto-fill from uploaded documents via Claude)
 - **Status lifecycle:** Draft → Submitted → Under Review → Approved / Rejected / Deferred
 - **Auto-generated reference IDs:** EAR-YYYY-NNNN format
 - **Audit history** for every status change
