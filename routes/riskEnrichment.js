@@ -54,10 +54,16 @@ function httpsGet(url, headers = {}) {
 
 function getCveUrl(keyword) {
   const encoded = encodeURIComponent(keyword);
-  return `https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${encoded}&resultsPerPage=30`;
+  const apiKey = process.env.NVD_API_KEY;
+  const keyParam = apiKey ? `&apiKey=${encodeURIComponent(apiKey)}` : '';
+  return `https://services.nvd.nist.gov/rest/json/cves/2.0?keywordSearch=${encoded}&resultsPerPage=30${keyParam}`;
 }
 
 async function fetchNvdData(keyword) {
+  if (!process.env.NVD_API_KEY) {
+    return { keyword, cveCount: 0, highestCvss: 0, severity: 'None', topCves: [], nvdKeyMissing: true };
+  }
+
   const cacheKey = keyword.toLowerCase().trim();
   const cached = nvdCache.get(cacheKey);
   if (cached && (Date.now() - cached.fetchedAt) < NVD_CACHE_TTL_MS) {
@@ -325,6 +331,9 @@ router.post('/cvss', async (req, res) => {
   const { technologies } = req.body;
   if (!Array.isArray(technologies) || technologies.length === 0) {
     return res.status(400).json({ error: 'technologies array required' });
+  }
+  if (!process.env.NVD_API_KEY) {
+    return res.status(503).json({ error: 'nvd_key_missing' });
   }
   const unique = [...new Set(technologies.map(t => t.trim()).filter(Boolean))].slice(0, 15);
   try {

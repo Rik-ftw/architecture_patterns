@@ -1815,8 +1815,8 @@ function renderVendorIntelScorecard(report) {
   let urlScanStatus = urlScan.scanned ? (urlScan.verdict && urlScan.verdict.malicious ? 'bad' : 'ok') : 'unknown';
   let urlScanLabel = urlScan.scanned ? (urlScan.verdict && urlScan.verdict.malicious ? 'Malicious verdict' : 'Clean') : (urlScan.note || urlScan.error || 'Not scanned');
 
-  let cveStatus = cves.severity === 'Critical' ? 'bad' : cves.severity === 'High' ? 'warn' : cves.severity === 'Medium' || cves.severity === 'Low' ? 'ok' : 'unknown';
-  let cveLabel = cves.cveCount > 0 ? `${cves.cveCount} CVEs · ${cves.severity}` : 'No CVEs found';
+  let cveStatus = cves.nvdKeyMissing ? 'unknown' : (cves.severity === 'Critical' ? 'bad' : cves.severity === 'High' ? 'warn' : cves.severity === 'Medium' || cves.severity === 'Low' ? 'ok' : 'unknown');
+  let cveLabel = cves.nvdKeyMissing ? 'NVD API key not configured' : (cves.cveCount > 0 ? `${cves.cveCount} CVEs · ${cves.severity}` : 'No CVEs found');
 
   function dot(status) {
     const cls = { ok: 'vi-dot-ok', warn: 'vi-dot-warn', bad: 'vi-dot-bad', unknown: 'vi-dot-unknown' }[status] || 'vi-dot-unknown';
@@ -1879,7 +1879,10 @@ function renderVendorIntelScorecard(report) {
   ${ssl.findings && ssl.findings.length ? `<ul style="margin-top:.5rem;list-style:none;display:flex;flex-direction:column;gap:.2rem">${ssl.findings.map(f=>`<li class="text-xs text-muted" style="padding:.15rem 0;border-bottom:1px solid var(--border)">${f}</li>`).join('')}</ul>` : ''}` : `<div class="text-sm text-muted">SSL not yet inspected. Use the Vendor Registry to trigger an SSL check first.</div>
   ${vendorMatch && vendorMatch.id ? `<button class="btn btn-sm btn-secondary" style="margin-top:.6rem" onclick="inspectSslFromIntel(${vendorMatch.id})">Run SSL Check</button>` : ''}`;
 
-  const cvesBody = cves.cveCount > 0 ? `<div class="vi-kv" style="margin-bottom:.5rem">
+  const cvesBody = cves.nvdKeyMissing ? `<div class="alert alert-warning" style="margin:0">
+    <div><strong>NVD API key not configured</strong> — CVE data unavailable.<br>
+    <span style="font-size:.76rem">Request a free key at <a href="https://nvd.nist.gov/developers/request-an-api-key" target="_blank" style="color:inherit;text-decoration:underline">nvd.nist.gov/developers/request-an-api-key</a> and set the <code style="font-family:monospace">NVD_API_KEY</code> environment variable.</span></div>
+  </div>` : cves.cveCount > 0 ? `<div class="vi-kv" style="margin-bottom:.5rem">
     <div class="vi-kv-item"><label>CVE Count</label><span style="font-weight:700">${cves.cveCount}</span></div>
     <div class="vi-kv-item"><label>Highest CVSS</label><span style="font-weight:700;color:${cves.severity==='Critical'?'var(--risk-critical)':cves.severity==='High'?'var(--risk-high)':cves.severity==='Medium'?'var(--risk-medium)':'var(--text)'}">${cves.highestCvss||'–'}</span></div>
     <div class="vi-kv-item"><label>Severity</label><span class="badge badge-${cves.severity==='Critical'?'critical':cves.severity==='High'?'high':cves.severity==='Medium'?'medium':'low'}">${cves.severity}</span></div>
@@ -2572,7 +2575,16 @@ async function loadScaPanel(r) {
     }
     el.innerHTML = h;
   } catch(err) {
-    el.innerHTML = `<div class="alert alert-danger">Failed to load CVE data: ${err.error||err.message||'Unknown error'}</div>`;
+    if (err.error === 'nvd_key_missing') {
+      el.innerHTML = `<div class="alert alert-warning">
+        <div><strong>NVD API key not configured</strong> — CVE data unavailable.<br>
+        <span style="font-size:.76rem">To enable CVE enrichment, request a free API key at
+        <a href="https://nvd.nist.gov/developers/request-an-api-key" target="_blank" style="color:inherit;text-decoration:underline">nvd.nist.gov/developers/request-an-api-key</a>
+        and set the <code style="font-family:monospace;font-size:.78rem">NVD_API_KEY</code> environment variable.</span></div>
+      </div>`;
+    } else {
+      el.innerHTML = `<div class="alert alert-danger">Failed to load CVE data: ${err.error||err.message||'Unknown error'}</div>`;
+    }
   }
 }
 
