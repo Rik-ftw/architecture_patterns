@@ -404,6 +404,68 @@ router.get('/ssl/:vendorId', (req, res) => {
   res.json({ vendorId, domain: vendor.domain, ssl, cached: !!ssl });
 });
 
+router.get('/health', (req, res) => {
+  const nvdKeyPresent = !!process.env.NVD_API_KEY;
+  const cfTokenPresent = !!process.env.CLOUDFLARE_API_TOKEN;
+
+  let nvdLastFetched = null;
+  let nvdCacheSize = 0;
+  nvdCacheSize = nvdCache.size;
+  if (nvdCache.size > 0) {
+    let latest = 0;
+    nvdCache.forEach(v => { if (v.fetchedAt > latest) latest = v.fetchedAt; });
+    if (latest) nvdLastFetched = new Date(latest).toISOString();
+  }
+
+  const sslCache = loadSslCache();
+  const sslCacheEntries = Object.keys(sslCache).length;
+  let sslLastFetched = null;
+  let sslHasRealData = false;
+  Object.values(sslCache).forEach(entry => {
+    if (!entry.mock && entry.fetchedAt) {
+      sslHasRealData = true;
+      if (!sslLastFetched || entry.fetchedAt > sslLastFetched) sslLastFetched = entry.fetchedAt;
+    }
+  });
+
+  let mitreAvailable = false;
+  try {
+    const mitreMapping = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mitreMapping.json'), 'utf8'));
+    mitreAvailable = !!(mitreMapping && mitreMapping.tactics && mitreMapping.tactics.length > 0);
+  } catch {}
+
+  res.json({
+    feeds: {
+      cvss_nvd: {
+        active: nvdKeyPresent,
+        keyPresent: nvdKeyPresent,
+        realData: nvdKeyPresent,
+        lastFetched: nvdLastFetched,
+        cacheEntries: nvdCacheSize,
+        status: nvdKeyPresent ? 'active' : 'degraded',
+        message: nvdKeyPresent ? 'NVD API key configured — real CVE data available' : 'NVD_API_KEY not set — CVSS feed inactive, mock/empty data returned'
+      },
+      ssl_cloudflare: {
+        active: cfTokenPresent,
+        keyPresent: cfTokenPresent,
+        realData: cfTokenPresent && sslHasRealData,
+        lastFetched: sslLastFetched,
+        cacheEntries: sslCacheEntries,
+        status: cfTokenPresent ? 'active' : 'degraded',
+        message: cfTokenPresent ? 'Cloudflare API token configured — real SSL data available' : 'CLOUDFLARE_API_TOKEN not set — SSL feed inactive, Unknown grades returned'
+      },
+      mitre: {
+        active: mitreAvailable,
+        keyPresent: true,
+        realData: mitreAvailable,
+        lastFetched: null,
+        status: mitreAvailable ? 'active' : 'degraded',
+        message: mitreAvailable ? 'MITRE ATT&CK mapping loaded from local data file' : 'MITRE mapping file missing or empty'
+      }
+    }
+  });
+});
+
 router.post('/mitre', (req, res) => {
   const intake = req.body;
   try {

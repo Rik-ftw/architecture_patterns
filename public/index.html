@@ -41,8 +41,8 @@ header h1{font-size:.95rem;font-weight:700;letter-spacing:-.01em;white-space:now
 .top-nav-item.active{background:rgba(255,212,0,.08);color:var(--accent);font-weight:700;border-bottom-color:var(--accent)}
 
 /* KPI strip */
-.kpi-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 24px;display:flex;gap:0;flex-shrink:0}
-.kpi-strip-item{display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--border);padding:0 18px 0 0;margin-right:18px;flex:1;min-width:0}
+.kpi-strip{background:var(--surface);border-bottom:1px solid var(--border);padding:9px 24px;display:flex;gap:0;flex-shrink:0;overflow-x:auto}
+.kpi-strip-item{display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--border);padding:0 18px 0 0;margin-right:18px;flex:1;min-width:120px}
 .kpi-strip-item:last-child{border-right:none}
 .kpi-strip-val{font-size:1.3rem;font-weight:900;line-height:1}
 .kpi-strip-label{font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
@@ -981,6 +981,7 @@ async function showDashboard() {
     ${queueHtml}
     ${solHtml}
     <div id="risk-widget-section" class="bento-span-3"><div class="section-card" style="opacity:.6;text-align:center;color:var(--muted);font-size:.82rem;padding:1.2rem">Loading risk intelligence...</div></div>
+    <div id="feed-health-section" class="bento-span-3"><div class="section-card" style="opacity:.6;text-align:center;color:var(--muted);font-size:.82rem;padding:1.2rem">Loading feed status...</div></div>
   </div>`;
   setMain(h);
 
@@ -991,6 +992,15 @@ async function showDashboard() {
   } catch(e) {
     const el=document.getElementById('risk-widget-section');
     if(el) el.innerHTML=`<div class="alert alert-warning">Risk intelligence data unavailable — ${e.message||'unknown error'}</div>`;
+  }
+
+  // Load feed health status async
+  try {
+    const fh = await api.get('/api/risk/health');
+    renderFeedHealth(fh);
+  } catch(e) {
+    const el=document.getElementById('feed-health-section');
+    if(el) el.innerHTML=`<div class="alert alert-warning">Feed health data unavailable — ${e.message||'unknown error'}</div>`;
   }
 }
 
@@ -1126,6 +1136,43 @@ function renderRiskWidget(rd) {
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:.9rem">
       ${scHtml}${trendHtml}
     </div>`;
+}
+
+function renderFeedHealth(fh) {
+  const el=document.getElementById('feed-health-section');
+  if(!el) return;
+  const feeds=fh.feeds||{};
+  const feedDefs=[
+    {key:'cvss_nvd',label:'CVSS / NVD',icon:'🔍'},
+    {key:'ssl_cloudflare',label:'SSL / Cloudflare',icon:'🔒'},
+    {key:'mitre',label:'MITRE ATT&CK',icon:'🛡'}
+  ];
+  let html=`<div class="section-card">
+    <h3 style="margin-bottom:.6rem">Risk Feed Health <span style="font-size:.65rem;color:var(--muted);font-weight:400;text-transform:none;letter-spacing:0">enrichment data sources</span></h3>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem">`;
+  feedDefs.forEach(({key,label,icon})=>{
+    const f=feeds[key]||{};
+    const active=f.status==='active';
+    const warming=active&&!f.realData&&f.cacheEntries===0;
+    const col=active?(warming?'var(--review)':'var(--risk-low)'):'var(--risk-critical)';
+    const bg=active?(warming?'rgba(243,156,18,.08)':'rgba(46,204,113,.08)'):'rgba(231,76,60,.08)';
+    const border=active?(warming?'rgba(243,156,18,.3)':'rgba(46,204,113,.3)'):'rgba(231,76,60,.3)';
+    const statusLabel=active?(warming?'Warming':'Active'):'Degraded';
+    let lastFetched='Never';
+    if(f.lastFetched){const d=new Date(f.lastFetched);lastFetched=d.toLocaleString();}
+    html+=`<div style="padding:.65rem .8rem;border-radius:8px;background:${bg};border:1px solid ${border}">
+      <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
+        <span style="font-size:.95rem">${icon}</span>
+        <span style="font-size:.78rem;font-weight:700;color:var(--text)">${label}</span>
+        <span style="margin-left:auto;font-size:.65rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;background:${col};color:#000">${statusLabel}</span>
+      </div>
+      <div style="font-size:.68rem;color:var(--muted);line-height:1.4">${f.message||''}</div>
+      ${f.lastFetched?`<div style="font-size:.62rem;color:var(--muted);margin-top:.3rem">Last data: ${lastFetched}</div>`:''}
+      ${f.cacheEntries!==undefined?`<div style="font-size:.62rem;color:var(--muted)">Cache entries: ${f.cacheEntries}</div>`:''}
+    </div>`;
+  });
+  html+=`</div></div>`;
+  el.innerHTML=html;
 }
 
 // ─── Kanban Board ─────────────────────────────────────────────────────────────

@@ -39,11 +39,63 @@ async function buildEnrichmentSignals(intake) {
 
     const scaSignals = await buildScaSignalsAsync(intake);
 
+    let mitreSignals = { totalTechniques: 0, riskLevel: 'Low', available: false };
+    try {
+      const mitreMapping = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'mitreMapping.json'), 'utf8'));
+      const compReqs = intake.complianceRequirements || intake.compliance_requirements || [];
+      const archType = (intake.architectureType || intake.architecture_type || '').toLowerCase();
+      const components = intake.components || [];
+      const isOtScada = compReqs.some(r => r.includes('IEC 62443') || r.includes('OT')) ||
+        archType.includes('ot') || archType.includes('ics') || archType.includes('scada') ||
+        components.some(c => ['SCADA', 'PLC', 'HMI', 'DCS', 'OPC-UA', 'Historian'].some(ot => c.toLowerCase().includes(ot.toLowerCase())));
+      const hm = (intake.hostingModel || intake.hosting_model || '').toLowerCase();
+      const isCloud = hm.includes('cloud') || hm.includes('saas') || hm.includes('paas') || hm.includes('azure') || hm.includes('aws');
+      const intPoints = intake.integrationPoints || intake.integration_points || 0;
+      const dataTypes = intake.dataTypes || intake.data_types || [];
+      const dataClass = intake.dataClassification || intake.data_classification || 'Internal';
+      const vendorCount = ((intake.vendorIds || intake.vendor_ids || []).length + (intake.newVendors || intake.new_vendors || []).length);
+      const ctx = {
+        isPublicFacing: !!(intake.isPublicFacing || intake.is_public_facing),
+        hasLegacyDependencies: !!(intake.hasLegacyDependencies || intake.has_legacy_dependencies),
+        hasMfa_false: !(intake.hasMfa || intake.has_mfa),
+        hasWaf_false: !(intake.hasWaf || intake.has_waf),
+        hasMonitoring_false: !(intake.hasMonitoring || intake.has_monitoring),
+        isZeroTrustAligned_false: !(intake.isZeroTrustAligned || intake.is_zero_trust_aligned),
+        encryptionAtRest_false: !(intake.encryptionAtRest || intake.encryption_at_rest),
+        externalDataSharing: !!(intake.externalDataSharing || intake.external_data_sharing),
+        hostingModel_cloud: isCloud,
+        integrationPoints_high: intPoints > 4,
+        vendorCount_high: vendorCount > 3,
+        dataTypes_pii: dataTypes.some(t => t.includes('PII') || t.includes('PHI')),
+        dataTypes_credentials: dataTypes.includes('Credentials/Secrets'),
+        dataTypes_ot: dataTypes.includes('OT/SCADA Data'),
+        dataClassification_sensitive: ['Confidential', 'Restricted'].includes(dataClass),
+        otScada: isOtScada
+      };
+      const tacticsList = [...(mitreMapping.tactics || [])];
+      if (isOtScada) (mitreMapping.ics_tactics || []).forEach(t => tacticsList.push(t));
+      let totalTechniques = 0;
+      tacticsList.forEach(tactic => {
+        (tactic.techniques || []).forEach(tech => {
+          if (tech.conditions && tech.conditions.every(c => !!ctx[c])) totalTechniques++;
+        });
+      });
+      let riskLevel = 'Low';
+      if (totalTechniques >= 12) riskLevel = 'Critical';
+      else if (totalTechniques >= 7) riskLevel = 'High';
+      else if (totalTechniques >= 3) riskLevel = 'Medium';
+      mitreSignals = { totalTechniques, riskLevel, available: true };
+    } catch (mitreErr) {
+      console.error('[buildEnrichmentSignals] MITRE error:', mitreErr.message || mitreErr);
+    }
+
     return {
       vendorSignals: { missingCerts, failedSsl },
-      scaSignals
+      scaSignals,
+      mitreSignals
     };
-  } catch {
+  } catch (err) {
+    console.error('[buildEnrichmentSignals] error:', err.message || err);
     return null;
   }
 }
@@ -350,7 +402,7 @@ function computeSupplyChainSignals(submissionRows) {
 
 router.get('/:id', async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM intake_requests WHERE id::text = $1 OR reference_id = $1', [req.params.id]);
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     const row = result.rows[0];
     const [comments, history] = await Promise.all([
@@ -433,7 +485,7 @@ router.post('/', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);
+    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id::text = $1 OR reference_id = $1', [req.params.id]);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const existing = serializeIntake(existingResult.rows[0]);
     const d = req.body;
@@ -495,7 +547,7 @@ router.patch('/:id', async (req, res) => {
 
 router.post('/:id/status', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);
+    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id::text = $1 OR reference_id = $1', [req.params.id]);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const existing = existingResult.rows[0];
     const { status, reviewerName, reviewerNotes, approvedPatternId } = req.body;
@@ -534,7 +586,7 @@ router.post('/:id/status', async (req, res) => {
 
 router.post('/:id/comments', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);
+    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id::text = $1 OR reference_id = $1', [req.params.id]);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const { author, role, comment } = req.body;
     if (!comment) return res.status(400).json({ error: 'Comment required' });
@@ -551,7 +603,7 @@ router.post('/:id/comments', async (req, res) => {
 
 router.delete('/:id', async (req, res) => {
   try {
-    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id = $1 OR reference_id = $1', [req.params.id]);
+    const existingResult = await pool.query('SELECT * FROM intake_requests WHERE id::text = $1 OR reference_id = $1', [req.params.id]);
     if (!existingResult.rows.length) return res.status(404).json({ error: 'Not found' });
     const existing = existingResult.rows[0];
     if (!['Draft', 'Withdrawn'].includes(existing.status)) {

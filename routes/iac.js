@@ -296,7 +296,7 @@ router.post('/pattern/:patternId', async (req, res) => {
 router.post('/intake/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM intake_requests WHERE id=$1 OR reference_id=$1',
+      'SELECT * FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
@@ -324,7 +324,7 @@ router.post('/intake/:id', async (req, res) => {
 router.get('/intake/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT iac_code FROM intake_requests WHERE id=$1 OR reference_id=$1',
+      'SELECT iac_code FROM intake_requests WHERE id::text=$1 OR reference_id=$1',
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Intake not found' });
@@ -338,7 +338,7 @@ router.get('/intake/:id', async (req, res) => {
 router.post('/solution/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT * FROM solution_designs WHERE id=$1 OR reference_id=$1',
+      'SELECT * FROM solution_designs WHERE id::text=$1 OR reference_id=$1',
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Solution not found' });
@@ -366,7 +366,7 @@ router.post('/solution/:id', async (req, res) => {
 router.get('/solution/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT iac_code FROM solution_designs WHERE id=$1 OR reference_id=$1',
+      'SELECT iac_code FROM solution_designs WHERE id::text=$1 OR reference_id=$1',
       [req.params.id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Solution not found' });
