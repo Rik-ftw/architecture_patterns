@@ -109,7 +109,17 @@
       }
     ],
     "createdAt": "2026-03-15T01:22:13.879Z",
-    "updatedAt": "2026-03-15T01:22:13.879Z"
+    "updatedAt": "2026-03-15T01:22:13.879Z",
+    "sslCache": {
+      "grade": "Unknown",
+      "protocol": null,
+      "mode": null,
+      "minTlsVersion": null,
+      "findings": [
+        "Domain not found in Cloudflare — may not use Cloudflare CDN/proxy"
+      ],
+      "fetchedAt": "2026-04-02T20:51:25.080Z"
+    }
   },
   {
     "id": 16,
@@ -137,7 +147,17 @@
       }
     ],
     "createdAt": "2026-03-15T01:22:13.879Z",
-    "updatedAt": "2026-03-15T01:22:13.879Z"
+    "updatedAt": "2026-03-15T01:22:13.879Z",
+    "sslCache": {
+      "grade": "Unknown",
+      "protocol": null,
+      "mode": null,
+      "minTlsVersion": null,
+      "findings": [
+        "Domain not found in Cloudflare — may not use Cloudflare CDN/proxy"
+      ],
+      "fetchedAt": "2026-04-02T20:51:25.080Z"
+    }
   },
   {
     "id": 1,
@@ -168,12 +188,13 @@
     "updatedAt": "2026-03-15T01:22:13.879Z",
     "sslCache": {
       "grade": "Unknown",
-      "protocol": "Unknown",
+      "protocol": null,
+      "mode": null,
+      "minTlsVersion": null,
       "findings": [
-        "Cloudflare API token not configured"
+        "Domain not found in Cloudflare — may not use Cloudflare CDN/proxy"
       ],
-      "fetchedAt": "2026-04-01T21:31:11.599Z",
-      "mock": true
+      "fetchedAt": "2026-04-02T20:49:23.678Z"
     }
   },
   {
@@ -205,12 +226,13 @@
     "updatedAt": "2026-03-15T01:22:13.879Z",
     "sslCache": {
       "grade": "Unknown",
-      "protocol": "Unknown",
+      "protocol": null,
+      "mode": null,
+      "minTlsVersion": null,
       "findings": [
-        "Cloudflare API token not configured"
+        "Domain not found in Cloudflare — may not use Cloudflare CDN/proxy"
       ],
-      "fetchedAt": "2026-04-01T21:31:11.599Z",
-      "mock": true
+      "fetchedAt": "2026-04-02T20:49:23.678Z"
     }
   },
   {
