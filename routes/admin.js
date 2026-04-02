@@ -8,7 +8,7 @@ function adminAuth(req, res, next) {
   if (!process.env.ADMIN_TOKEN) {
     return res.status(503).json({ error: 'Admin portal not configured (ADMIN_TOKEN not set)' });
   }
-  if (!token || token !== process.env.ADMIN_TOKEN) {
+  if (!token || token !== process.env.ADMIN_TOKEN.trim()) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   next();
