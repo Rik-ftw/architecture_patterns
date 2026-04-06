@@ -46,4 +46,7 @@ modules = ["nodejs-20", "postgresql-16"]
 
   [nix]
   channel = "stable-25_05"
+
+[deployment]
+deploymentTarget = "cloudrun"
   
