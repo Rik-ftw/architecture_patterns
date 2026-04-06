@@ -69,23 +69,84 @@ async function upsertFile(repoPath, content, message) {
   });
 }
 
+function buildPatternExport(data) {
+  const { id, diagramSvg, ...rest } = data;
+  return { type: 'pattern', ...rest };
+}
+
+async function upsertPatternToDb(patternId, data) {
+  const { id, diagramSvg, ...cleanData } = data;
+  await pool.query(
+    `INSERT INTO architecture_patterns (pattern_id, data, updated_at)
+     VALUES ($1, $2, NOW())
+     ON CONFLICT (pattern_id) DO UPDATE SET data = $2, updated_at = NOW()`,
+    [patternId, JSON.stringify(cleanData)]
+  );
+}
+
+router.post('/ingest-patterns', async (req, res) => {
+  try {
+    const files = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.json'));
+    if (files.length === 0) return res.status(400).json({ error: 'No pattern files found in patterns directory' });
+
+    const ingested = [];
+    const errors = [];
+
+    for (const file of files) {
+      try {
+        const raw = JSON.parse(fs.readFileSync(path.join(PATTERNS_DIR, file), 'utf8'));
+        const patternId = raw.patternId || file.replace('.json', '');
+        await upsertPatternToDb(patternId, raw);
+        ingested.push({ file, patternId, status: 'ingested' });
+      } catch (e) {
+        errors.push({ file, error: e.message });
+      }
+    }
+
+    res.json({
+      success: errors.length === 0,
+      ingested: ingested.length,
+      errors: errors.length,
+      results: ingested,
+      errorDetails: errors,
+      ingestedAt: new Date().toISOString()
+    });
+  } catch (err) {
+    console.error('Pattern ingest error:', err);
+    res.status(500).json({ error: err.message || 'Pattern ingest failed' });
+  }
+});
+
 router.post('/sync-patterns', async (req, res) => {
   try {
-    const files = fs.readdirSync(PATTERNS_DIR);
-    const jsonFiles = files.filter(f => f.endsWith('.json'));
-    const svgFiles = files.filter(f => f.endsWith('.svg'));
+    const svgFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.svg'));
 
-    if (jsonFiles.length === 0) return res.status(400).json({ error: 'No pattern files found' });
+    let dbResult = await pool.query(`SELECT pattern_id, data FROM architecture_patterns ORDER BY pattern_id ASC`);
+    if (dbResult.rows.length === 0) {
+      const diskFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.json'));
+      for (const file of diskFiles) {
+        try {
+          const raw = JSON.parse(fs.readFileSync(path.join(PATTERNS_DIR, file), 'utf8'));
+          const patternId = raw.patternId || file.replace('.json', '');
+          await upsertPatternToDb(patternId, raw);
+        } catch {}
+      }
+      dbResult = await pool.query(`SELECT pattern_id, data FROM architecture_patterns ORDER BY pattern_id ASC`);
+    }
+    const dbPatterns = dbResult.rows;
+
+    if (dbPatterns.length === 0) return res.status(400).json({ error: 'No pattern records found' });
 
     await ensureBranchExists();
 
     const results = [];
     const errors = [];
 
-    for (const file of jsonFiles) {
+    for (const row of dbPatterns) {
+      const file = `${row.pattern_id}.json`;
       try {
-        const content = fs.readFileSync(path.join(PATTERNS_DIR, file), 'utf8');
-        await upsertFile(`patterns/${file}`, content, `chore: sync pattern ${file} from EA Platform`);
+        const exportObj = buildPatternExport(row.data);
+        await upsertFile(`patterns/${file}`, JSON.stringify(exportObj, null, 2), `chore: sync pattern ${file} from EA Platform`);
         results.push({ file, status: 'synced' });
       } catch (e) {
         errors.push({ file, error: e.message });
@@ -126,7 +187,7 @@ router.post('/sync-patterns', async (req, res) => {
     const approvedSolutions = solResult.rows;
     const solutionCount = approvedSolutions.length;
 
-    const readme = generateReadme(jsonFiles.length, svgFiles.length, solutionCount);
+    const readme = generateReadme(dbPatterns.length, svgFiles.length, solutionCount);
     try {
       await upsertFile('README.md', readme, 'docs: update README from EA Platform sync');
       results.push({ file: 'README.md', status: 'synced' });
@@ -165,11 +226,22 @@ router.post('/sync-solutions', async (req, res) => {
 
     for (const sol of approvedSolutions) {
       try {
-        const revResult = await pool.query('SELECT * FROM solution_reviews WHERE solution_id=$1 ORDER BY created_at ASC', [sol.id]);
+        const [revResult, alignResult, iterResult, opsResult] = await Promise.all([
+          pool.query('SELECT * FROM solution_reviews WHERE solution_id=$1 ORDER BY created_at ASC', [sol.id]),
+          pool.query('SELECT * FROM solution_pattern_alignments WHERE solution_id=$1 ORDER BY created_at ASC', [sol.id]),
+          pool.query('SELECT * FROM solution_iterations WHERE solution_id=$1 ORDER BY created_at ASC', [sol.id]),
+          pool.query('SELECT reference_id FROM operational_support WHERE solution_id=$1 LIMIT 1', [sol.id])
+        ]);
+
         const reviews = revResult.rows;
-        const patterns = parseJson(sol.pattern_ids, []);
+        const alignments = alignResult.rows;
+        const iterations = iterResult.rows;
+        const opsRecord = opsResult.rows[0] || null;
+
+        const iacCode = sol.iac_code || null;
 
         const solutionJson = {
+          type: 'solution',
           referenceId: sol.reference_id,
           title: sol.title,
           description: sol.description,
@@ -178,9 +250,13 @@ router.post('/sync-solutions', async (req, res) => {
           businessUnit: sol.business_unit,
           complexity: sol.complexity,
           estimatedCostBand: sol.estimated_cost_band,
-          patternIds: patterns,
+          riskTier: sol.risk_tier || null,
+          patternIds: parseJson(sol.pattern_ids, []),
+          vendorIds: parseJson(sol.vendor_ids, []),
           deploymentRegions: parseJson(sol.deployment_regions, []),
           intakeReference: sol.intake_reference || null,
+          jiraEpics: parseJson(sol.jira_epics, []),
+          iacReference: iacCode ? { generated: true, note: 'IaC Terraform files available via /api/github/push-iac' } : { generated: false },
           status: sol.status,
           createdAt: sol.created_at,
           updatedAt: sol.updated_at,
@@ -190,7 +266,21 @@ router.post('/sync-solutions', async (req, res) => {
             decision: r.decision,
             comments: r.comments,
             reviewedAt: r.reviewed_at
-          }))
+          })),
+          patternAlignments: alignments.map(a => ({
+            patternId: a.pattern_id,
+            patternName: a.pattern_name || null,
+            status: a.status,
+            note: a.note || null,
+            reviewer: a.reviewer || null
+          })),
+          iterationHistory: iterations.map(i => ({
+            versionLabel: i.version_label,
+            changeSummary: i.change_summary || null,
+            author: i.author || null,
+            createdAt: i.created_at
+          })),
+          operationalSupportReference: opsRecord ? opsRecord.reference_id : null
         };
 
         const fileName = `${sol.reference_id}.json`;
@@ -201,9 +291,16 @@ router.post('/sync-solutions', async (req, res) => {
       }
     }
 
-    const jsonFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.json'));
     const svgFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.svg'));
-    const readme = generateReadme(jsonFiles.length, svgFiles.length, approvedSolutions.length);
+    let patternCount = 0;
+    try {
+      const patternCountResult = await pool.query('SELECT COUNT(*) FROM architecture_patterns');
+      patternCount = parseInt(patternCountResult.rows[0].count, 10) || 0;
+    } catch {}
+    if (patternCount === 0) {
+      patternCount = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.json')).length;
+    }
+    const readme = generateReadme(patternCount, svgFiles.length, approvedSolutions.length);
     try {
       await upsertFile('README.md', readme, 'docs: update README with solutions folder from EA Platform sync');
       results.push({ file: 'README.md', status: 'synced' });
@@ -342,32 +439,84 @@ Each pattern is classified at one of three abstraction levels:
 
 ## Pattern File Structure
 
-Each pattern is a JSON file in the \`patterns/\` directory named by its Pattern ID (e.g. \`AP-001.json\`).
+Each pattern is a JSON file in the \`patterns/\` directory named by its Pattern ID (e.g. \`AP-001.json\`). SVG architecture diagrams are pushed alongside their JSON file where available.
 
 \`\`\`
 patterns/
-  AP-001.json   — API Gateway Pattern
+  AP-001.json   — API Gateway Pattern (JSON metadata)
   AP-001.svg    — Architecture diagram (where available)
   ...
 \`\`\`
 
+Each pattern JSON file contains the following top-level fields:
+
+| Field | Description |
+|-------|-------------|
+| \`type\` | Always \`"pattern"\` — identifies this as a pattern document |
+| \`patternId\` | Unique pattern identifier (e.g. \`AP-001\`) |
+| \`name\` | Pattern name |
+| \`domain\` | Architecture domain |
+| \`tier\` | Abstraction level (Conceptual / Logical / Component) |
+| \`status\` | Pattern status (Endorsed, In Development, Under Review, Deprecated) |
+| \`version\` | Current version number |
+| \`owner\` | Pattern owner name |
+| \`leanixRef\` | LeanIX reference ID |
+| \`ccoeCertRef\` | CCoE certification reference |
+| \`level\` | Additional classification level field |
+| \`guardrails\` | Mandatory constraints and guardrails |
+| \`composition\` | Composed sub-patterns or building blocks |
+| \`implementationAssets\` | Links to reference implementations and assets |
+| \`revisionHistory\` | Version history entries |
+| \`useCases\` | When to use / when not to use guidance |
+| \`interactionSteps\` | Step-by-step interaction flow |
+| \`securityConsiderations\` | Security requirements and controls |
+| \`azureDesign\` | Azure-specific design notes |
+| \`thirdPartyRisks\` | Third-party and vendor risk considerations |
+
+> Note: The \`id\` database field and embedded \`diagramSvg\` blob are omitted from exported files. Diagram files are pushed separately as \`.svg\` files.
+
 ## Solution Designs
 
-${solutionCount > 0 ? `This repository contains **${solutionCount} approved solution design${solutionCount !== 1 ? 's'  : ''}** that compose patterns into end-to-end architectures.` : 'Approved solution designs are synced here as they are approved through the review pipeline.'}
+${solutionCount > 0 ? `This repository contains **${solutionCount} approved solution design${solutionCount !== 1 ? 's' : ''}** that compose patterns into end-to-end architectures.` : 'Approved solution designs are synced here as they are approved through the review pipeline.'}
 
 Solution designs follow a multi-stage approval pipeline:
 **Draft → EA Review → Security Review → Architecture Board → Approved**
 
-Each approved solution is stored in the \`solutions/\` folder as a structured JSON file named by its Reference ID (e.g. \`ESD-2026-0001.json\`). Each file contains:
-- Solution metadata (title, owner, business unit, complexity, cost band)
-- Composed pattern IDs and deployment regions
-- Full review trail (reviewer name, decision, comments, timestamp per stage)
+Each approved solution is stored in the \`solutions/\` folder as a structured JSON file named by its Reference ID (e.g. \`ESD-2026-0001.json\`).
 
 \`\`\`
 solutions/
-  ESD-2026-0001.json   — Solution design with review artifacts
+  ESD-2026-0001.json   — Solution design with full data model
   ...
 \`\`\`
+
+Each solution JSON file contains the following top-level fields:
+
+| Field | Description |
+|-------|-------------|
+| \`type\` | Always \`"solution"\` — identifies this as a solution document |
+| \`referenceId\` | Unique solution identifier (e.g. \`ESD-2026-0001\`) |
+| \`title\` | Solution name |
+| \`description\` | Detailed solution description |
+| \`businessContext\` | Business problem and context |
+| \`owner\` | Solution owner name |
+| \`businessUnit\` | Owning business unit |
+| \`complexity\` | Assessed complexity level |
+| \`estimatedCostBand\` | Cost band estimate |
+| \`riskTier\` | Risk tier assessed during intake (e.g. High / Medium / Low) |
+| \`patternIds\` | Array of pattern IDs this solution composes |
+| \`vendorIds\` | Array of vendor record IDs referenced by this solution |
+| \`deploymentRegions\` | Target Azure/cloud deployment regions |
+| \`intakeReference\` | Linked intake request reference ID |
+| \`jiraEpics\` | Associated Jira epic keys or references |
+| \`iacReference\` | IaC generation summary (\`generated\` boolean + note) |
+| \`status\` | Current solution status |
+| \`createdAt\` | Creation timestamp |
+| \`updatedAt\` | Last updated timestamp |
+| \`reviews\` | Full review trail — stage, reviewer, decision, comments, timestamp |
+| \`patternAlignments\` | Pattern alignment records — patternId, patternName, status, note, reviewer |
+| \`iterationHistory\` | Version/iteration history — versionLabel, changeSummary, author, createdAt |
+| \`operationalSupportReference\` | Reference ID of the linked operational support record (if any) |
 
 ## Contributing
 

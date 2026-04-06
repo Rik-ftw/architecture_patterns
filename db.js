@@ -201,6 +201,16 @@ async function initDb() {
   `);
 
   await pool.query(`
+    CREATE TABLE IF NOT EXISTS architecture_patterns (
+      id SERIAL PRIMARY KEY,
+      pattern_id TEXT UNIQUE NOT NULL,
+      data JSONB NOT NULL,
+      created_at TIMESTAMPTZ DEFAULT NOW(),
+      updated_at TIMESTAMPTZ DEFAULT NOW()
+    );
+  `);
+
+  await pool.query(`
     CREATE TABLE IF NOT EXISTS solution_pattern_alignments (
       id SERIAL PRIMARY KEY,
       solution_id INTEGER NOT NULL REFERENCES solution_designs(id),

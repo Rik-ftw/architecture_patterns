@@ -22,6 +22,19 @@ app.get('/api/patterns', (req, res) => {
     } catch { return null; }
   }).filter(Boolean);
   res.json(patterns);
+  setImmediate(() => {
+    patterns.forEach(p => {
+      const patternId = p.patternId || p.id;
+      if (!patternId) return;
+      const { id, diagramSvg, _svgFile, ...cleanData } = p;
+      pool.query(
+        `INSERT INTO architecture_patterns (pattern_id, data, updated_at)
+         VALUES ($1, $2, NOW())
+         ON CONFLICT (pattern_id) DO UPDATE SET data = $2, updated_at = NOW()`,
+        [String(patternId), JSON.stringify(cleanData)]
+      ).catch(() => {});
+    });
+  });
 });
 
 app.get('/api/patterns/:file', (req, res) => {
