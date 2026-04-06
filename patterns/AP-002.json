@@ -1,19 +1,12 @@
 {
-  "id": 8,
-  "patternId": "AP-002",
+  "type": "pattern",
   "name": "Service Mesh for Microservices",
-  "domain": "Application & Integration",
   "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Carlos Mendes",
+  "domain": "Application & Integration",
   "status": "Endorsed",
   "version": "1.3",
-  "owner": "Carlos Mendes",
-  "approvers": "Platform Engineering, Mike Davis",
-  "lastReviewed": "2025-12-05",
-  "ccoeCertified": "Yes",
-  "ccoeCertRef": "CCOE-AP-2025-002",
-  "leanixRef": "LX-5203",
-  "strategicIntent": "Implement a service mesh using the sidecar proxy model to provide consistent observability, traffic management, and mutual TLS between microservices across McCain's containerized workloads.",
-  "problemStatement": "As McCain's microservices estate grows, teams implement inconsistent approaches to service discovery, retries, circuit-breaking, and inter-service encryption, leading to reliability gaps and difficulty diagnosing cross-service failures in production.",
   "useCases": [
     {
       "use": "AKS-hosted microservices requiring mutual TLS and traffic shaping",
@@ -28,28 +21,17 @@
       "dontUse": "Batch processing jobs with no real-time inter-service communication"
     }
   ],
+  "approvers": "Platform Engineering, Mike Davis",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": "LX-5203",
+  "patternId": "AP-002",
+  "updatedAt": "2026-03-15T01:49:48.071Z",
   "components": [
     "Istio Service Mesh — control plane for traffic management and policy",
     "Envoy Sidecar Proxy — data plane for request routing and telemetry",
     "Kiali — service mesh observability dashboard",
     "Jaeger — distributed tracing for cross-service request flows",
     "Prometheus & Grafana — metrics collection and visualization"
-  ],
-  "interactionSteps": [
-    "Envoy sidecar is automatically injected into each pod via Istio admission webhook",
-    "Service-to-service calls are intercepted by Envoy and encrypted with mutual TLS",
-    "Istio VirtualService rules manage traffic splitting for canary deployments",
-    "DestinationRules configure circuit-breaking thresholds and retry policies",
-    "Jaeger captures distributed traces across the full request chain",
-    "Kiali dashboard visualizes service topology, traffic flow, and error rates",
-    "Prometheus scrapes Envoy metrics and Grafana renders operational dashboards"
-  ],
-  "securityConsiderations": [
-    "Mutual TLS must be enforced in STRICT mode for all mesh-enrolled namespaces",
-    "Istio AuthorizationPolicies must restrict cross-namespace access to explicit allow-lists",
-    "Sidecar resource limits must be configured to prevent proxy resource exhaustion",
-    "Control plane components must run in a dedicated, hardened namespace",
-    "Mesh telemetry data must not contain PII or sensitive payload content"
   ],
   "guardrails": [
     {
@@ -73,6 +55,8 @@
       "severity": "Recommended"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-AP-2025-002",
   "composition": [
     {
       "patternId": "NW-001",
@@ -85,12 +69,8 @@
       "relationship": "Deployed on"
     }
   ],
-  "implementationAssets": {
-    "ccoeRunbook": "service-mesh-operations-runbook-v1.3",
-    "configExample": "istio-mesh-config-v1.3.yaml",
-    "terraformModule": "github.com/mccain/terraform-aks-istio-mesh"
-  },
-  "exceptionProcess": "Submit Platform Engineering variance request for non-mesh service communication. Must include network-level compensating controls (NSG rules, private endpoints) and security team sign-off.",
+  "lastReviewed": "2025-12-05",
+  "ccoeCertified": "Yes",
   "revisionHistory": [
     {
       "date": "2025-04-10",
@@ -105,11 +85,30 @@
       "version": "1.3"
     }
   ],
+  "strategicIntent": "Implement a service mesh using the sidecar proxy model to provide consistent observability, traffic management, and mutual TLS between microservices across McCain's containerized workloads.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Platform Engineering variance request for non-mesh service communication. Must include network-level compensating controls (NSG rules, private endpoints) and security team sign-off.",
+  "interactionSteps": [
+    "Envoy sidecar is automatically injected into each pod via Istio admission webhook",
+    "Service-to-service calls are intercepted by Envoy and encrypted with mutual TLS",
+    "Istio VirtualService rules manage traffic splitting for canary deployments",
+    "DestinationRules configure circuit-breaking thresholds and retry policies",
+    "Jaeger captures distributed traces across the full request chain",
+    "Kiali dashboard visualizes service topology, traffic flow, and error rates",
+    "Prometheus scrapes Envoy metrics and Grafana renders operational dashboards"
+  ],
+  "problemStatement": "As McCain's microservices estate grows, teams implement inconsistent approaches to service discovery, retries, circuit-breaking, and inter-service encryption, leading to reliability gaps and difficulty diagnosing cross-service failures in production.",
   "submissionSource": null,
-  "diagramSvg": "<svg width=\"900\" height=\"600\" viewBox=\"0 0 900 600\" font-family=\"system-ui, -apple-system, sans-serif\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" fill=\"#1B3A6B\"/>\n    </marker>\n    <marker id=\"arr2\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" fill=\"#0F6E56\"/>\n    </marker>\n  </defs>\n\n  <!-- Title Bar -->\n  <rect width=\"900\" height=\"44\" fill=\"#1B3A6B\" rx=\"0\"/>\n  <text x=\"20\" y=\"16\" fill=\"white\" font-size=\"11\" font-weight=\"normal\" opacity=\"0.75\">Application &amp; Integration · Tier 2 — Logical</text>\n  <text x=\"20\" y=\"32\" fill=\"white\" font-size=\"15\" font-weight=\"700\">Service Mesh for Microservices</text>\n\n  <!-- Background -->\n  <rect y=\"44\" width=\"900\" height=\"556\" fill=\"#EAF1FB\"/>\n\n  <!-- Istio Control Plane (center-top) -->\n  <rect x=\"340\" y=\"70\" width=\"220\" height=\"60\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/>\n  <rect x=\"340\" y=\"70\" width=\"220\" height=\"18\" rx=\"8\" fill=\"#1B3A6B\"/>\n  <rect x=\"340\" y=\"80\" width=\"220\" height=\"8\" fill=\"#1B3A6B\"/>\n  <text x=\"450\" y=\"83\" fill=\"white\" font-size=\"10\" font-weight=\"600\" text-anchor=\"middle\">CONTROL PLANE</text>\n  <text x=\"450\" y=\"108\" fill=\"#1e293b\" font-size=\"12\" font-weight=\"700\" text-anchor=\"middle\">Istio Service Mesh</text>\n  <text x=\"450\" y=\"122\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Traffic mgmt &amp; policy</text>\n\n  <!-- Envoy Sidecar -->\n  <rect x=\"100\" y=\"210\" width=\"190\" height=\"60\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/>\n  <rect x=\"100\" y=\"210\" width=\"190\" height=\"18\" rx=\"8\" fill=\"#0F6E56\"/>\n  <rect x=\"100\" y=\"220\" width=\"190\" height=\"8\" fill=\"#0F6E56\"/>\n  <text x=\"195\" y=\"223\" fill=\"white\" font-size=\"10\" font-weight=\"600\" text-anchor=\"middle\">DATA PLANE</text>\n  <text x=\"195\" y=\"248\" fill=\"#1e293b\" font-size=\"12\" font-weight=\"700\" text-anchor=\"middle\">Envoy Sidecar Proxy</text>\n  <text x=\"195\" y=\"262\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Routing &amp; mTLS</text>\n\n  <!-- Jaeger -->\n  <rect x=\"340\" y=\"210\" width=\"190\" height=\"60\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"2\"/>\n  <rect x=\"340\" y=\"210\" width=\"190\" height=\"18\" rx=\"8\" fill=\"#BA7517\"/>\n  <rect x=\"340\" y=\"220\" width=\"190\" height=\"8\" fill=\"#BA7517\"/>\n  <text x=\"435\" y=\"223\" fill=\"white\" font-size=\"10\" font-weight=\"600\" text-anchor=\"middle\">TRACING</text>\n  <text x=\"435\" y=\"248\" fill=\"#1e293b\" font-size=\"12\" font-weight=\"700\" text-anchor=\"middle\">Jaeger</text>\n  <text x=\"435\" y=\"262\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Distributed traces</text>\n\n  <!-- Kiali -->\n  <rect x=\"580\" y=\"210\" width=\"190\" height=\"60\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/>\n  <rect x=\"580\" y=\"210\" width=\"190\" height=\"18\" rx=\"8\" fill=\"#1B3A6B\"/>\n  <rect x=\"580\" y=\"220\" width=\"190\" height=\"8\" fill=\"#1B3A6B\"/>\n  <text x=\"675\" y=\"223\" fill=\"white\" font-size=\"10\" font-weight=\"600\" text-anchor=\"middle\">OBSERVABILITY</text>\n  <text x=\"675\" y=\"248\" fill=\"#1e293b\" font-size=\"12\" font-weight=\"700\" text-anchor=\"middle\">Kiali</text>\n  <text x=\"675\" y=\"262\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Service topology viz</text>\n\n  <!-- Prometheus & Grafana -->\n  <rect x=\"340\" y=\"360\" width=\"220\" height=\"60\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/>\n  <rect x=\"340\" y=\"360\" width=\"220\" height=\"18\" rx=\"8\" fill=\"#0F6E56\"/>\n  <rect x=\"340\" y=\"370\" width=\"220\" height=\"8\" fill=\"#0F6E56\"/>\n  <text x=\"450\" y=\"373\" fill=\"white\" font-size=\"10\" font-weight=\"600\" text-anchor=\"middle\">METRICS</text>\n  <text x=\"450\" y=\"398\" fill=\"#1e293b\" font-size=\"12\" font-weight=\"700\" text-anchor=\"middle\">Prometheus &amp; Grafana</text>\n  <text x=\"450\" y=\"412\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Collection &amp; dashboards</text>\n\n  <!-- Arrows -->\n  <!-- Istio → Envoy (injection) -->\n  <line x1=\"370\" y1=\"130\" x2=\"220\" y2=\"210\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\" stroke-dasharray=\"5,3\"/>\n  <text x=\"270\" y=\"168\" fill=\"#1B3A6B\" font-size=\"9\" text-anchor=\"middle\">1 inject</text>\n\n  <!-- Envoy → Jaeger -->\n  <line x1=\"290\" y1=\"240\" x2=\"340\" y2=\"240\" stroke=\"#BA7517\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n  <text x=\"315\" y=\"234\" fill=\"#BA7517\" font-size=\"9\" text-anchor=\"middle\">5</text>\n\n  <!-- Istio → Kiali -->\n  <line x1=\"530\" y1=\"130\" x2=\"640\" y2=\"210\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"605\" y=\"168\" fill=\"#1B3A6B\" font-size=\"9\" text-anchor=\"middle\">6</text>\n\n  <!-- Istio → Envoy (VirtualService) -->\n  <line x1=\"380\" y1=\"130\" x2=\"230\" y2=\"210\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n\n  <!-- Envoy → Prometheus -->\n  <line x1=\"195\" y1=\"270\" x2=\"380\" y2=\"360\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n  <text x=\"268\" y=\"325\" fill=\"#0F6E56\" font-size=\"9\" text-anchor=\"middle\">7 scrape</text>\n\n  <!-- Istio → Prometheus -->\n  <line x1=\"450\" y1=\"130\" x2=\"450\" y2=\"360\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\" stroke-dasharray=\"4,3\"/>\n\n  <!-- Jaeger → Kiali -->\n  <line x1=\"530\" y1=\"240\" x2=\"580\" y2=\"240\" stroke=\"#64748b\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n\n  <!-- Prometheus → Kiali -->\n  <line x1=\"560\" y1=\"390\" x2=\"675\" y2=\"270\" stroke=\"#64748b\" stroke-width=\"1.5\" marker-end=\"url(#arr2)\"/>\n\n  <!-- Step labels box -->\n  <rect x=\"20\" y=\"350\" width=\"270\" height=\"130\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1\" opacity=\"0.9\"/>\n  <text x=\"30\" y=\"368\" fill=\"#1B3A6B\" font-size=\"11\" font-weight=\"700\">Flow Steps</text>\n  <text x=\"30\" y=\"385\" fill=\"#64748b\" font-size=\"9\">1 · Envoy injected via admission webhook</text>\n  <text x=\"30\" y=\"399\" fill=\"#64748b\" font-size=\"9\">2 · Service calls intercepted + mTLS</text>\n  <text x=\"30\" y=\"413\" fill=\"#64748b\" font-size=\"9\">3 · VirtualService manages canary splits</text>\n  <text x=\"30\" y=\"427\" fill=\"#64748b\" font-size=\"9\">4 · DestinationRules: circuit-break &amp; retry</text>\n  <text x=\"30\" y=\"441\" fill=\"#64748b\" font-size=\"9\">5–7 · Traces, topology &amp; metrics collected</text>\n  <line x1=\"20\" y1=\"374\" x2=\"290\" y2=\"374\" stroke=\"#EAF1FB\" stroke-width=\"1\"/>\n\n  <!-- Related Patterns -->\n  <rect x=\"20\" y=\"498\" width=\"200\" height=\"48\" rx=\"8\" fill=\"none\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" stroke-dasharray=\"6,3\"/>\n  <text x=\"120\" y=\"516\" fill=\"#1B3A6B\" font-size=\"10\" font-weight=\"700\" text-anchor=\"middle\">NW-001</text>\n  <text x=\"120\" y=\"530\" fill=\"#64748b\" font-size=\"9\" text-anchor=\"middle\">Hub-Spoke Network</text>\n  <text x=\"120\" y=\"542\" fill=\"#64748b\" font-size=\"9\" text-anchor=\"middle\">Runs within</text>\n\n  <rect x=\"240\" y=\"498\" width=\"200\" height=\"48\" rx=\"8\" fill=\"none\" stroke=\"#0F6E56\" stroke-width=\"1.5\" stroke-dasharray=\"6,3\"/>\n  <text x=\"340\" y=\"516\" fill=\"#0F6E56\" font-size=\"10\" font-weight=\"700\" text-anchor=\"middle\">CP-001</text>\n  <text x=\"340\" y=\"530\" fill=\"#64748b\" font-size=\"9\" text-anchor=\"middle\">Azure Landing Zone</text>\n  <text x=\"340\" y=\"542\" fill=\"#64748b\" font-size=\"9\" text-anchor=\"middle\">Deployed on</text>\n\n  <text x=\"20\" y=\"492\" fill=\"#64748b\" font-size=\"10\" font-weight=\"600\">Related Patterns</text>\n</svg>",
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-15T01:49:48.071Z",
-  "level": "Logical"
+  "implementationAssets": {
+    "ccoeRunbook": "service-mesh-operations-runbook-v1.3",
+    "configExample": "istio-mesh-config-v1.3.yaml",
+    "terraformModule": "github.com/mccain/terraform-aks-istio-mesh"
+  },
+  "securityConsiderations": [
+    "Mutual TLS must be enforced in STRICT mode for all mesh-enrolled namespaces",
+    "Istio AuthorizationPolicies must restrict cross-namespace access to explicit allow-lists",
+    "Sidecar resource limits must be configured to prevent proxy resource exhaustion",
+    "Control plane components must run in a dedicated, hardened namespace",
+    "Mesh telemetry data must not contain PII or sensitive payload content"
+  ]
 }
