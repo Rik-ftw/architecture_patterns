@@ -1,19 +1,12 @@
 {
-  "id": 12,
-  "patternId": "AP-006",
+  "type": "pattern",
   "name": "Secure Integration Zones",
-  "domain": "Application & Integration",
   "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Raj Patel",
+  "domain": "Application & Integration",
   "status": "Endorsed",
   "version": "1.2",
-  "owner": "Raj Patel",
-  "approvers": "Security Architecture Board, Network Team",
-  "lastReviewed": "2025-12-20",
-  "ccoeCertified": "Yes",
-  "ccoeCertRef": "CCOE-AP-2025-006",
-  "leanixRef": "LX-5607",
-  "strategicIntent": "Establish isolated network and compute zones for hosting third-party integration connectors, ensuring that external partner traffic never reaches internal systems directly and all egress is controlled and auditable.",
-  "problemStatement": "Third-party connectors (EDI partners, logistics providers, payment gateways) require network connectivity that, if hosted within internal zones, exposes core systems to external attack vectors and complicates compliance with data residency requirements.",
   "useCases": [
     {
       "use": "EDI connectors for retailer order ingestion (Walmart, Costco, Tesco)",
@@ -28,6 +21,11 @@
       "dontUse": "Internal BI reporting connections to Azure Synapse or Data Lake"
     }
   ],
+  "approvers": "Security Architecture Board, Network Team",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": "LX-5607",
+  "patternId": "AP-006",
+  "updatedAt": "2026-03-15T01:08:22.427Z",
   "components": [
     "Azure Virtual Network (DMZ spoke) — isolated network zone for integration workloads",
     "Azure Firewall — egress filtering and threat inspection for outbound partner traffic",
@@ -35,23 +33,6 @@
     "Azure Private Link — secure inbound connectivity from integration zone to internal services",
     "Azure NSG & ASG — micro-segmentation within the integration zone",
     "Azure Monitor — network flow logging and anomaly detection"
-  ],
-  "interactionSteps": [
-    "Third-party connector is deployed into the isolated DMZ spoke VNet",
-    "Inbound partner traffic is routed through Azure Firewall with allow-listed IPs and FQDNs",
-    "Connector processes partner data and transforms to internal canonical format",
-    "Outbound calls to internal services routed via Private Link endpoints only",
-    "Azure Firewall enforces egress allow-list — blocks all non-approved outbound destinations",
-    "Network flow logs capture all traffic for security monitoring and compliance auditing",
-    "Anomaly detection alerts on unexpected traffic patterns or volume spikes"
-  ],
-  "securityConsiderations": [
-    "Integration zone must be a separate VNet with no direct peering to internal application VNets",
-    "All egress from the integration zone must pass through Azure Firewall with explicit allow-lists",
-    "Third-party connector images must be scanned for vulnerabilities before deployment",
-    "Data leaving the integration zone to partners must be encrypted in transit (TLS 1.2+)",
-    "PCI DSS-scoped connectors must run in a dedicated sub-zone with additional audit controls",
-    "No corporate credentials may be stored within the integration zone — use Key Vault references"
   ],
   "guardrails": [
     {
@@ -80,6 +61,8 @@
       "severity": "Required"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-AP-2025-006",
   "composition": [
     {
       "patternId": "NW-001",
@@ -92,13 +75,8 @@
       "relationship": "Implements"
     }
   ],
-  "implementationAssets": {
-    "azurePolicy": "Deny-Direct-Peering-IntegrationZone",
-    "ccoeRunbook": "integration-zone-onboarding-guide-v1.2",
-    "configExample": "integration-zone-dmz-v1.2.yaml",
-    "terraformModule": "github.com/mccain/terraform-azure-integration-zone"
-  },
-  "exceptionProcess": "Submit Security Architecture Board request with threat model for any direct connectivity bypassing the integration zone. CISO and Network Team approval required. Must include compensating network controls and 30-day review.",
+  "lastReviewed": "2025-12-20",
+  "ccoeCertified": "Yes",
   "revisionHistory": [
     {
       "date": "2025-05-01",
@@ -113,11 +91,32 @@
       "version": "1.2"
     }
   ],
+  "strategicIntent": "Establish isolated network and compute zones for hosting third-party integration connectors, ensuring that external partner traffic never reaches internal systems directly and all egress is controlled and auditable.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Security Architecture Board request with threat model for any direct connectivity bypassing the integration zone. CISO and Network Team approval required. Must include compensating network controls and 30-day review.",
+  "interactionSteps": [
+    "Third-party connector is deployed into the isolated DMZ spoke VNet",
+    "Inbound partner traffic is routed through Azure Firewall with allow-listed IPs and FQDNs",
+    "Connector processes partner data and transforms to internal canonical format",
+    "Outbound calls to internal services routed via Private Link endpoints only",
+    "Azure Firewall enforces egress allow-list — blocks all non-approved outbound destinations",
+    "Network flow logs capture all traffic for security monitoring and compliance auditing",
+    "Anomaly detection alerts on unexpected traffic patterns or volume spikes"
+  ],
+  "problemStatement": "Third-party connectors (EDI partners, logistics providers, payment gateways) require network connectivity that, if hosted within internal zones, exposes core systems to external attack vectors and complicates compliance with data residency requirements.",
   "submissionSource": null,
-  "diagramSvg": null,
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-15T01:08:22.427Z",
-  "level": "Logical"
+  "implementationAssets": {
+    "azurePolicy": "Deny-Direct-Peering-IntegrationZone",
+    "ccoeRunbook": "integration-zone-onboarding-guide-v1.2",
+    "configExample": "integration-zone-dmz-v1.2.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-integration-zone"
+  },
+  "securityConsiderations": [
+    "Integration zone must be a separate VNet with no direct peering to internal application VNets",
+    "All egress from the integration zone must pass through Azure Firewall with explicit allow-lists",
+    "Third-party connector images must be scanned for vulnerabilities before deployment",
+    "Data leaving the integration zone to partners must be encrypted in transit (TLS 1.2+)",
+    "PCI DSS-scoped connectors must run in a dedicated sub-zone with additional audit controls",
+    "No corporate credentials may be stored within the integration zone — use Key Vault references"
+  ]
 }
