@@ -97,44 +97,13 @@
   "azure": {
     "data": {
       "keyword": "Azure",
-      "cveCount": 30,
-      "highestCvss": 9.8,
-      "severity": "Critical",
-      "topCves": [
-        {
-          "id": "CVE-2015-7876",
-          "score": 7.5,
-          "description": "The escapeLike function in sqlsrv/database.inc in the Drupal 7 driver for SQL Server and SQL Azure 7.x-1.x before 7.x-1....",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2015-7876"
-        },
-        {
-          "id": "CVE-2008-6587",
-          "score": 6.8,
-          "description": "Cross-site request forgery (CSRF) vulnerability in index.tmpl in Vuze (formerly Azureus HTML WebUI), probably 0.7.6, all...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2008-6587"
-        },
-        {
-          "id": "CVE-2006-3230",
-          "score": 2.6,
-          "description": "Cross-site scripting (XSS) vulnerability in index.tmpl in Azureus Tracker 2.4.0.2 and earlier (Java BitTorrent Client Tr...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2006-3230"
-        },
-        {
-          "id": "CVE-2011-1068",
-          "score": 2.6,
-          "description": "Microsoft Windows Azure Software Development Kit (SDK) 1.3.x before 1.3.20121.1237, when Full IIS and a Web Role are use...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2011-1068"
-        },
-        {
-          "id": "CVE-2011-3649",
-          "score": 2.6,
-          "description": "Mozilla Firefox 7.0 and Thunderbird 7.0, when the Direct2D (aka D2D) API is used on Windows in conjunction with the Azur...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2011-3649"
-        }
-      ],
-      "fetchedAt": "2026-04-01T21:33:40.976Z"
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.815Z"
     },
-    "fetchedAt": 1775079220976
+    "fetchedAt": 1775504904815
   },
   "claroty": {
     "data": {
@@ -187,5 +156,192 @@
       "fetchedAt": "2026-04-02T20:51:25.003Z"
     },
     "fetchedAt": 1775163085003
+  },
+  "azure b2c (external identity)": {
+    "data": {
+      "keyword": "Azure B2C (External Identity)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.814Z"
+    },
+    "fetchedAt": 1775504904814
+  },
+  "azure blob storage": {
+    "data": {
+      "keyword": "Azure Blob Storage",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.825Z"
+    },
+    "fetchedAt": 1775504904825
+  },
+  "azure app service": {
+    "data": {
+      "keyword": "Azure App Service",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.829Z"
+    },
+    "fetchedAt": 1775504904829
+  },
+  "azure api management": {
+    "data": {
+      "keyword": "Azure API Management",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.835Z"
+    },
+    "fetchedAt": 1775504904835
+  },
+  "sap integration suite": {
+    "data": {
+      "keyword": "SAP Integration Suite",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.839Z"
+    },
+    "fetchedAt": 1775504904839
+  },
+  "azure sql database": {
+    "data": {
+      "keyword": "Azure SQL Database",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T19:48:24.840Z"
+    },
+    "fetchedAt": 1775504904840
+  },
+  "api gateway": {
+    "data": {
+      "keyword": "API Gateway",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.468Z"
+    },
+    "fetchedAt": 1775505945468
+  },
+  "sap btp - cloud platform integration (cpi)": {
+    "data": {
+      "keyword": "SAP BTP - Cloud Platform Integration (CPI)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.469Z"
+    },
+    "fetchedAt": 1775505945469
+  },
+  "mccain enterprise data platform (databricks)": {
+    "data": {
+      "keyword": "McCain Enterprise Data Platform (Databricks)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.479Z"
+    },
+    "fetchedAt": 1775505945479
+  },
+  "sap s/4 hana": {
+    "data": {
+      "keyword": "SAP S/4 HANA",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.479Z"
+    },
+    "fetchedAt": 1775505945479
+  },
+  "blue yonder idsp platform (azure saas)": {
+    "data": {
+      "keyword": "Blue Yonder IDSP Platform (Azure SaaS)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.481Z"
+    },
+    "fetchedAt": 1775505945481
+  },
+  "saas": {
+    "data": {
+      "keyword": "SaaS",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.489Z"
+    },
+    "fetchedAt": 1775505945489
+  },
+  "blue yonder portal": {
+    "data": {
+      "keyword": "Blue Yonder Portal",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.490Z"
+    },
+    "fetchedAt": 1775505945490
+  },
+  "sap ci-ds (cloud integration for data services)": {
+    "data": {
+      "keyword": "SAP CI-DS (Cloud Integration for Data Services)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.494Z"
+    },
+    "fetchedAt": 1775505945495
+  },
+  "snowflake database": {
+    "data": {
+      "keyword": "Snowflake Database",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.495Z"
+    },
+    "fetchedAt": 1775505945495
+  },
+  "blue yonder platform data cloud (pdc)": {
+    "data": {
+      "keyword": "Blue Yonder Platform Data Cloud (PDC)",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.496Z"
+    },
+    "fetchedAt": 1775505945496
+  },
+  "sap ibp/apo": {
+    "data": {
+      "keyword": "SAP IBP/APO",
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T20:05:45.504Z"
+    },
+    "fetchedAt": 1775505945504
   }
 }
