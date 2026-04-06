@@ -1,19 +1,12 @@
 {
-  "id": 16,
-  "patternId": "IN-003",
+  "type": "pattern",
   "name": "API Productization",
-  "domain": "Application & Integration",
   "tier": "Layer 3 — Conceptual",
+  "level": "Conceptual",
+  "owner": "Emma Larsson",
+  "domain": "Application & Integration",
   "status": "In Development",
   "version": "0.8",
-  "owner": "Emma Larsson",
-  "approvers": "Digital Platform Team, Integration Architecture Board",
-  "lastReviewed": "2026-03-01",
-  "ccoeCertified": "No",
-  "ccoeCertRef": null,
-  "leanixRef": null,
-  "strategicIntent": "Package internal APIs as managed products with defined SLAs, comprehensive documentation, tiered access plans, and self-service developer onboarding to accelerate partner integration and internal API reuse across McCain's digital ecosystem.",
-  "problemStatement": "Internal APIs are built as point solutions without documentation, SLAs, or onboarding processes. Partners and internal teams spend weeks discovering, understanding, and gaining access to APIs, slowing time-to-market for new integrations and digital products.",
   "useCases": [
     {
       "use": "Packaging order management APIs for retailer partner self-service integration",
@@ -28,6 +21,11 @@
       "dontUse": "Machine-to-machine integrations already governed by specific partner contracts"
     }
   ],
+  "approvers": "Digital Platform Team, Integration Architecture Board",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": null,
+  "patternId": "IN-003",
+  "updatedAt": "2026-03-15T01:08:22.427Z",
   "components": [
     "Azure API Management Developer Portal — self-service API discovery and onboarding",
     "Azure API Management Products — API grouping, access tiers, and subscription management",
@@ -35,22 +33,6 @@
     "Azure AD B2C — partner identity management and API subscription authentication",
     "Azure Monitor & API Analytics — usage tracking, SLA monitoring, and billing metrics",
     "Azure DevOps Pipelines — automated API documentation generation and portal publishing"
-  ],
-  "interactionSteps": [
-    "API team publishes OpenAPI spec and creates API Product in API Management",
-    "Product is configured with access tiers (Bronze: 100 req/min, Silver: 1000, Gold: 10000)",
-    "SLA targets are defined per tier and configured in Azure Monitor",
-    "API documentation is auto-generated from OpenAPI spec and published to Developer Portal",
-    "Partner registers on Developer Portal and subscribes to appropriate product tier",
-    "Subscription keys are issued and partner completes sandbox testing",
-    "API usage metrics track consumption against SLA and trigger alerts on threshold breach"
-  ],
-  "securityConsiderations": [
-    "Developer Portal must require Azure AD B2C authentication for all access",
-    "API subscription keys must have configurable expiry and rotation policies",
-    "Sandbox and production environments must be completely isolated",
-    "API documentation must not expose internal implementation details or infrastructure information",
-    "Partner access must be revocable immediately in case of security incident"
   ],
   "guardrails": [
     {
@@ -79,6 +61,8 @@
       "severity": "Recommended"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": null,
   "composition": [
     {
       "patternId": "AP-001",
@@ -91,12 +75,8 @@
       "relationship": "May expose"
     }
   ],
-  "implementationAssets": {
-    "ccoeRunbook": "api-productization-onboarding-guide-v0.8",
-    "configExample": "api-product-order-mgmt-v0.8.yaml",
-    "terraformModule": "github.com/mccain/terraform-azure-api-products"
-  },
-  "exceptionProcess": "Submit Digital Platform Team request for APIs consumed externally without API Product packaging. Must include documentation plan, SLA commitment, and partner onboarding process.",
+  "lastReviewed": "2026-03-01",
+  "ccoeCertified": "No",
   "revisionHistory": [
     {
       "date": "2026-03-01",
@@ -105,11 +85,30 @@
       "version": "0.8"
     }
   ],
+  "strategicIntent": "Package internal APIs as managed products with defined SLAs, comprehensive documentation, tiered access plans, and self-service developer onboarding to accelerate partner integration and internal API reuse across McCain's digital ecosystem.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Digital Platform Team request for APIs consumed externally without API Product packaging. Must include documentation plan, SLA commitment, and partner onboarding process.",
+  "interactionSteps": [
+    "API team publishes OpenAPI spec and creates API Product in API Management",
+    "Product is configured with access tiers (Bronze: 100 req/min, Silver: 1000, Gold: 10000)",
+    "SLA targets are defined per tier and configured in Azure Monitor",
+    "API documentation is auto-generated from OpenAPI spec and published to Developer Portal",
+    "Partner registers on Developer Portal and subscribes to appropriate product tier",
+    "Subscription keys are issued and partner completes sandbox testing",
+    "API usage metrics track consumption against SLA and trigger alerts on threshold breach"
+  ],
+  "problemStatement": "Internal APIs are built as point solutions without documentation, SLAs, or onboarding processes. Partners and internal teams spend weeks discovering, understanding, and gaining access to APIs, slowing time-to-market for new integrations and digital products.",
   "submissionSource": null,
-  "diagramSvg": null,
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-15T01:08:22.427Z",
-  "level": "Conceptual"
+  "implementationAssets": {
+    "ccoeRunbook": "api-productization-onboarding-guide-v0.8",
+    "configExample": "api-product-order-mgmt-v0.8.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-api-products"
+  },
+  "securityConsiderations": [
+    "Developer Portal must require Azure AD B2C authentication for all access",
+    "API subscription keys must have configurable expiry and rotation policies",
+    "Sandbox and production environments must be completely isolated",
+    "API documentation must not expose internal implementation details or infrastructure information",
+    "Partner access must be revocable immediately in case of security incident"
+  ]
 }
