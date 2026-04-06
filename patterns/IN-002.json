@@ -1,19 +1,12 @@
 {
-  "id": 15,
-  "patternId": "IN-002",
+  "type": "pattern",
   "name": "Connector Isolation & Throttling",
-  "domain": "Application & Integration",
   "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Raj Patel",
+  "domain": "Application & Integration",
   "status": "Endorsed",
   "version": "1.1",
-  "owner": "Raj Patel",
-  "approvers": "Integration Architecture Board, Platform Engineering",
-  "lastReviewed": "2025-10-20",
-  "ccoeCertified": "Yes",
-  "ccoeCertRef": "CCOE-IN-2025-002",
-  "leanixRef": "LX-5809",
-  "strategicIntent": "Enforce connector-level rate-limiting, backpressure, and failover patterns to protect both internal systems and external partners from traffic spikes, cascading failures, and resource exhaustion.",
-  "problemStatement": "Integration connectors without throttling controls allow traffic spikes from one system to overwhelm downstream targets, causing cascading failures across the integration layer. A single misbehaving connector can degrade the entire integration platform.",
   "useCases": [
     {
       "use": "SAP RFC connectors that must respect legacy system concurrency limits",
@@ -28,6 +21,11 @@
       "dontUse": "Azure-native service integrations with auto-scaling capabilities"
     }
   ],
+  "approvers": "Integration Architecture Board, Platform Engineering",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": "LX-5809",
+  "patternId": "IN-002",
+  "updatedAt": "2026-03-15T01:08:22.427Z",
   "components": [
     "Azure Service Bus — request buffering with session-based ordering",
     "Azure API Management — connector-level rate-limiting and quota policies",
@@ -35,22 +33,6 @@
     "Azure Cache for Redis — token bucket / sliding window rate-limiter state",
     "Azure Monitor — throttling metrics, connector health scores, and alerting",
     "Azure Traffic Manager — connector failover routing to standby instances"
-  ],
-  "interactionSteps": [
-    "Inbound request arrives at connector endpoint via API Management",
-    "Rate-limiter checks Redis-backed token bucket for connector-specific quota",
-    "If within quota, request is forwarded to connector for processing",
-    "If quota exceeded, request is buffered in Service Bus for deferred processing",
-    "Backpressure orchestrator (Durable Functions) processes buffered requests at safe rate",
-    "If connector fails health check, Traffic Manager routes to standby connector instance",
-    "Azure Monitor tracks throttling rate, queue depth, and connector response times"
-  ],
-  "securityConsiderations": [
-    "Rate-limiter state in Redis must be protected with authentication and encryption in transit",
-    "Buffered requests in Service Bus must retain original authentication context",
-    "Connector failover must not bypass security controls applied to the primary instance",
-    "Throttling configurations must be protected from unauthorized modification",
-    "All throttling events must be logged for security audit and capacity planning"
   ],
   "guardrails": [
     {
@@ -79,6 +61,8 @@
       "severity": "Recommended"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-IN-2025-002",
   "composition": [
     {
       "patternId": "AP-006",
@@ -91,12 +75,8 @@
       "relationship": "Protects"
     }
   ],
-  "implementationAssets": {
-    "ccoeRunbook": "connector-isolation-operations-v1.1",
-    "configExample": "connector-throttling-sap-v1.1.yaml",
-    "terraformModule": "github.com/mccain/terraform-azure-connector-throttling"
-  },
-  "exceptionProcess": "Submit Integration Architecture Board request for connectors without throttling. Must include downstream system capacity analysis and peak load testing results demonstrating no degradation risk.",
+  "lastReviewed": "2025-10-20",
+  "ccoeCertified": "Yes",
   "revisionHistory": [
     {
       "date": "2025-05-15",
@@ -111,11 +91,30 @@
       "version": "1.1"
     }
   ],
+  "strategicIntent": "Enforce connector-level rate-limiting, backpressure, and failover patterns to protect both internal systems and external partners from traffic spikes, cascading failures, and resource exhaustion.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Integration Architecture Board request for connectors without throttling. Must include downstream system capacity analysis and peak load testing results demonstrating no degradation risk.",
+  "interactionSteps": [
+    "Inbound request arrives at connector endpoint via API Management",
+    "Rate-limiter checks Redis-backed token bucket for connector-specific quota",
+    "If within quota, request is forwarded to connector for processing",
+    "If quota exceeded, request is buffered in Service Bus for deferred processing",
+    "Backpressure orchestrator (Durable Functions) processes buffered requests at safe rate",
+    "If connector fails health check, Traffic Manager routes to standby connector instance",
+    "Azure Monitor tracks throttling rate, queue depth, and connector response times"
+  ],
+  "problemStatement": "Integration connectors without throttling controls allow traffic spikes from one system to overwhelm downstream targets, causing cascading failures across the integration layer. A single misbehaving connector can degrade the entire integration platform.",
   "submissionSource": null,
-  "diagramSvg": null,
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-15T01:08:22.427Z",
-  "level": "Logical"
+  "implementationAssets": {
+    "ccoeRunbook": "connector-isolation-operations-v1.1",
+    "configExample": "connector-throttling-sap-v1.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-connector-throttling"
+  },
+  "securityConsiderations": [
+    "Rate-limiter state in Redis must be protected with authentication and encryption in transit",
+    "Buffered requests in Service Bus must retain original authentication context",
+    "Connector failover must not bypass security controls applied to the primary instance",
+    "Throttling configurations must be protected from unauthorized modification",
+    "All throttling events must be logged for security audit and capacity planning"
+  ]
 }
