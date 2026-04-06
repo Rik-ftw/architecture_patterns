@@ -1,19 +1,12 @@
 {
-  "id": 14,
-  "patternId": "IN-001",
+  "type": "pattern",
   "name": "Enterprise Service Bus (Logical)",
-  "domain": "Application & Integration",
   "tier": "Layer 3 — Conceptual",
+  "level": "Conceptual",
+  "owner": "Priya Sharma",
+  "domain": "Application & Integration",
   "status": "Endorsed",
   "version": "1.4",
-  "owner": "Priya Sharma",
-  "approvers": "Integration Architecture Board, Enterprise Architecture",
-  "lastReviewed": "2025-11-01",
-  "ccoeCertified": "Yes",
-  "ccoeCertRef": "CCOE-IN-2025-001",
-  "leanixRef": "LX-5708",
-  "strategicIntent": "Define a logical enterprise service bus layer for complex multi-system orchestrations, canonical data model enforcement, and protocol mediation across McCain's ERP, CRM, supply chain, and manufacturing ecosystems.",
-  "problemStatement": "McCain's enterprise landscape includes 200+ applications across SAP, Salesforce, factory MES systems, and logistics platforms. Without a logical integration backbone, each point-to-point integration creates exponential complexity, inconsistent data formats, and ungoverned data flows.",
   "useCases": [
     {
       "use": "Multi-step order-to-cash orchestrations spanning SAP, Salesforce, and logistics",
@@ -28,6 +21,11 @@
       "dontUse": "Intra-cluster microservice communication handled by service mesh"
     }
   ],
+  "approvers": "Integration Architecture Board, Enterprise Architecture",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": "LX-5708",
+  "patternId": "IN-001",
+  "updatedAt": "2026-03-15T01:08:22.427Z",
   "components": [
     "Azure Integration Services — Logic Apps, Service Bus, API Management, Event Grid",
     "Azure Logic Apps — orchestration workflows with enterprise connectors",
@@ -35,22 +33,6 @@
     "Canonical Data Model library — standardized schemas for order, product, customer, plant entities",
     "Azure Data Factory — batch integration and data movement pipelines",
     "Azure Monitor — integration flow monitoring, SLA tracking, and alerting"
-  ],
-  "interactionSteps": [
-    "Source system publishes business event or sends message to ESB ingress (Service Bus topic)",
-    "Logic App orchestrator picks up message and applies canonical data model transformation",
-    "Orchestrator routes transformed message to target system(s) based on content-based routing rules",
-    "Protocol mediation layer converts between SOAP/REST/file-based formats as needed",
-    "Target system confirms receipt; orchestrator updates flow state and audit log",
-    "Failed deliveries are routed to DLQ with alerting for integration operations team",
-    "Azure Monitor tracks end-to-end flow latency, success rates, and SLA compliance"
-  ],
-  "securityConsiderations": [
-    "All ESB message payloads must be encrypted in transit and at rest",
-    "Integration flows handling PII must comply with data residency requirements per region",
-    "Service Bus namespaces must use managed identity authentication, not shared access keys",
-    "Logic App connectors to external systems must store credentials in Key Vault",
-    "Audit logs for all integration flows must be retained for compliance (minimum 1 year)"
   ],
   "guardrails": [
     {
@@ -79,6 +61,8 @@
       "severity": "Required"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-IN-2025-001",
   "composition": [
     {
       "patternId": "AP-004",
@@ -91,12 +75,8 @@
       "relationship": "Exposes via"
     }
   ],
-  "implementationAssets": {
-    "ccoeRunbook": "esb-operations-runbook-v1.4",
-    "configExample": "esb-order-to-cash-flow-v1.4.yaml",
-    "terraformModule": "github.com/mccain/terraform-azure-integration-services"
-  },
-  "exceptionProcess": "Submit Integration Architecture Board request for point-to-point integrations bypassing the ESB layer. Must include integration complexity analysis and governance plan for ongoing maintenance.",
+  "lastReviewed": "2025-11-01",
+  "ccoeCertified": "Yes",
   "revisionHistory": [
     {
       "date": "2025-01-15",
@@ -117,11 +97,30 @@
       "version": "1.4"
     }
   ],
+  "strategicIntent": "Define a logical enterprise service bus layer for complex multi-system orchestrations, canonical data model enforcement, and protocol mediation across McCain's ERP, CRM, supply chain, and manufacturing ecosystems.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Integration Architecture Board request for point-to-point integrations bypassing the ESB layer. Must include integration complexity analysis and governance plan for ongoing maintenance.",
+  "interactionSteps": [
+    "Source system publishes business event or sends message to ESB ingress (Service Bus topic)",
+    "Logic App orchestrator picks up message and applies canonical data model transformation",
+    "Orchestrator routes transformed message to target system(s) based on content-based routing rules",
+    "Protocol mediation layer converts between SOAP/REST/file-based formats as needed",
+    "Target system confirms receipt; orchestrator updates flow state and audit log",
+    "Failed deliveries are routed to DLQ with alerting for integration operations team",
+    "Azure Monitor tracks end-to-end flow latency, success rates, and SLA compliance"
+  ],
+  "problemStatement": "McCain's enterprise landscape includes 200+ applications across SAP, Salesforce, factory MES systems, and logistics platforms. Without a logical integration backbone, each point-to-point integration creates exponential complexity, inconsistent data formats, and ungoverned data flows.",
   "submissionSource": null,
-  "diagramSvg": null,
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-15T01:08:22.427Z",
-  "level": "Conceptual"
+  "implementationAssets": {
+    "ccoeRunbook": "esb-operations-runbook-v1.4",
+    "configExample": "esb-order-to-cash-flow-v1.4.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-integration-services"
+  },
+  "securityConsiderations": [
+    "All ESB message payloads must be encrypted in transit and at rest",
+    "Integration flows handling PII must comply with data residency requirements per region",
+    "Service Bus namespaces must use managed identity authentication, not shared access keys",
+    "Logic App connectors to external systems must store credentials in Key Vault",
+    "Audit logs for all integration flows must be retained for compliance (minimum 1 year)"
+  ]
 }
