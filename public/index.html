@@ -1744,11 +1744,11 @@ async function generateJiraEpics(solutionId) {
     if (col) {
       const genDiv = document.createElement('div');
       genDiv.className = 'jira-panel';
-      genDiv.innerHTML = `<div class="jira-generating"><div class="jira-spin"></div><span>Claude is analysing your solution and generating Epics & Stories…</span></div>`;
+      genDiv.innerHTML = `<div class="jira-generating"><div class="jira-spin"></div><span>AI is analysing your solution and generating Epics & Stories…</span></div>`;
       col.appendChild(genDiv);
     }
   } else {
-    existingPanel.innerHTML = `<div class="jira-generating"><div class="jira-spin"></div><span>Claude is analysing your solution and generating Epics & Stories…</span></div>`;
+    existingPanel.innerHTML = `<div class="jira-generating"><div class="jira-spin"></div><span>AI is analysing your solution and generating Epics & Stories…</span></div>`;
   }
 
   try {
@@ -2125,10 +2125,10 @@ async function showIntakeDetail(id) {
   ${r.deviates_from_patterns?`<div class="section-card"><h3>Pattern Deviation</h3><div class="alert alert-warning" style="margin-bottom:0">⚠ Deviates from established patterns.${r.deviation_justification?' Justification: '+r.deviation_justification:''}</div></div>`:''}
   ${r.reviewer_notes?`<div class="section-card"><h3>Reviewer Notes</h3><p class="text-sm">${r.reviewer_notes}</p><p class="text-xs text-muted mt-1">— ${r.reviewer_name||'Reviewer'}, ${fmtDate(r.reviewed_at)}</p></div>`:''}
   ${r.comments&&r.comments.length?`<div class="section-card"><h3>Comments (${r.comments.length})</h3>${r.comments.map(c=>`<div class="comment-box"><div class="flex justify-between items-center"><div><span class="comment-author">${c.author}</span>${c.role?` <span class="comment-role">· ${c.role}</span>`:''}</div><span class="comment-time">${fmtDate(c.created_at)}</span></div><p class="text-sm mt-1">${c.comment}</p></div>`).join('')}</div>`:''}
-  <div id="diagram-panel">${r.aiDiagram?`<div class="diagram-panel" id="diagram-card"><h3>⬡ Architecture Diagram <span style="font-size:.6rem;opacity:.55;margin-left:.3rem;font-weight:400">${r.aiDiagram.title||''}</span></h3><div class="diagram-canvas" id="diagram-canvas">Rendering…</div>${r.aiDiagram.legend?`<div class="diagram-legend">${r.aiDiagram.legend}</div>`:''}<div class="diagram-meta">Generated ${r.aiDiagram.generatedAt?new Date(r.aiDiagram.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${r.aiDiagram.model||''}</div></div>`:`<div class="diagram-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#60a5fa;margin-bottom:.25rem">Architecture Diagram</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Claude will generate a layered architecture diagram from your request details — components, data flows, security zones, and vendor integrations.</p><button class="btn btn-sm" style="background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ Generate Architecture Diagram</button></div>`}</div>
+  <div id="diagram-panel">${r.aiDiagram?`<div class="diagram-panel" id="diagram-card"><h3>⬡ Architecture Diagram <span style="font-size:.6rem;opacity:.55;margin-left:.3rem;font-weight:400">${r.aiDiagram.title||''}</span></h3><div class="diagram-canvas" id="diagram-canvas">Rendering…</div>${r.aiDiagram.legend?`<div class="diagram-legend">${r.aiDiagram.legend}</div>`:''}<div class="diagram-meta">Generated ${r.aiDiagram.generatedAt?new Date(r.aiDiagram.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):''} · ${r.aiDiagram.model||''}</div></div>`:`<div class="diagram-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#60a5fa;margin-bottom:.25rem">Architecture Diagram</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">AI will generate a layered architecture diagram from your request details — components, data flows, security zones, and vendor integrations.</p><button class="btn btn-sm" style="background:rgba(96,165,250,.15);color:#60a5fa;border:1px solid rgba(96,165,250,.3)" onclick="generateDiagram('${r.id}','${r.reference_id}')">⬡ Generate Architecture Diagram</button></div>`}</div>
   </div>
   <div>
-    <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">Claude AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Claude will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
+    <div id="ai-review-panel">${r.aiReview?renderAIPanel(r.aiReview):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">✦</div><div style="font-size:.82rem;font-weight:700;color:#a78bfa;margin-bottom:.3rem">AI Architecture Review</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">AI will review pattern alignment, security posture, architecture quality, and provide expert recommendations specific to your request.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="generateAIReview('${r.id}','${r.reference_id}')">✦ Generate AI Review</button></div>`}</div>
     <div id="iac-panel">${r.iacCode?renderIaCPanel(r.iacCode,'intake',r.id,r.reference_id):`<div class="iac-panel" style="text-align:center;padding:1.3rem 1rem"><div style="font-size:1.4rem;margin-bottom:.4rem">⬡</div><div style="font-size:.82rem;font-weight:700;color:#4ade80;margin-bottom:.25rem">Terraform IaC</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.8rem">Generate production-grade Terraform code for this architecture — providers, resources, variables, outputs, and a cost-estimated README.</p><button class="btn btn-sm" style="background:rgba(74,222,128,.12);color:#4ade80;border:1px solid rgba(74,222,128,.3)" onclick="generateIntakeIaC('${r.id}','${r.reference_id}')">⬡ Generate IaC</button></div>`}</div>
     <div id="triage-panel">${r.triageResult?renderTriagePanel(r.triageResult,r.triageRoutingLane,r.triageCompositeScore,r.triageRiskTier,r.triageCompletedAt):`<div class="ai-panel" style="text-align:center;padding:1.4rem 1rem"><div style="font-size:1.5rem;margin-bottom:.5rem">⚡</div><div style="font-size:.82rem;font-weight:700;color:#fbbf24;margin-bottom:.3rem">AI Triage Pipeline</div><p class="text-xs text-muted" style="line-height:1.6;margin-bottom:.9rem">Run the 7-stage LangChain triage pipeline — completeness check, classification, pattern matching, vendor analysis, risk scoring, routing decision, and executive summary.</p><button class="btn btn-sm" style="background:rgba(251,191,36,.15);color:#fbbf24;border:1px solid rgba(251,191,36,.35)" onclick="runAITriage('${r.id}','${r.reference_id}')">⚡ Run AI Triage</button></div>`}</div>
     ${r.risk_tier&&r.riskBreakdown?renderRiskDeepDive(r):''}
@@ -2256,7 +2256,7 @@ function renderDocUploadPanel() {
   const files = S._docFiles || [];
   let h = `<div class="doc-upload-panel">
     <h3>📄 Upload Documents <span style="font-weight:400;font-size:.68rem;color:var(--muted);text-transform:none;letter-spacing:0">— optional, auto-fills the form</span></h3>
-    <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.55">Upload project documents, architecture specs, code files, or a zipped repo. Claude will extract architecture information and pre-fill the form fields.</p>
+    <p class="text-xs text-muted" style="margin-bottom:.8rem;line-height:1.55">Upload project documents, architecture specs, code files, or a zipped repo. AI will extract architecture information and pre-fill the form fields.</p>
     <div class="drop-zone" id="doc-drop-zone" onclick="document.getElementById('doc-file-input').click()">
       <input type="file" id="doc-file-input" multiple accept=".pdf,.docx,.txt,.zip,.js,.ts,.jsx,.tsx,.py,.java,.cs,.go,.rb,.yaml,.yml,.json,.xml,.sh,.tf,.md" style="display:none" onchange="docFilesSelected(this.files)"/>
       <div class="drop-zone-icon">📂</div>
@@ -2318,7 +2318,7 @@ async function docParseFiles() {
   const statusEl = document.getElementById('doc-status');
   const btn = document.getElementById('doc-parse-btn');
   if (btn) btn.disabled = true;
-  if (statusEl) statusEl.innerHTML = `<div class="doc-parse-progress"><div class="doc-parse-spin"></div>Extracting text and analysing with Claude — this may take 15–30 seconds…</div>`;
+  if (statusEl) statusEl.innerHTML = `<div class="doc-parse-progress"><div class="doc-parse-spin"></div>Extracting text and analysing with AI — this may take 15–30 seconds…</div>`;
 
   try {
     const formData = new FormData();
@@ -2448,7 +2448,7 @@ function renderWizardStep(step){
       </div><div>
         ${risk.tier==='Critical'?`<div class="alert alert-danger">⚠ Critical risk — Architecture Board and CISO review mandatory before any implementation.</div>`:''}
         ${risk.tier==='High'?`<div class="alert alert-warning">⚠ High risk — Architecture Board review required for approval.</div>`:''}
-        <div id="quick-ai-box"><div class="ai-panel" style="text-align:center;padding:1.2rem .9rem"><div style="font-size:1.2rem;margin-bottom:.35rem">✦</div><div style="font-size:.8rem;font-weight:700;color:#a78bfa;margin-bottom:.25rem">Claude Quick Scan</div><p class="text-xs text-muted" style="margin-bottom:.7rem">Get an instant AI perspective on your architecture before submitting.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="runQuickAIAssess(S.wizardData)">✦ Run Quick Scan</button></div></div>
+        <div id="quick-ai-box"><div class="ai-panel" style="text-align:center;padding:1.2rem .9rem"><div style="font-size:1.2rem;margin-bottom:.35rem">✦</div><div style="font-size:.8rem;font-weight:700;color:#a78bfa;margin-bottom:.25rem">AI Quick Scan</div><p class="text-xs text-muted" style="margin-bottom:.7rem">Get an instant AI perspective on your architecture before submitting.</p><button class="btn btn-sm" style="background:rgba(124,92,191,.2);color:#a78bfa;border:1px solid rgba(124,92,191,.4)" onclick="runQuickAIAssess(S.wizardData)">✦ Run Quick Scan</button></div></div>
         ${risk.flags.length?`<div class="section-card mt-2"><h3>Risk Flags</h3><ul class="flags-list">${risk.flags.map(f=>`<li>${f}</li>`).join('')}</ul></div>`:''}
         ${risk.recommendations.length?`<div class="section-card mt-2"><h3>Recommendations</h3><ul class="recs-list">${risk.recommendations.map(r=>`<li>${r}</li>`).join('')}</ul></div>`:''}
       </div></div>
@@ -3660,7 +3660,7 @@ function renderRiskPanel(score,tier,breakdown,flags,recs){
 async function generateAIReview(intakeId, refId) {
   const panel = document.getElementById('ai-review-panel');
   const btn = document.getElementById('ai-review-btn');
-  if (panel) panel.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> Claude is reviewing the architecture request… this takes 15–30 seconds</div>`;
+  if (panel) panel.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> AI is reviewing the architecture request… this takes 15–30 seconds</div>`;
   if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
   try {
     const r = await api.post(`/api/ai/review/${intakeId}`, {});
@@ -3894,7 +3894,7 @@ function renderAIPanel(review) {
   const risks = (review.keyRisks || []).sort((a,b) => sevOrder.indexOf(a.severity) - sevOrder.indexOf(b.severity));
 
   let h = `<div class="ai-panel">
-    <h3>✦ Claude AI Architecture Review <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">claude-sonnet-4-5 · ${review.generatedAt ? new Date(review.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</span></h3>
+    <h3>✦ AI Architecture Review <span style="font-size:.62rem;opacity:.6;margin-left:.4rem">claude-sonnet-4-5 · ${review.generatedAt ? new Date(review.generatedAt).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</span></h3>
     <div class="flex gap-2 items-center" style="margin-bottom:.9rem;flex-wrap:wrap">
       <span class="ai-badge ${ratingClass}">${ratingIcon} ${review.overallRating}</span>
       ${review.reviewComplexity ? `<span class="badge" style="background:rgba(124,92,191,.15);color:#a78bfa;border:1px solid rgba(124,92,191,.3)">${review.reviewComplexity} Review</span>` : ''}
@@ -3997,13 +3997,13 @@ function renderAIPanel(review) {
 async function runQuickAIAssess(wizardData) {
   const box = document.getElementById('quick-ai-box');
   if (!box) return;
-  box.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> Claude is scanning for quick insights…</div>`;
+  box.innerHTML = `<div class="ai-generating"><span class="ai-spin"></span> AI is scanning for quick insights…</div>`;
   try {
     const r = await api.post('/api/ai/quick-assess', wizardData);
     const ratingColors = { 'Low Concern': '#2ecc71', 'Review Needed': '#f39c12', 'Significant Gaps': '#e67e22', 'Major Issues': '#e74c3c' };
     const col = ratingColors[r.quickRating] || '#a78bfa';
     box.innerHTML = `<div class="quick-ai-box">
-      <div class="qa-rating" style="color:${col}">✦ Claude Quick Scan — ${r.quickRating}</div>
+      <div class="qa-rating" style="color:${col}">✦ AI Quick Scan — ${r.quickRating}</div>
       <div class="qa-headline">${r.headline || ''}</div>
       ${r.topConcerns?.length ? `<div class="tag-list" style="margin-bottom:.5rem">${r.topConcerns.map(c => `<span class="badge badge-review" style="font-size:.7rem">⚠ ${c}</span>`).join('')}</div>` : ''}
       ${r.suggestedPatterns?.length ? `<div class="tag-list" style="margin-bottom:.5rem">${r.suggestedPatterns.map(p => `<span class="badge badge-endorsed" style="font-size:.7rem">→ ${p}</span>`).join('')}</div>` : ''}
@@ -4051,7 +4051,7 @@ async function mountDiagram(code, canvasId) {
 async function generateDiagram(intakeId, refId) {
   const panel = document.getElementById('diagram-panel');
   const btn = document.getElementById('diagram-btn');
-  if (panel) panel.innerHTML = `<div class="diagram-panel"><div class="diagram-generating"><span class="diagram-spin"></span> Claude is generating the architecture diagram… this takes 15–25 seconds</div></div>`;
+  if (panel) panel.innerHTML = `<div class="diagram-panel"><div class="diagram-generating"><span class="diagram-spin"></span> AI is generating the architecture diagram… this takes 15–25 seconds</div></div>`;
   if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
   try {
     const r = await api.post(`/api/ai/diagram/${intakeId}`, {});
@@ -4161,7 +4161,7 @@ async function iacPushToGitHub(btn, pathPrefix, cacheKey, label) {
 
 async function generatePatternIaC(patternId) {
   const panel = document.getElementById('pattern-iac-panel');
-  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for pattern ${patternId}… this takes 20–30 seconds</div></div>`;
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> AI is generating Terraform IaC for pattern ${patternId}… this takes 20–30 seconds</div></div>`;
   try {
     const r = await api.post(`/api/iac/pattern/${patternId}`, {});
     const iac = r.iac || r;
@@ -4174,7 +4174,7 @@ async function generatePatternIaC(patternId) {
 async function generateIntakeIaC(intakeId, refId) {
   const btn = document.getElementById('iac-btn');
   const panel = document.getElementById('iac-panel');
-  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> AI is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
   if (btn) { btn.disabled = true; btn.textContent = '⟳ Generating…'; }
   try {
     const r = await api.post(`/api/iac/intake/${intakeId}`, {});
@@ -4191,7 +4191,7 @@ async function generateIntakeIaC(intakeId, refId) {
 
 async function generateSolutionIaC(solutionId, refId) {
   const panel = document.getElementById('solution-iac-panel');
-  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> Claude is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
+  if (panel) panel.innerHTML = `<div class="iac-panel"><div class="iac-generating"><span class="iac-spin"></span> AI is generating Terraform IaC for ${refId}… this takes 20–30 seconds</div></div>`;
   try {
     const r = await api.post(`/api/iac/solution/${solutionId}`, {});
     const iac = r.iac || r;
