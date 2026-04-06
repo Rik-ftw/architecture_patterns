@@ -38,10 +38,10 @@ function loadVendors() {
   try { return JSON.parse(fs.readFileSync(vendorRegistryFile, 'utf8')); } catch { return []; }
 }
 
-function httpsGet(url, headers = {}) {
+function httpsGet(url, headers = {}, timeoutMs = 9000) {
   return new Promise((resolve, reject) => {
     const opts = Object.assign({ headers: { 'User-Agent': 'McCain-EA-Platform/1.0', ...headers } }, require('url').parse(url));
-    https.get(opts, res => {
+    const req = https.get(opts, res => {
       let data = '';
       res.on('data', d => { data += d; });
       res.on('end', () => {
@@ -49,6 +49,11 @@ function httpsGet(url, headers = {}) {
         catch { resolve({ status: res.statusCode, body: data }); }
       });
     }).on('error', reject);
+    const timer = setTimeout(() => {
+      req.destroy();
+      reject(new Error(`httpsGet timeout after ${timeoutMs}ms: ${url}`));
+    }, timeoutMs);
+    req.on('close', () => clearTimeout(timer));
   });
 }
 
@@ -129,7 +134,8 @@ async function fetchNvdData(keyword) {
     saveNvdDiskCache();
     return data;
   } catch (err) {
-    return { keyword, cveCount: 0, highestCvss: 0, severity: 'None', topCves: [], error: err.message };
+    const timedOut = !!(err.message && err.message.includes('httpsGet timeout'));
+    return { keyword, cveCount: 0, highestCvss: 0, severity: 'None', topCves: [], error: err.message, timedOut };
   }
 }
 
@@ -336,17 +342,49 @@ router.post('/cvss', async (req, res) => {
     return res.status(503).json({ error: 'nvd_key_missing' });
   }
   const unique = [...new Set(technologies.map(t => t.trim()).filter(Boolean))].slice(0, 15);
+  const MASTER_TIMEOUT_MS = 20000;
   try {
-    const results = await Promise.all(unique.map(t => fetchNvdData(t)));
+    const settled = new Array(unique.length).fill(null);
+    const promises = unique.map((t, i) =>
+      fetchNvdData(t).then(
+        result => { settled[i] = result; return result; },
+        () => {
+          const fallback = { keyword: t, cveCount: 0, highestCvss: 0, severity: 'None', topCves: [], timedOut: true };
+          settled[i] = fallback;
+          return fallback;
+        }
+      )
+    );
+
+    let timedOut = false;
+    let masterTimer;
+    const masterTimeout = new Promise(resolve => {
+      masterTimer = setTimeout(() => { timedOut = true; resolve('timeout'); }, MASTER_TIMEOUT_MS);
+    });
+
+    await Promise.race([Promise.all(promises).finally(() => clearTimeout(masterTimer)), masterTimeout]);
+
+    const results = unique.map((t, i) =>
+      settled[i] || { keyword: t, cveCount: 0, highestCvss: 0, severity: 'None', topCves: [], timedOut: true }
+    );
+
+    if (results.every(r => r.timedOut || r.error)) {
+      const allTimedOut = results.every(r => r.timedOut);
+      const msg = allTimedOut
+        ? 'CVE lookup timed out — NVD API did not respond in time'
+        : 'All CVE lookups failed — NVD API may be unavailable';
+      return res.status(503).json({ error: msg });
+    }
+
     const criticalCount = results.filter(r => r.severity === 'Critical').length;
     const highCount = results.filter(r => r.severity === 'High').length;
     let overallRisk = 'Low';
     if (criticalCount > 0) overallRisk = 'Critical';
     else if (highCount >= 2) overallRisk = 'High';
     else if (highCount >= 1) overallRisk = 'Medium';
-    res.json({ results, overallRisk, criticalCount, highCount });
+    res.json({ results, overallRisk, criticalCount, highCount, partial: timedOut });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(503).json({ error: err.message });
   }
 });
 

@@ -3449,16 +3449,20 @@ async function loadScaPanel(r) {
       <div class="sca-summary-stat"><div class="sca-summary-stat-val" style="color:var(--risk-high)">${result.highCount||0}</div><div class="sca-summary-stat-label">High CVE Tech</div></div>
       <div class="sca-summary-stat"><div class="sca-summary-stat-val">${technologies.length}</div><div class="sca-summary-stat-label">Technologies</div></div>
     </div>`;
+    if (result.partial) {
+      h += `<div class="alert alert-warning" style="margin-bottom:.6rem">⚠ NVD API was slow — some lookups timed out. Showing partial results; rows marked "Lookup timed out" may be incomplete.</div>`;
+    }
     h += `<div class="table-wrap"><table class="tech-table"><thead><tr><th>Technology</th><th>CVE Count</th><th>Highest CVSS</th><th>Severity</th><th>Top CVEs</th></tr></thead><tbody>`;
     (result.results || []).forEach(tech => {
       const sc = sevColor[tech.severity] || 'var(--muted)';
       const cveLinks = (tech.topCves || []).slice(0,3).map(c => `<a class="cve-link" href="${c.url}" target="_blank" title="${c.description}">${c.id}</a>`).join(' ');
+      const topCveCell = tech.timedOut ? '<span class="text-muted text-xs">Lookup timed out</span>' : tech.error ? '<span class="text-muted text-xs">Lookup failed</span>' : (cveLinks||'<span class="text-muted text-xs">None found</span>');
       h += `<tr>
         <td><strong>${tech.keyword}</strong></td>
         <td>${tech.cveCount||0}</td>
         <td style="font-weight:700;color:${sc}">${tech.highestCvss||'–'}</td>
         <td><span class="badge badge-${tech.severity==='Critical'?'critical':tech.severity==='High'?'high':tech.severity==='Medium'?'medium':tech.severity==='Low'?'low':'draft'}">${tech.severity}</span></td>
-        <td>${cveLinks||'<span class="text-muted text-xs">None found</span>'}</td>
+        <td>${topCveCell}</td>
       </tr>`;
     });
     h += `</tbody></table></div>`;
