@@ -1,19 +1,12 @@
 {
-  "id": 10,
-  "patternId": "AP-004",
+  "type": "pattern",
   "name": "Event-Driven Integration",
-  "domain": "Application & Integration",
   "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "David Okonkwo",
+  "domain": "Application & Integration",
   "status": "Endorsed",
   "version": "2.0",
-  "owner": "David Okonkwo",
-  "approvers": "Integration Architecture Board, Sarah Chen",
-  "lastReviewed": "2026-02-01",
-  "ccoeCertified": "Yes",
-  "ccoeCertRef": "CCOE-AP-2025-004",
-  "leanixRef": "LX-5405",
-  "strategicIntent": "Establish a publish/subscribe event-driven architecture with durable messaging, dead-letter queues, and idempotency guarantees to decouple services and enable real-time data flows across McCain's supply chain and manufacturing systems.",
-  "problemStatement": "Point-to-point synchronous integrations between supply chain, ERP, and manufacturing systems create tight coupling, cascading failures during peak order periods, and inability to process events at different rates across global regions.",
   "useCases": [
     {
       "use": "Real-time inventory updates from factory MES systems to central ERP",
@@ -28,28 +21,17 @@
       "dontUse": "Human-initiated CRUD operations on master data with immediate consistency needs"
     }
   ],
+  "approvers": "Integration Architecture Board, Sarah Chen",
+  "createdAt": "2026-03-15T01:08:22.427Z",
+  "leanixRef": "LX-5405",
+  "patternId": "AP-004",
+  "updatedAt": "2026-03-25T14:13:54.588Z",
   "components": [
     "Azure Event Hubs — high-throughput event ingestion with partitioned consumers",
     "Azure Service Bus — enterprise messaging with topics, sessions, and DLQ",
     "Azure Functions — event processors and subscriber handlers",
     "Azure Event Grid — system event routing and webhook delivery",
     "Azure Cosmos DB — event store for idempotency tracking and replay"
-  ],
-  "interactionSteps": [
-    "Producer publishes domain event with unique correlation ID to Event Hubs or Service Bus topic",
-    "Event Hubs partitions events by key (e.g., plant code or order ID) for ordered processing",
-    "Consumer groups process events independently at their own rate",
-    "Subscriber checks idempotency store in Cosmos DB before processing to prevent duplicates",
-    "Failed events are routed to Dead Letter Queue after configurable retry attempts",
-    "DLQ monitor Azure Function alerts operations team and enables manual replay",
-    "Event Grid publishes system lifecycle events for infrastructure automation"
-  ],
-  "securityConsiderations": [
-    "All event payloads containing PII must be encrypted at the field level before publishing",
-    "Event Hub and Service Bus connections must use managed identity, not connection strings",
-    "Dead Letter Queues must have restricted access — only operations team can read/replay",
-    "Event schemas must be registered in a schema registry to prevent breaking changes",
-    "Consumer applications must validate event schema version before processing"
   ],
   "guardrails": [
     {
@@ -78,6 +60,8 @@
       "severity": "Recommended"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-AP-2025-004",
   "composition": [
     {
       "patternId": "AP-005",
@@ -90,13 +74,8 @@
       "relationship": "Uses"
     }
   ],
-  "implementationAssets": {
-    "azurePolicy": "Require-Managed-Identity-EventHub",
-    "ccoeRunbook": "event-driven-operations-runbook-v2.0",
-    "configExample": "event-driven-config-v2.0.yaml",
-    "terraformModule": "github.com/mccain/terraform-azure-event-driven"
-  },
-  "exceptionProcess": "Submit Integration Architecture Board request for synchronous integration exceptions. Must include failure mode analysis, SLA impact assessment, and compensating retry strategy.",
+  "lastReviewed": "2026-02-01",
+  "ccoeCertified": "Yes",
   "revisionHistory": [
     {
       "date": "2025-02-20",
@@ -117,11 +96,31 @@
       "version": "2.0"
     }
   ],
+  "strategicIntent": "Establish a publish/subscribe event-driven architecture with durable messaging, dead-letter queues, and idempotency guarantees to decouple services and enable real-time data flows across McCain's supply chain and manufacturing systems.",
   "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Integration Architecture Board request for synchronous integration exceptions. Must include failure mode analysis, SLA impact assessment, and compensating retry strategy.",
+  "interactionSteps": [
+    "Producer publishes domain event with unique correlation ID to Event Hubs or Service Bus topic",
+    "Event Hubs partitions events by key (e.g., plant code or order ID) for ordered processing",
+    "Consumer groups process events independently at their own rate",
+    "Subscriber checks idempotency store in Cosmos DB before processing to prevent duplicates",
+    "Failed events are routed to Dead Letter Queue after configurable retry attempts",
+    "DLQ monitor Azure Function alerts operations team and enables manual replay",
+    "Event Grid publishes system lifecycle events for infrastructure automation"
+  ],
+  "problemStatement": "Point-to-point synchronous integrations between supply chain, ERP, and manufacturing systems create tight coupling, cascading failures during peak order periods, and inability to process events at different rates across global regions.",
   "submissionSource": null,
-  "diagramSvg": "<svg width=\"900\" height=\"600\" viewBox=\"0 0 900 600\" font-family=\"system-ui, -apple-system, sans-serif\" xmlns=\"http://www.w3.org/2000/svg\">\n  <defs>\n    <marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" fill=\"#1B3A6B\"/>\n    </marker>\n    <marker id=\"arrt\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" fill=\"#0F6E56\"/>\n    </marker>\n    <marker id=\"arra\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\">\n      <path d=\"M0,0 L0,6 L8,3 z\" fill=\"#BA7517\"/>\n    </marker>\n  </defs>\n\n  <!-- Background -->\n  <rect width=\"900\" height=\"600\" fill=\"#EAF1FB\"/>\n\n  <!-- Title Bar -->\n  <rect width=\"900\" height=\"44\" fill=\"#1B3A6B\" rx=\"0\"/>\n  <text x=\"20\" y=\"16\" fill=\"white\" font-size=\"11\" font-weight=\"600\" opacity=\"0.7\">Application &amp; Integration · Layer 2 — Logical</text>\n  <text x=\"20\" y=\"33\" fill=\"white\" font-size=\"15\" font-weight=\"700\">Event-Driven Integration</text>\n\n  <!-- Producers label -->\n  <rect x=\"20\" y=\"58\" width=\"100\" height=\"24\" rx=\"4\" fill=\"#1B3A6B\" opacity=\"0.15\"/>\n  <text x=\"70\" y=\"74\" fill=\"#1B3A6B\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Producers</text>\n\n  <!-- Producer box -->\n  <rect x=\"20\" y=\"88\" width=\"130\" height=\"50\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n  <text x=\"85\" y=\"108\" fill=\"#1B3A6B\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Domain Events</text>\n  <text x=\"85\" y=\"124\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">+ Correlation ID</text>\n\n  <!-- Step 1 arrow -->\n  <line x1=\"150\" y1=\"113\" x2=\"230\" y2=\"160\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"178\" y=\"143\" fill=\"#1B3A6B\" font-size=\"10\">1</text>\n\n  <!-- Event Hubs -->\n  <rect x=\"230\" y=\"140\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/>\n  <rect x=\"230\" y=\"140\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#1B3A6B\"/>\n  <rect x=\"230\" y=\"152\" width=\"150\" height=\"8\" fill=\"#1B3A6B\"/>\n  <text x=\"305\" y=\"155\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Azure Event Hubs</text>\n  <text x=\"305\" y=\"177\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Partitioned Ingestion</text>\n  <text x=\"305\" y=\"190\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Consumer Groups</text>\n\n  <!-- Step 1b arrow to Service Bus -->\n  <line x1=\"150\" y1=\"113\" x2=\"230\" y2=\"270\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n\n  <!-- Service Bus -->\n  <rect x=\"230\" y=\"248\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/>\n  <rect x=\"230\" y=\"248\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#0F6E56\"/>\n  <rect x=\"230\" y=\"260\" width=\"150\" height=\"8\" fill=\"#0F6E56\"/>\n  <text x=\"305\" y=\"263\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Azure Service Bus</text>\n  <text x=\"305\" y=\"285\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Topics / Sessions</text>\n  <text x=\"305\" y=\"298\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Dead Letter Queue</text>\n\n  <!-- Step 2/3 arrows to Azure Functions -->\n  <line x1=\"380\" y1=\"167\" x2=\"480\" y2=\"200\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"418\" y=\"189\" fill=\"#1B3A6B\" font-size=\"10\">2,3</text>\n  <line x1=\"380\" y1=\"272\" x2=\"480\" y2=\"240\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arrt)\"/>\n  <text x=\"418\" y=\"258\" fill=\"#0F6E56\" font-size=\"10\">3</text>\n\n  <!-- Azure Functions -->\n  <rect x=\"480\" y=\"190\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/>\n  <rect x=\"480\" y=\"190\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#1B3A6B\"/>\n  <rect x=\"480\" y=\"202\" width=\"150\" height=\"8\" fill=\"#1B3A6B\"/>\n  <text x=\"555\" y=\"205\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Azure Functions</text>\n  <text x=\"555\" y=\"227\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Event Processors</text>\n  <text x=\"555\" y=\"240\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Subscriber Handlers</text>\n\n  <!-- Step 4 arrow to Cosmos DB -->\n  <line x1=\"630\" y1=\"217\" x2=\"700\" y2=\"217\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"655\" y=\"212\" fill=\"#1B3A6B\" font-size=\"10\">4</text>\n\n  <!-- Cosmos DB -->\n  <rect x=\"700\" y=\"190\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/>\n  <rect x=\"700\" y=\"190\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#0F6E56\"/>\n  <rect x=\"700\" y=\"202\" width=\"150\" height=\"8\" fill=\"#0F6E56\"/>\n  <text x=\"775\" y=\"205\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Azure Cosmos DB</text>\n  <text x=\"775\" y=\"227\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Idempotency Store</text>\n  <text x=\"775\" y=\"240\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Event Replay</text>\n\n  <!-- Step 5 DLQ arrow -->\n  <line x1=\"380\" y1=\"295\" x2=\"480\" y2=\"350\" stroke=\"#BA7517\" stroke-width=\"1.5\" stroke-dasharray=\"5,3\" marker-end=\"url(#arra)\"/>\n  <text x=\"415\" y=\"330\" fill=\"#BA7517\" font-size=\"10\">5 DLQ</text>\n\n  <!-- DLQ Monitor Function -->\n  <rect x=\"480\" y=\"330\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"2\"/>\n  <rect x=\"480\" y=\"330\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#BA7517\"/>\n  <rect x=\"480\" y=\"342\" width=\"150\" height=\"8\" fill=\"#BA7517\"/>\n  <text x=\"555\" y=\"345\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">DLQ Monitor Fn</text>\n  <text x=\"555\" y=\"367\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Alert + Replay</text>\n  <text x=\"555\" y=\"380\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Step 6</text>\n\n  <!-- Event Grid -->\n  <rect x=\"700\" y=\"330\" width=\"150\" height=\"54\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/>\n  <rect x=\"700\" y=\"330\" width=\"150\" height=\"20\" rx=\"8\" fill=\"#1B3A6B\"/>\n  <rect x=\"700\" y=\"342\" width=\"150\" height=\"8\" fill=\"#1B3A6B\"/>\n  <text x=\"775\" y=\"345\" fill=\"white\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Azure Event Grid</text>\n  <text x=\"775\" y=\"367\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">System Events</text>\n  <text x=\"775\" y=\"380\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">Webhook Delivery</text>\n\n  <!-- Step 7 arrow -->\n  <line x1=\"630\" y1=\"357\" x2=\"698\" y2=\"357\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"655\" y=\"350\" fill=\"#1B3A6B\" font-size=\"10\">7</text>\n\n  <!-- Related Patterns -->\n  <text x=\"20\" y=\"450\" fill=\"#1B3A6B\" font-size=\"11\" font-weight=\"700\">Related Patterns</text>\n  <rect x=\"20\" y=\"460\" width=\"220\" height=\"44\" rx=\"8\" fill=\"none\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" stroke-dasharray=\"6,3\"/>\n  <text x=\"30\" y=\"478\" fill=\"#1B3A6B\" font-size=\"11\" font-weight=\"600\">AP-005</text>\n  <text x=\"75\" y=\"478\" fill=\"#1e293b\" font-size=\"11\">Saga &amp; Distributed Txn</text>\n  <text x=\"30\" y=\"494\" fill=\"#64748b\" font-size=\"10\">Enables</text>\n\n  <rect x=\"260\" y=\"460\" width=\"220\" height=\"44\" rx=\"8\" fill=\"none\" stroke=\"#0F6E56\" stroke-width=\"1.5\" stroke-dasharray=\"6,3\"/>\n  <text x=\"270\" y=\"478\" fill=\"#0F6E56\" font-size=\"11\" font-weight=\"600\">IN-002</text>\n  <text x=\"315\" y=\"478\" fill=\"#1e293b\" font-size=\"11\">Connector Isolation</text>\n  <text x=\"270\" y=\"494\" fill=\"#64748b\" font-size=\"10\">Uses</text>\n\n  <!-- Legend -->\n  <rect x=\"620\" y=\"450\" width=\"260\" height=\"90\" rx=\"6\" fill=\"white\" stroke=\"#64748b\" stroke-width=\"1\" opacity=\"0.9\"/>\n  <text x=\"750\" y=\"468\" fill=\"#1e293b\" font-size=\"11\" font-weight=\"700\" text-anchor=\"middle\">Legend</text>\n  <line x1=\"635\" y1=\"482\" x2=\"665\" y2=\"482\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n  <text x=\"672\" y=\"486\" fill=\"#1e293b\" font-size=\"10\">Event / Message Flow</text>\n  <line x1=\"635\" y1=\"500\" x2=\"665\" y2=\"500\" stroke=\"#BA7517\" stroke-width=\"1.5\" stroke-dasharray=\"5,3\" marker-end=\"url(#arra)\"/>\n  <text x=\"672\" y=\"504\" fill=\"#1e293b\" font-size=\"10\">Error / DLQ Route</text>\n  <line x1=\"635\" y1=\"518\" x2=\"665\" y2=\"518\" stroke=\"#0F6E56\" stroke-width=\"1.5\" marker-end=\"url(#arrt)\"/>\n  <text x=\"672\" y=\"522\" fill=\"#1e293b\" font-size=\"10\">Idempotency Check</text>\n\n  <!-- Footer -->\n  <text x=\"450\" y=\"590\" fill=\"#64748b\" font-size=\"10\" text-anchor=\"middle\">McCain Foods · Event-Driven Integration · IN-001 · Tier: Layer 2 Logical</text>\n</svg>",
-  "azureDesign": null,
-  "createdAt": "2026-03-15T01:08:22.427Z",
-  "updatedAt": "2026-03-25T14:13:54.588Z",
-  "level": "Logical"
+  "implementationAssets": {
+    "azurePolicy": "Require-Managed-Identity-EventHub",
+    "ccoeRunbook": "event-driven-operations-runbook-v2.0",
+    "configExample": "event-driven-config-v2.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-event-driven"
+  },
+  "securityConsiderations": [
+    "All event payloads containing PII must be encrypted at the field level before publishing",
+    "Event Hub and Service Bus connections must use managed identity, not connection strings",
+    "Dead Letter Queues must have restricted access — only operations team can read/replay",
+    "Event schemas must be registered in a schema registry to prevent breaking changes",
+    "Consumer applications must validate event schema version before processing"
+  ]
 }
