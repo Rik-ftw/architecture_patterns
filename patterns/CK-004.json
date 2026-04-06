@@ -1,19 +1,12 @@
 {
-  "id": 18,
-  "patternId": "CK-004",
+  "type": "pattern",
   "name": "McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes",
-  "domain": "Containers & Kubernetes",
   "tier": "Tier 2 — Logical",
+  "level": "Logical",
+  "owner": "Rashmi Tripathi — Platform Engineer (AKS), rashmi.tripathi@mccain.ca",
+  "domain": "Containers & Kubernetes",
   "status": "In Development",
   "version": "1.0",
-  "owner": "Rashmi Tripathi — Platform Engineer (AKS), rashmi.tripathi@mccain.ca",
-  "approvers": "TBD",
-  "lastReviewed": "2026-03-11",
-  "ccoeCertified": "No",
-  "ccoeCertRef": "",
-  "leanixRef": "",
-  "strategicIntent": "Deploy a single, enterprise-grade private Azure Kubernetes Service (AKS) cluster in a dedicated spoke subscription aligned to McCain's landing zone, providing a secure, multi-tenant container platform for Business Units across the enterprise. The platform enforces strict workload isolation via namespaces, Cilium network policies, and dedicated node pools, while centralizing ingress/egress controls through Application Gateway and Azure Firewall. All cluster operations are automated via GitOps (ArgoCD) and Azure DevOps pipelines, with cost chargeback allocated transparently across onboarded Business Units.",
-  "problemStatement": "McCain Foods requires a standardized, secure, and scalable Kubernetes platform capable of hosting multiple Business Unit workloads within a single enterprise cluster without cross-tenant exposure or lateral movement risk. Ad-hoc or BU-siloed container deployments lead to duplicated infrastructure costs, inconsistent security posture, and operational sprawl across Azure subscriptions. There is also a need to enforce supply chain integrity (signed images), fine-grained network isolation, and RBAC-driven access without exposing the Kubernetes API server to the public internet.",
   "useCases": [
     {
       "use": "Hosting containerized application workloads for multiple McCain Business Units requiring shared platform infrastructure with strong isolation boundaries, private API access, and enterprise identity integration via Microsoft Entra ID.",
@@ -28,6 +21,11 @@
       "dontUse": "Proof-of-concept or experimental workloads that do not require enterprise-grade SLAs, availability zone distribution, or formal onboarding into the platform RBAC model."
     }
   ],
+  "approvers": "TBD",
+  "createdAt": "2026-03-16T16:56:02.298Z",
+  "leanixRef": "",
+  "patternId": "CK-004",
+  "updatedAt": "2026-03-24T13:10:54.720Z",
   "components": [
     "Private AKS Cluster — Single enterprise cluster with private API server endpoint via Azure Private Link; no public Kubernetes API exposure; reachable only via hub network (ExpressRoute/VPN/Zscaler) and approved jump hosts.",
     "System Node Pool — Dedicated node pool for critical AKS add-ons and platform components, tainted with CriticalAddonsOnly=true to prevent BU workload scheduling on system nodes.",
@@ -48,37 +46,6 @@
     "Notation v2 + Ratify — Image signing in GitHub DevSecOps pipeline using Notation v2; signatures stored as OCI artifacts in ACR; Ratify integrated with Gatekeeper enforces signature verification at admission (currently Audit mode).",
     "Observability Stack — Integration with McCain's enterprise Grafana and Log Analytics observability solution managed by IE&O; AKS diagnostic logs, metrics, and Container Insights enabled.",
     "Azure DevOps Pipelines + Terraform — Infrastructure-as-code automation for cluster and supporting resource provisioning; includes linting, OPA/Gatekeeper policy checks, image scanning, and progressive delivery gates."
-  ],
-  "interactionSteps": [
-    "Step 1 — Internal Client Request: A client on the McCain corporate network issues a DNS query to the internal Domain Controller, which resolves the application hostname (e.g., app-int.mccain.com) to the Application Gateway Private Frontend IP.",
-    "Step 2 — TLS Handshake to App Gateway (Internal): The client establishes an HTTPS connection on port 443 to the Application Gateway Private Frontend; TLS is terminated at the App Gateway.",
-    "Step 3 — App Gateway to AKS Internal Load Balancer: Application Gateway forwards the request over HTTPS (443) to the Internal Load Balancer IP associated with the NGINX ingress controller in the app-routing-system namespace.",
-    "Step 4 — Certificate Fetch via Workload Identity: The WebApp Routing managed identity authenticates via OIDC to Azure Key Vault over HTTPS (443) and retrieves the TLS certificate for SSL offloading on the NGINX ingress.",
-    "Step 5 — ILB to NGINX Ingress Pod: The Internal Load Balancer distributes incoming traffic across available NGINX controller pod replicas.",
-    "Step 6 — NGINX Ingress to Application Pod: NGINX performs SSL offloading and routes plain HTTP traffic via Azure CNI Overlay to the target BU application pod on its dedicated node pool, enforcing ingress rules per namespace.",
-    "Step 7 — Internet Client Request (External Flow): An external client resolves the public domain via Cloudflare DNS; Cloudflare WAF inspects and proxies the HTTPS request to the Application Gateway Public Frontend IP.",
-    "Step 8 — App Gateway (Public) to AKS Internal Load Balancer: Application Gateway receives the Cloudflare-proxied request on the public frontend and forwards it to the same AKS Internal Load Balancer backend pool, following the same ingress path as internal traffic from Step 5 onward.",
-    "Step 9 — Outbound Traffic via Azure Firewall: Any pod-initiated egress traffic (Azure APIs, MCR, Log Analytics, Defender, Key Vault) traverses Azure Firewall or NAT with allowed FQDN and service tag rules enforced.",
-    "Step 10 — GitOps Reconciliation: ArgoCD continuously reconciles cluster state against the Git repository (mccain-aks-platform); CiliumClusterwideNetworkPolicies are applied cluster-wide by the platform team, and per-tenant CiliumNetworkPolicies are deployed via ApplicationSet to BU namespaces labeled platform.io/tenant=true.",
-    "Step 11 — Image Admission Control: On pod creation, Ratify (integrated with Gatekeeper) intercepts the admission request, queries ACR for the Notation v2 signature OCI artifact, and verifies cryptographic trust before allowing or auditing the image pull.",
-    "Step 12 — Cost Chargeback Allocation: Azure Cost Management tags (BU, app, env) combined with AKS VMSS resource group attribution enable monthly chargeback: each BU is charged its dedicated VMSS node pool cost plus an equal share of shared platform (App RG and Foundation RG) costs."
-  ],
-  "securityConsiderations": [
-    "The AKS API server is fully private via Azure Private Link; no public endpoint is exposed. Access is restricted to hub network paths (ExpressRoute/VPN/Zscaler) and approved jump hosts only.",
-    "Kubernetes local accounts are disabled cluster-wide; all authentication is federated through Microsoft Entra ID with Azure RBAC enforcing least-privilege access for both operators and application teams.",
-    "Workload Identity (OIDC) eliminates static credentials for pod-to-Azure resource access; each service account is bound to a federated managed identity scoped to specific Azure resources (Key Vault, Storage, ACR).",
-    "Cilium network policies enforce a deny-by-default posture within all tenant namespaces; CiliumClusterwideNetworkPolicies are platform-controlled and cannot be overridden by tenants, preventing lateral movement between Business Unit namespaces.",
-    "All container images must be cryptographically signed using Notation v2 before deployment; Ratify enforces signature verification at admission via Gatekeeper integration (currently in Audit mode, with enforcement planned).",
-    "Azure Policy enforces PSS-Restricted Pod Security Standards including: read-only root filesystem, no privileged containers, no CAP_SYS_ADMIN, no host namespace sharing, restricted AppArmor profiles, and approved user/group IDs.",
-    "Microsoft Defender for Containers provides runtime threat detection and vulnerability management (MDVM) for both registry images (ACR) and running container images on the cluster.",
-    "ACR is accessible only via private endpoint; image pulls from public registries are blocked by policy enforcing approved images from the private ACR only.",
-    "Key Vault secrets are mounted via the Secrets Store CSI driver with autorotation enabled; no secrets are stored as Kubernetes native secrets or in cluster-scoped configuration.",
-    "Outbound egress is fully restricted via Azure Firewall with an explicit FQDN allowlist; all other outbound traffic is blocked by default, preventing data exfiltration or C2 communication from compromised pods.",
-    "Cloudflare WAF provides edge-level inspection and DDoS protection for all internet-facing workloads before traffic reaches Azure infrastructure; Application Gateway WAF policies provide a secondary layer.",
-    "TLS is enforced end-to-end from client to App Gateway; NSG rules restrict inbound to AKS ILB exclusively from the Application Gateway subnet, preventing direct pod access from other network paths.",
-    "ArgoCD access to application logs and namespaces is scoped per Entra ID security group mapped to ArgoCD RBAC roles, ensuring teams cannot access other BUs' namespaces or logs.",
-    "Drift detection and auto-remediation via ArgoCD ensures CiliumClusterwideNetworkPolicies cannot be modified outside of the GitOps pipeline, preventing unauthorized policy changes.",
-    "Availability zone distribution for node pools ensures resilience against single-zone failures; PodDisruptionBudgets (PDBs) and anti-affinity rules are required for all application workloads to maintain SLA during upgrades."
   ],
   "guardrails": [
     {
@@ -157,6 +124,8 @@
       "severity": "Required"
     }
   ],
+  "azureDesign": null,
+  "ccoeCertRef": "",
   "composition": [
     {
       "patternId": "ID-005",
@@ -164,14 +133,8 @@
       "relationship": "None"
     }
   ],
-  "implementationAssets": {
-    "azurePolicy": "",
-    "ccoeRunbook": "",
-    "configExample": "",
-    "githubTemplate": "",
-    "terraformModule": ""
-  },
-  "exceptionProcess": "Exceptions to platform guardrails (e.g., privileged container requirements, public API endpoint access, or use of unsigned images in enforcement mode) must be submitted to the Platform Engineering team and reviewed by the McCain Cloud Centre of Excellence (CCoE) and Information Security. Exceptions require documented business justification, a defined time-bound remediation plan, and formal sign-off from the Platform Owner and Information Security. Approved exceptions are tracked in the platform risk register and reviewed at each quarterly architecture review cycle.",
+  "lastReviewed": "2026-03-11",
+  "ccoeCertified": "No",
   "revisionHistory": [
     {
       "date": "2026-03-13",
@@ -180,6 +143,7 @@
       "version": "1.0"
     }
   ],
+  "strategicIntent": "Deploy a single, enterprise-grade private Azure Kubernetes Service (AKS) cluster in a dedicated spoke subscription aligned to McCain's landing zone, providing a secure, multi-tenant container platform for Business Units across the enterprise. The platform enforces strict workload isolation via namespaces, Cilium network policies, and dedicated node pools, while centralizing ingress/egress controls through Application Gateway and Azure Firewall. All cluster operations are automated via GitOps (ArgoCD) and Azure DevOps pipelines, with cost chargeback allocated transparently across onboarded Business Units.",
   "thirdPartyRisks": [
     {
       "notes": "www.snowflake.com",
@@ -196,10 +160,45 @@
       "certifications": []
     }
   ],
+  "exceptionProcess": "Exceptions to platform guardrails (e.g., privileged container requirements, public API endpoint access, or use of unsigned images in enforcement mode) must be submitted to the Platform Engineering team and reviewed by the McCain Cloud Centre of Excellence (CCoE) and Information Security. Exceptions require documented business justification, a defined time-bound remediation plan, and formal sign-off from the Platform Owner and Information Security. Approved exceptions are tracked in the platform risk register and reviewed at each quarterly architecture review cycle.",
+  "interactionSteps": [
+    "Step 1 — Internal Client Request: A client on the McCain corporate network issues a DNS query to the internal Domain Controller, which resolves the application hostname (e.g., app-int.mccain.com) to the Application Gateway Private Frontend IP.",
+    "Step 2 — TLS Handshake to App Gateway (Internal): The client establishes an HTTPS connection on port 443 to the Application Gateway Private Frontend; TLS is terminated at the App Gateway.",
+    "Step 3 — App Gateway to AKS Internal Load Balancer: Application Gateway forwards the request over HTTPS (443) to the Internal Load Balancer IP associated with the NGINX ingress controller in the app-routing-system namespace.",
+    "Step 4 — Certificate Fetch via Workload Identity: The WebApp Routing managed identity authenticates via OIDC to Azure Key Vault over HTTPS (443) and retrieves the TLS certificate for SSL offloading on the NGINX ingress.",
+    "Step 5 — ILB to NGINX Ingress Pod: The Internal Load Balancer distributes incoming traffic across available NGINX controller pod replicas.",
+    "Step 6 — NGINX Ingress to Application Pod: NGINX performs SSL offloading and routes plain HTTP traffic via Azure CNI Overlay to the target BU application pod on its dedicated node pool, enforcing ingress rules per namespace.",
+    "Step 7 — Internet Client Request (External Flow): An external client resolves the public domain via Cloudflare DNS; Cloudflare WAF inspects and proxies the HTTPS request to the Application Gateway Public Frontend IP.",
+    "Step 8 — App Gateway (Public) to AKS Internal Load Balancer: Application Gateway receives the Cloudflare-proxied request on the public frontend and forwards it to the same AKS Internal Load Balancer backend pool, following the same ingress path as internal traffic from Step 5 onward.",
+    "Step 9 — Outbound Traffic via Azure Firewall: Any pod-initiated egress traffic (Azure APIs, MCR, Log Analytics, Defender, Key Vault) traverses Azure Firewall or NAT with allowed FQDN and service tag rules enforced.",
+    "Step 10 — GitOps Reconciliation: ArgoCD continuously reconciles cluster state against the Git repository (mccain-aks-platform); CiliumClusterwideNetworkPolicies are applied cluster-wide by the platform team, and per-tenant CiliumNetworkPolicies are deployed via ApplicationSet to BU namespaces labeled platform.io/tenant=true.",
+    "Step 11 — Image Admission Control: On pod creation, Ratify (integrated with Gatekeeper) intercepts the admission request, queries ACR for the Notation v2 signature OCI artifact, and verifies cryptographic trust before allowing or auditing the image pull.",
+    "Step 12 — Cost Chargeback Allocation: Azure Cost Management tags (BU, app, env) combined with AKS VMSS resource group attribution enable monthly chargeback: each BU is charged its dedicated VMSS node pool cost plus an equal share of shared platform (App RG and Foundation RG) costs."
+  ],
+  "problemStatement": "McCain Foods requires a standardized, secure, and scalable Kubernetes platform capable of hosting multiple Business Unit workloads within a single enterprise cluster without cross-tenant exposure or lateral movement risk. Ad-hoc or BU-siloed container deployments lead to duplicated infrastructure costs, inconsistent security posture, and operational sprawl across Azure subscriptions. There is also a need to enforce supply chain integrity (signed images), fine-grained network isolation, and RBAC-driven access without exposing the Kubernetes API server to the public internet.",
   "submissionSource": null,
-  "diagramSvg": "<svg viewBox=\"0 0 900 600\" width=\"900\" height=\"600\" font-family=\"system-ui,-apple-system,sans-serif\" xmlns=\"http://www.w3.org/2000/svg\">\n<defs>\n<marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n<path d=\"M0,0 L0,6 L8,3 z\" fill=\"#1B3A6B\"/>\n</marker>\n<marker id=\"arr2\" markerWidth=\"8\" markerHeight=\"8\" refX=\"6\" refY=\"3\" orient=\"auto\">\n<path d=\"M0,0 L0,6 L8,3 z\" fill=\"#0F6E56\"/>\n</marker>\n</defs>\n<!-- Title -->\n<rect width=\"900\" height=\"36\" fill=\"#1B3A6B\"/>\n<text x=\"450\" y=\"23\" fill=\"white\" font-size=\"13\" font-weight=\"bold\" text-anchor=\"middle\">McCain Enterprise AKS Platform — Private Multi-Tenant Kubernetes</text>\n\n<!-- Background zones -->\n<rect x=\"8\" y=\"44\" width=\"884\" height=\"548\" rx=\"8\" fill=\"#EAF1FB\" stroke=\"#1B3A6B\" stroke-width=\"1\" stroke-dasharray=\"4,2\" opacity=\"0.4\"/>\n\n<!-- EDGE / INGRESS ZONE -->\n<rect x=\"16\" y=\"52\" width=\"260\" height=\"130\" rx=\"6\" fill=\"#E8F5F0\" stroke=\"#0F6E56\" stroke-width=\"1.2\"/>\n<text x=\"146\" y=\"67\" font-size=\"10\" fill=\"#0F6E56\" font-weight=\"bold\" text-anchor=\"middle\">Edge / Ingress</text>\n<!-- Cloudflare -->\n<rect x=\"24\" y=\"72\" width=\"110\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.5\"/>\n<text x=\"79\" y=\"91\" font-size=\"11\" fill=\"#1e293b\" text-anchor=\"middle\">Cloudflare WAF</text>\n<!-- App GW -->\n<rect x=\"152\" y=\"72\" width=\"112\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"208\" y=\"87\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">App Gateway v2</text>\n<text x=\"208\" y=\"97\" font-size=\"9\" fill=\"#64748b\" text-anchor=\"middle\">(WAF, L7, ILB/Pub)</text>\n<!-- NGINX Ingress -->\n<rect x=\"80\" y=\"116\" width=\"140\" height=\"28\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"150\" y=\"134\" font-size=\"11\" fill=\"#1e293b\" text-anchor=\"middle\">Managed NGINX Ingress</text>\n\n<!-- AKS CLUSTER ZONE -->\n<rect x=\"16\" y=\"192\" width=\"570\" height=\"270\" rx=\"6\" fill=\"#EAF1FB\" stroke=\"#1B3A6B\" stroke-width=\"1.5\"/>\n<text x=\"301\" y=\"207\" font-size=\"11\" fill=\"#1B3A6B\" font-weight=\"bold\" text-anchor=\"middle\">Private AKS Cluster (Azure CNI Overlay)</text>\n<!-- System Node Pool -->\n<rect x=\"26\" y=\"214\" width=\"120\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"86\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">System Node Pool</text>\n<text x=\"86\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">CriticalAddonsOnly</text>\n<!-- User Node Pools -->\n<rect x=\"160\" y=\"214\" width=\"130\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.3\"/>\n<text x=\"225\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">User Node Pools</text>\n<text x=\"225\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">per BU, Autoscaler</text>\n<!-- Cilium -->\n<rect x=\"305\" y=\"214\" width=\"110\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.3\"/>\n<text x=\"360\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Cilium Net Policies</text>\n<text x=\"360\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">CCNP / CNP</text>\n<!-- ArgoCD -->\n<rect x=\"430\" y=\"214\" width=\"140\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.3\"/>\n<text x=\"500\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">ArgoCD (GitOps)</text>\n<text x=\"500\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">ApplicationSet, RBAC</text>\n<!-- Azure Policy -->\n<rect x=\"26\" y=\"262\" width=\"120\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.3\"/>\n<text x=\"86\" y=\"274\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Azure Policy Add-on</text>\n<text x=\"86\" y=\"284\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">PSS/Gatekeeper</text>\n<!-- Workload Identity -->\n<rect x=\"160\" y=\"262\" width=\"130\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"225\" y=\"274\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Workload Identity</text>\n<text x=\"225\" y=\"284\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">OIDC Federated</text>\n<!-- Ratify -->\n<rect x=\"305\" y=\"262\" width=\"110\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.3\"/>\n<text x=\"360\" y=\"274\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Notation v2 + Ratify</text>\n<text x=\"360\" y=\"284\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Admission Signing</text>\n<!-- Entra ID -->\n<rect x=\"430\" y=\"262\" width=\"140\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"500\" y=\"274\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Entra ID + Azure RBAC</text>\n<text x=\"500\" y=\"284\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Auth/Authz</text>\n<!-- Defender -->\n<rect x=\"26\" y=\"308\" width=\"120\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.3\"/>\n<text x=\"86\" y=\"320\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Defender Containers</text>\n<text x=\"86\" y=\"330\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Runtime + MDVM</text>\n<!-- Observability -->\n<rect x=\"160\" y=\"308\" width=\"130\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1.3\"/>\n<text x=\"225\" y=\"320\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Observability Stack</text>\n<text x=\"225\" y=\"330\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Grafana, Log Analytics</text>\n<!-- Azure DevOps -->\n<rect x=\"305\" y=\"308\" width=\"260\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1.3\"/>\n<text x=\"435\" y=\"320\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Azure DevOps + Terraform</text>\n<text x=\"435\" y=\"330\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">IaC, OPA, Pipeline Gates</text>\n<!-- Cost Chargeback -->\n<rect x=\"26\" y=\"354\" width=\"570\" height=\"26\" rx=\"8\" fill=\"#fff8e1\" stroke=\"#BA7517\" stroke-width=\"1.2\"/>\n<text x=\"311\" y=\"371\" font-size=\"10\" fill=\"#BA7517\" font-weight=\"bold\" text-anchor=\"middle\">Cost Chargeback — Azure Cost Mgmt Tags (BU/app/env) + VMSS Attribution</text>\n\n<!-- PLATFORM SERVICES ZONE -->\n<rect x=\"598\" y=\"192\" width=\"290\" height=\"270\" rx=\"6\" fill=\"#E8F5F0\" stroke=\"#0F6E56\" stroke-width=\"1.2\"/>\n<text x=\"743\" y=\"207\" font-size=\"11\" fill=\"#0F6E56\" font-weight=\"bold\" text-anchor=\"middle\">Platform Services</text>\n<!-- ACR -->\n<rect x=\"608\" y=\"214\" width=\"125\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"670\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">ACR Premium</text>\n<text x=\"670\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Private EP, Notation</text>\n<!-- Key Vault -->\n<rect x=\"752\" y=\"214\" width=\"125\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"814\" y=\"228\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Key Vault + CSI</text>\n<text x=\"814\" y=\"240\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Secrets, Certs, RBAC</text>\n<!-- Azure Firewall -->\n<rect x=\"608\" y=\"264\" width=\"268\" height=\"34\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1.3\"/>\n<text x=\"742\" y=\"278\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Azure Firewall / NAT</text>\n<text x=\"742\" y=\"290\" font-size=\"8\" fill=\"#64748b\" text-anchor=\"middle\">Egress FQDN/Service Tag Rules</text>\n<!-- Related Pattern -->\n<rect x=\"608\" y=\"314\" width=\"268\" height=\"30\" rx=\"8\" fill=\"white\" stroke=\"#64748b\" stroke-width=\"1\" stroke-dasharray=\"4,2\"/>\n<text x=\"742\" y=\"326\" font-size=\"10\" fill=\"#64748b\" text-anchor=\"middle\">Related: ID-005 Cloud</text>\n<text x=\"742\" y=\"338\" font-size=\"9\" fill=\"#64748b\" text-anchor=\"middle\">(External Reference)</text>\n\n<!-- HUB / NETWORK -->\n<rect x=\"16\" y=\"472\" width=\"870\" height=\"68\" rx=\"6\" fill=\"#EAF1FB\" stroke=\"#1B3A6B\" stroke-width=\"1.2\"/>\n<text x=\"100\" y=\"487\" font-size=\"10\" fill=\"#1B3A6B\" font-weight=\"bold\">Hub Network</text>\n<rect x=\"24\" y=\"492\" width=\"140\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1\"/>\n<text x=\"94\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">ExpressRoute / VPN</text>\n<rect x=\"174\" y=\"492\" width=\"100\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1\"/>\n<text x=\"224\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Zscaler / Jump</text>\n<rect x=\"284\" y=\"492\" width=\"120\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"1\"/>\n<text x=\"344\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Private DNS Zones</text>\n<rect x=\"414\" y=\"492\" width=\"130\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1\"/>\n<text x=\"479\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">AKS Private API Link</text>\n<rect x=\"554\" y=\"492\" width=\"140\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"1\"/>\n<text x=\"624\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Private Endpoints (ACR/KV)</text>\n<rect x=\"704\" y=\"492\" width=\"170\" height=\"24\" rx=\"6\" fill=\"white\" stroke=\"#BA7517\" stroke-width=\"1\"/>\n<text x=\"789\" y=\"508\" font-size=\"10\" fill=\"#1e293b\" text-anchor=\"middle\">Spoke AKS Subscription (LZ)</text>\n\n<!-- ARROWS -->\n<!-- Cloudflare to AppGW -->\n<line x1=\"134\" y1=\"87\" x2=\"152\" y2=\"87\" stroke=\"#BA7517\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<!-- AppGW to NGINX -->\n<line x1=\"208\" y1=\"102\" x2=\"180\" y2=\"116\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<!-- NGINX to AKS cluster (user pods) -->\n<line x1=\"150\" y1=\"144\" x2=\"180\" y2=\"192\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<!-- AKS to Azure Firewall (egress) -->\n<line x1=\"586\" y1=\"308\" x2=\"608\" y2=\"285\" stroke=\"#0F6E56\" stroke-width=\"1.5\" stroke-dasharray=\"5,2\" marker-end=\"url(#arr2)\"/>\n<!-- ArgoCD to Cilium -->\n<line x1=\"430\" y1=\"231\" x2=\"415\" y2=\"231\" stroke=\"#BA7517\" stroke-width=\"1.3\" stroke-dasharray=\"4,2\" marker-end=\"url(#arr)\"/>\n<!-- Workload Identity to Key Vault -->\n<line x1=\"290\" y1=\"272\" x2=\"608\" y2=\"233\" stroke=\"#1B3A6B\" stroke-width=\"1.2\" stroke-dasharray=\"4,2\" marker-end=\"url(#arr)\"/>\n<!-- Ratify to ACR -->\n<line x1=\"360\" y1=\"262\" x2=\"608\" y2=\"230\" stroke=\"#BA7517\" stroke-width=\"1.2\" stroke-dasharray=\"4,2\" marker-end=\"url(#arr)\"/>\n<!-- AKS to Hub -->\n<line x1=\"301\" y1=\"462\" x2=\"344\" y2=\"472\" stroke=\"#1B3A6B\" stroke-width=\"1.2\" stroke-dasharray=\"3,2\" marker-end=\"url(#arr)\"/>\n<!-- External Internet arrow -->\n<line x1=\"79\" y1=\"52\" x2=\"79\" y2=\"72\" stroke=\"#BA7517\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/>\n<text x=\"82\" y=\"65\" font-size=\"9\" fill=\"#BA7517\">Internet</text>\n</svg>",
-  "azureDesign": null,
-  "createdAt": "2026-03-16T16:56:02.298Z",
-  "updatedAt": "2026-03-24T13:10:54.720Z",
-  "level": "Logical"
+  "implementationAssets": {
+    "azurePolicy": "",
+    "ccoeRunbook": "",
+    "configExample": "",
+    "githubTemplate": "",
+    "terraformModule": ""
+  },
+  "securityConsiderations": [
+    "The AKS API server is fully private via Azure Private Link; no public endpoint is exposed. Access is restricted to hub network paths (ExpressRoute/VPN/Zscaler) and approved jump hosts only.",
+    "Kubernetes local accounts are disabled cluster-wide; all authentication is federated through Microsoft Entra ID with Azure RBAC enforcing least-privilege access for both operators and application teams.",
+    "Workload Identity (OIDC) eliminates static credentials for pod-to-Azure resource access; each service account is bound to a federated managed identity scoped to specific Azure resources (Key Vault, Storage, ACR).",
+    "Cilium network policies enforce a deny-by-default posture within all tenant namespaces; CiliumClusterwideNetworkPolicies are platform-controlled and cannot be overridden by tenants, preventing lateral movement between Business Unit namespaces.",
+    "All container images must be cryptographically signed using Notation v2 before deployment; Ratify enforces signature verification at admission via Gatekeeper integration (currently in Audit mode, with enforcement planned).",
+    "Azure Policy enforces PSS-Restricted Pod Security Standards including: read-only root filesystem, no privileged containers, no CAP_SYS_ADMIN, no host namespace sharing, restricted AppArmor profiles, and approved user/group IDs.",
+    "Microsoft Defender for Containers provides runtime threat detection and vulnerability management (MDVM) for both registry images (ACR) and running container images on the cluster.",
+    "ACR is accessible only via private endpoint; image pulls from public registries are blocked by policy enforcing approved images from the private ACR only.",
+    "Key Vault secrets are mounted via the Secrets Store CSI driver with autorotation enabled; no secrets are stored as Kubernetes native secrets or in cluster-scoped configuration.",
+    "Outbound egress is fully restricted via Azure Firewall with an explicit FQDN allowlist; all other outbound traffic is blocked by default, preventing data exfiltration or C2 communication from compromised pods.",
+    "Cloudflare WAF provides edge-level inspection and DDoS protection for all internet-facing workloads before traffic reaches Azure infrastructure; Application Gateway WAF policies provide a secondary layer.",
+    "TLS is enforced end-to-end from client to App Gateway; NSG rules restrict inbound to AKS ILB exclusively from the Application Gateway subnet, preventing direct pod access from other network paths.",
+    "ArgoCD access to application logs and namespaces is scoped per Entra ID security group mapped to ArgoCD RBAC roles, ensuring teams cannot access other BUs' namespaces or logs.",
+    "Drift detection and auto-remediation via ArgoCD ensures CiliumClusterwideNetworkPolicies cannot be modified outside of the GitOps pipeline, preventing unauthorized policy changes.",
+    "Availability zone distribution for node pools ensures resilience against single-zone failures; PodDisruptionBudgets (PDBs) and anti-affinity rules are required for all application workloads to maintain SLA during upgrades."
+  ]
 }
