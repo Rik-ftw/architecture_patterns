@@ -1,46 +1,49 @@
 modules = ["nodejs-20", "postgresql-16"]
-[agent]
-expertMode = true
+  run = "npm start"
 
-[workflows]
-runButton = "Project"
+  [agent]
+  expertMode = true
 
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
+  [workflows]
+  runButton = "Project"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Start application"
+  [[workflows.workflow]]
+  name = "Project"
+  mode = "parallel"
+  author = "agent"
 
-[[workflows.workflow]]
-name = "Start application"
-author = "agent"
+  [[workflows.workflow.tasks]]
+  task = "workflow.run"
+  args = "Start application"
 
-[workflows.workflow.metadata]
-outputType = "webview"
+  [[workflows.workflow]]
+  name = "Start application"
+  author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm start"
-waitForPort = 5000
+  [workflows.workflow.metadata]
+  outputType = "webview"
 
-[[ports]]
-localPort = 5000
-externalPort = 80
+  [[workflows.workflow.tasks]]
+  task = "shell.exec"
+  args = "npm start"
+  waitForPort = 5000
 
-[[ports]]
-localPort = 23636
-externalPort = 3000
+  [[ports]]
+  localPort = 5000
+  externalPort = 80
 
-[[ports]]
-localPort = 23637
-externalPort = 3001
+  [[ports]]
+  localPort = 23636
+  externalPort = 3000
 
-[postMerge]
-path = "scripts/post-merge.sh"
-timeoutMs = 60000
+  [[ports]]
+  localPort = 23637
+  externalPort = 3001
 
-[nix]
-channel = "stable-25_05"
+  [postMerge]
+  path = "scripts/post-merge.sh"
+  timeoutMs = 60000
+
+  [nix]
+  channel = "stable-25_05"
+  
