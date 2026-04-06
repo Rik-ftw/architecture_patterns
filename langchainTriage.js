@@ -94,7 +94,7 @@ async function runStage(stageName, systemPrompt, userPrompt, model, context) {
 async function runTriagePipeline(intake, onStageUpdate) {
   const model = new ChatAnthropic({
     model: 'claude-haiku-4-5',
-    maxTokens: 1024,
+    maxTokens: 4096,
     temperature: 0,
   });
 
@@ -398,7 +398,7 @@ Return JSON:
 async function runSingleStage(stageName, intake) {
   const model = new ChatAnthropic({
     model: 'claude-haiku-4-5',
-    maxTokens: 1024,
+    maxTokens: 4096,
     temperature: 0,
   });
 

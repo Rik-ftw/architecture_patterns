@@ -2,44 +2,13 @@
   "microsoft azure": {
     "data": {
       "keyword": "Microsoft Azure",
-      "cveCount": 16,
-      "highestCvss": 9.1,
-      "severity": "Critical",
-      "topCves": [
-        {
-          "id": "CVE-2020-8611",
-          "score": 8.8,
-          "description": "In Progress MOVEit Transfer 2019.1 before 2019.1.4 and 2019.2 before 2019.2.1, multiple SQL Injection vulnerabilities ha...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-8611"
-        },
-        {
-          "id": "CVE-2021-31827",
-          "score": 8.8,
-          "description": "In Progress MOVEit Transfer before 2021.0 (13.0), a SQL injection vulnerability has been found in the MOVEit Transfer we...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-31827"
-        },
-        {
-          "id": "CVE-2021-33894",
-          "score": 8.8,
-          "description": "In Progress MOVEit Transfer before 2019.0.6 (11.0.6), 2019.1.x before 2019.1.5 (11.1.5), 2019.2.x before 2019.2.2 (11.2....",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-33894"
-        },
-        {
-          "id": "CVE-2016-7191",
-          "score": 8.1,
-          "description": "The Microsoft Azure Active Directory Passport (aka Passport-Azure-AD) library 1.x before 1.4.6 and 2.x before 2.0.1 for ...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2016-7191"
-        },
-        {
-          "id": "CVE-2020-35608",
-          "score": 7.8,
-          "description": "A code execution vulnerability exists in the normal world’s signed code execution functionality of Microsoft Azure Spher...",
-          "url": "https://nvd.nist.gov/vuln/detail/CVE-2020-35608"
-        }
-      ],
-      "fetchedAt": "2026-04-01T21:31:24.955Z"
+      "cveCount": 0,
+      "highestCvss": 0,
+      "severity": "None",
+      "topCves": [],
+      "fetchedAt": "2026-04-06T15:16:46.156Z"
     },
-    "fetchedAt": 1775079084955
+    "fetchedAt": 1775488606156
   },
   "node.js": {
     "data": {

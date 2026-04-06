@@ -258,6 +258,22 @@ Return ONLY a valid JSON object (no markdown, no backticks, no prose outside JSO
 }`;
 }
 
+function extractJson(text) {
+  text = text.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
+  }
+  try { return JSON.parse(text); } catch (e) {
+    const objMatch = text.match(/\{[\s\S]*\}/);
+    const arrMatch = text.match(/\[[\s\S]*\]/);
+    const pick = objMatch && arrMatch
+      ? (text.indexOf('{') < text.indexOf('[') ? objMatch : arrMatch)
+      : (objMatch || arrMatch);
+    if (pick) { try { return JSON.parse(pick[0]); } catch {} }
+    throw new SyntaxError(`AI response JSON parse failed (response length: ${text.length} chars). Details: ${e.message}`);
+  }
+}
+
 async function callClaude(prompt) {
   const config = await getSystemConfig().catch(() => ({}));
   const client = new Anthropic();
@@ -265,13 +281,11 @@ async function callClaude(prompt) {
 
   const message = await client.messages.create({
     model,
-    max_tokens: 4096,
+    max_tokens: 8000,
     messages: [{ role: 'user', content: prompt }]
   });
 
-  let text = message.content[0].text.trim();
-  if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-  return { result: JSON.parse(text), model };
+  return { result: extractJson(message.content[0].text), model };
 }
 
 router.post('/pattern/:patternId', async (req, res) => {

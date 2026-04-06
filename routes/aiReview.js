@@ -19,6 +19,22 @@ const ACCEPTED_CODE_EXTS = new Set([
 
 const MAX_EXTRACT_CHARS = 120000;
 
+function extractJson(text) {
+  text = text.trim();
+  if (text.startsWith('```')) {
+    text = text.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim();
+  }
+  try { return JSON.parse(text); } catch (e) {
+    const objMatch = text.match(/\{[\s\S]*\}/);
+    const arrMatch = text.match(/\[[\s\S]*\]/);
+    const pick = objMatch && arrMatch
+      ? (text.indexOf('{') < text.indexOf('[') ? objMatch : arrMatch)
+      : (objMatch || arrMatch);
+    if (pick) { try { return JSON.parse(pick[0]); } catch {} }
+    throw new SyntaxError(`AI response JSON parse failed (response length: ${text.length} chars). The response may have been cut off — try again. Details: ${e.message}`);
+  }
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 20 * 1024 * 1024, files: 10 },
@@ -402,7 +418,7 @@ router.post('/review/:id', async (req, res) => {
 
     const client = new Anthropic();
     const model = config.ai_model_review || 'claude-sonnet-4-5';
-    const maxTokens = parseInt(config.ai_max_tokens_review || '4096');
+    const maxTokens = parseInt(config.ai_max_tokens_review || '8000');
 
     const message = await client.messages.create({
       model,
@@ -410,9 +426,7 @@ router.post('/review/:id', async (req, res) => {
       messages: [{ role: 'user', content: buildReviewPrompt(intake, patterns, vendors, policies) }]
     });
 
-    let reviewText = message.content[0].text.trim();
-    if (reviewText.startsWith('```')) reviewText = reviewText.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    const review = JSON.parse(reviewText);
+    const review = extractJson(message.content[0].text);
     review.generatedAt = new Date().toISOString();
     review.model = model;
 
@@ -433,7 +447,7 @@ router.post('/quick-assess', async (req, res) => {
     const config = await getSystemConfig().catch(() => ({}));
     const client = new Anthropic();
     const model = config.ai_model_quick_assess || 'claude-haiku-4-5';
-    const maxTokens = parseInt(config.ai_max_tokens_quick || '512');
+    const maxTokens = parseInt(config.ai_max_tokens_quick || '1024');
 
     const message = await client.messages.create({
       model,
@@ -441,9 +455,7 @@ router.post('/quick-assess', async (req, res) => {
       messages: [{ role: 'user', content: buildQuickAssessPrompt(intake, patterns) }]
     });
 
-    let text = message.content[0].text.trim();
-    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    const result = JSON.parse(text);
+    const result = extractJson(message.content[0].text);
     res.json(result);
   } catch (err) {
     console.error('Quick assess error:', err);
@@ -475,7 +487,7 @@ router.post('/diagram/:id', async (req, res) => {
 
     const client = new Anthropic();
     const model = config.ai_model_diagram || 'claude-sonnet-4-5';
-    const maxTokens = parseInt(config.ai_max_tokens_diagram || '2048');
+    const maxTokens = parseInt(config.ai_max_tokens_diagram || '4096');
 
     const message = await client.messages.create({
       model,
@@ -483,9 +495,7 @@ router.post('/diagram/:id', async (req, res) => {
       messages: [{ role: 'user', content: buildDiagramPrompt(intake, patterns, vendors) }]
     });
 
-    let text = message.content[0].text.trim();
-    if (text.startsWith('```')) text = text.replace(/^```json?\n?/, '').replace(/\n?```$/, '');
-    const diagram = JSON.parse(text);
+    const diagram = extractJson(message.content[0].text);
     diagram.generatedAt = new Date().toISOString();
     diagram.model = model;
 
