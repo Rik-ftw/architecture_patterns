@@ -1,0 +1,120 @@
+{
+  "type": "pattern",
+  "name": "CQRS & Event Sourcing",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Priya Sharma",
+  "domain": "Application & Integration",
+  "status": "Endorsed",
+  "version": "1.1",
+  "useCases": [
+    {
+      "use": "High-throughput order management systems requiring independent scaling of order intake (writes) and order status queries (reads)",
+      "dontUse": "Simple CRUD applications with low write volume and simple query requirements"
+    },
+    {
+      "use": "Systems requiring full audit trail and point-in-time reconstruction of domain state (financial, compliance, supply chain)",
+      "dontUse": "Systems where eventual consistency is unacceptable and all reads must see the latest write immediately"
+    },
+    {
+      "use": "Event-driven microservices architectures where domain events must be shared reliably across bounded contexts",
+      "dontUse": "Legacy monolithic systems where introducing an event store creates disproportionate complexity"
+    }
+  ],
+  "approvers": "Integration Architecture Board, James Okafor",
+  "leanixRef": "LX-5210",
+  "patternId": "AP-008",
+  "components": [
+    "Azure Event Hubs — event store and event streaming backbone (Kafka-compatible)",
+    "Azure Service Bus — command queue for reliable command delivery to command handlers",
+    "Azure Cosmos DB — read model store (denormalised, query-optimised projections)",
+    "Azure SQL Database / PostgreSQL — write model store for transactional command processing",
+    "Azure Functions — event projectors (subscribe to events and update read models)",
+    "Azure Cache for Redis — read model caching layer for high-frequency queries",
+    "Azure Application Insights — command/query performance and event processing lag monitoring"
+  ],
+  "guardrails": [
+    {
+      "area": "Consistency",
+      "rule": "Downstream consumers must be designed for eventual consistency — SLAs must define maximum acceptable projection lag",
+      "severity": "Required"
+    },
+    {
+      "area": "Event Design",
+      "rule": "Events must be immutable, versioned, and backwards-compatible — breaking schema changes require a new event type",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "Events containing PII or Confidential data must be encrypted at the field level before publication to the event store",
+      "severity": "Required"
+    },
+    {
+      "area": "Operations",
+      "rule": "Projection lag must be monitored and alerting configured for lag exceeding defined SLA thresholds",
+      "severity": "Required"
+    },
+    {
+      "area": "Retention",
+      "rule": "Event store retention must align with business audit requirements — minimum 7 years for financial events",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-AP-2026-008",
+  "composition": [
+    {
+      "patternId": "AP-004",
+      "patternName": "Event-Driven Integration",
+      "relationship": "Extends"
+    },
+    {
+      "patternId": "DT-001",
+      "patternName": "Data Lake Architecture",
+      "relationship": "Archives event log to"
+    }
+  ],
+  "lastReviewed": "2026-01-20",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-08-12",
+      "author": "Priya Sharma",
+      "summary": "Initial CQRS pattern based on order management platform pilot",
+      "version": "1.0"
+    },
+    {
+      "date": "2026-01-20",
+      "author": "Priya Sharma",
+      "summary": "Added Event Sourcing guidance, PII field-level encryption guardrail, and Redis caching layer",
+      "version": "1.1"
+    }
+  ],
+  "strategicIntent": "Separate read and write workloads using Command Query Responsibility Segregation (CQRS) and capture all state changes as an immutable event log using Event Sourcing — enabling independent scaling of read/write paths, complete audit history, and temporal queries for high-throughput transactional systems.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Architecture Review Board request with justification for shared read/write model. Requires Integration Architecture Board sign-off and demonstration that projection lag is not acceptable for the use case.",
+  "interactionSteps": [
+    "Client submits a command (e.g., PlaceOrder) to the Command API via Azure Service Bus queue",
+    "Command handler validates the command against business rules using the write model (Azure SQL/PostgreSQL)",
+    "Command handler persists the state change as an immutable domain event (e.g., OrderPlaced) to Azure Event Hubs (event store)",
+    "Event projectors (Azure Functions) subscribe to the event stream and update read model projections in Cosmos DB",
+    "Client queries the read model API backed by Cosmos DB (or Redis cache) for low-latency, denormalised views",
+    "For temporal queries or audit, the full event history is replayed from Event Hubs to reconstruct state at any point in time",
+    "Application Insights tracks command processing latency, event processing lag, and projection freshness SLAs"
+  ],
+  "problemStatement": "Single-model architectures that share the same data model for reads and writes suffer from impedance mismatch: read-optimised queries conflict with write-optimised transactional models, creating lock contention, scalability ceilings, and inability to reconstruct historical state for audit or debugging purposes.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Require-EventHub-Capture-For-Compliance",
+    "ccoeRunbook": "cqrs-event-sourcing-operations-runbook-v1.1",
+    "configExample": "cqrs-event-sourcing-config-v1.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-cqrs-event-sourcing"
+  },
+  "securityConsiderations": [
+    "Event store must be immutable — no delete or update operations allowed on committed events; use Event Hubs capture to ADLS for long-term retention",
+    "Command and query APIs must enforce Azure AD authentication with separate RBAC roles for writers and readers",
+    "Events containing PII must be encrypted at the event level using Azure Key Vault-managed keys before publication",
+    "Read model projections must not aggregate data across classification boundaries without explicit data classification review",
+    "Idempotency keys must be enforced on all commands to prevent duplicate processing in at-least-once delivery scenarios"
+  ]
+}
