@@ -1,0 +1,127 @@
+{
+  "type": "pattern",
+  "name": "Identity & Privileged Access Management",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Sarah Chen",
+  "domain": "Security & Controls",
+  "status": "Endorsed",
+  "version": "2.0",
+  "useCases": [
+    {
+      "use": "All production Azure workloads requiring privileged operations (subscription admin, Key Vault, database admin, network changes)",
+      "dontUse": "Non-privileged read-only developer access to non-production sandboxes with no sensitive data"
+    },
+    {
+      "use": "Service-to-service authentication for all cloud-native workloads (replace service account passwords with Managed Identities)",
+      "dontUse": "Isolated research or innovation sandboxes with no connection to production or corporate identity plane"
+    },
+    {
+      "use": "Third-party vendor access requiring time-limited, audited privileged access to McCain systems",
+      "dontUse": "Consumer-facing application identity (use Azure AD B2C pattern instead)"
+    }
+  ],
+  "approvers": "CISO, CCoE Security Board",
+  "leanixRef": "LX-7001",
+  "patternId": "SEC-IAM-001",
+  "components": [
+    "Microsoft Entra ID (Azure AD) — corporate identity plane for all human and workload identities",
+    "Microsoft Entra Privileged Identity Management (PIM) — just-in-time privileged role activation with approval workflow",
+    "Microsoft Entra ID Governance — access reviews, lifecycle workflows, and entitlement management",
+    "Azure Managed Identities — system-assigned and user-assigned identities for all Azure service-to-service auth",
+    "Microsoft Entra Verified ID — verifiable credentials for third-party vendor identity verification",
+    "Microsoft Defender for Identity — identity threat detection (lateral movement, pass-the-hash, Kerberoasting)",
+    "Azure Key Vault — certificate and secret management for workload identities",
+    "Microsoft Sentinel — identity-based incident detection and SOAR playbooks"
+  ],
+  "guardrails": [
+    {
+      "area": "Identity",
+      "rule": "MFA is mandatory for all human identities — passwordless (FIDO2) required for all privileged users",
+      "severity": "Required"
+    },
+    {
+      "area": "Privilege",
+      "rule": "No standing Owner or Contributor role assignments in production subscriptions — PIM eligible only",
+      "severity": "Required"
+    },
+    {
+      "area": "Service Identity",
+      "rule": "All Azure workloads must use Managed Identity for service-to-service auth — no stored secrets in code or config",
+      "severity": "Required"
+    },
+    {
+      "area": "Governance",
+      "rule": "Quarterly access reviews must be completed for all privileged and sensitive roles — non-response = revoke",
+      "severity": "Required"
+    },
+    {
+      "area": "Monitoring",
+      "rule": "Identity audit logs from Entra ID must be streamed to Sentinel — minimum 2-year retention",
+      "severity": "Required"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-SEC-2026-001",
+  "composition": [
+    {
+      "patternId": "SC-001",
+      "patternName": "Zero Trust Network Access",
+      "relationship": "Underpins"
+    },
+    {
+      "patternId": "AP-001",
+      "patternName": "API Gateway Pattern",
+      "relationship": "Provides identity plane for"
+    }
+  ],
+  "lastReviewed": "2026-01-30",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-04-01",
+      "author": "Sarah Chen",
+      "summary": "Initial IAM pattern covering Entra ID, PIM, and Managed Identities",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-10-15",
+      "author": "Sarah Chen",
+      "summary": "Added Entra ID Governance access reviews, Verified ID for vendors, and Defender for Identity integration",
+      "version": "1.5"
+    },
+    {
+      "date": "2026-01-30",
+      "author": "Sarah Chen",
+      "summary": "Elevated to Endorsed status after CISO review. Added FIDO2 passwordless mandate for privileged users.",
+      "version": "2.0"
+    }
+  ],
+  "strategicIntent": "Establish a unified Identity & Privileged Access Management (IAM/PAM) framework across McCain's entire Azure estate — ensuring that every human and non-human identity is governed by least-privilege access, just-in-time elevation, and continuous verification aligned with Zero Trust principles.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Security Exception Request via ServiceNow with CISO approval. Standing privileged access exceptions require formal risk acceptance, compensating controls (enhanced logging, 30-day review cycle), and automatic expiry after 90 days.",
+  "interactionSteps": [
+    "All human identities authenticate via Microsoft Entra ID using MFA (FIDO2 or Microsoft Authenticator) before any Azure resource access",
+    "Privileged roles (Owner, Contributor, Key Vault Administrator, etc.) are not permanently assigned — eligible via PIM only",
+    "Engineer requests privileged access via PIM — specifies duration (max 4 hours), justification, and approver",
+    "PIM notifies designated approver; approval granted, activation time-bounded and fully audited",
+    "All Azure service-to-service authentication uses system-assigned Managed Identities — no stored credentials or service account passwords",
+    "Quarterly access reviews run via Entra ID Governance — resource owners certify or revoke standing access",
+    "Defender for Identity monitors all identity activity; anomalous behaviour (unusual privilege use, lateral movement) triggers Sentinel alert and SOAR playbook"
+  ],
+  "problemStatement": "Without a standardised IAM/PAM framework, teams provision standing privileged access, share service account credentials, and operate outside the corporate identity plane — creating exploitable privilege escalation paths, audit failures, and inability to respond rapidly to identity-based incidents.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Require-ManagedIdentity-For-AppServices, Deny-Classic-Admins, Require-PIM-For-PrivilegedRoles",
+    "ccoeRunbook": "iam-pam-operations-runbook-v2.0",
+    "configExample": "pim-role-settings-v2.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-iam-baseline"
+  },
+  "securityConsiderations": [
+    "No standing privileged roles are permitted in production — all elevated access must be JIT via PIM",
+    "Service accounts with passwords are prohibited — all workload identities must use Managed Identities or certificate-based authentication",
+    "Breakglass accounts must be documented, MFA-exempt (FIDO2 hardware key only), and access triggers immediate SOC alert",
+    "All PIM activations, access reviews, and role assignments must be exported to Sentinel for long-term audit retention (7 years)",
+    "Third-party vendor access must be provisioned via Entra External Identities with time-bounded access packages — never via shared accounts"
+  ]
+}
