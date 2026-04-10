@@ -1,0 +1,120 @@
+{
+  "type": "pattern",
+  "name": "Data Mesh Architecture",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Aisha Patel",
+  "domain": "Data & Storage",
+  "status": "Endorsed",
+  "version": "1.0",
+  "useCases": [
+    {
+      "use": "Domain teams (Supply Chain, Finance, Marketing) publishing their own data products to a federated catalogue",
+      "dontUse": "Simple single-domain analytics projects that can be served by a standard data lake (DT-001)"
+    },
+    {
+      "use": "Large-scale enterprise data initiatives with 5+ distinct business domains producing data independently",
+      "dontUse": "Operational transactional databases — Data Mesh is an analytical pattern only"
+    },
+    {
+      "use": "Organisations requiring federated data governance with domain autonomy and cross-domain discoverability",
+      "dontUse": "Small teams where central data ownership is pragmatic and the overhead of domain data products is not justified"
+    }
+  ],
+  "approvers": "Data Architecture Board, James Okafor",
+  "leanixRef": "LX-6201",
+  "patternId": "DT-002",
+  "components": [
+    "Azure Purview — federated data catalogue and governance plane",
+    "Azure Data Lake Storage Gen2 — per-domain storage accounts (domain data product storage)",
+    "Azure Databricks — domain-specific transformation and serving compute",
+    "Azure Synapse Analytics — cross-domain analytical queries and federated views",
+    "Azure Event Hubs — real-time data product event streaming between domains",
+    "Azure API Management — data product API gateway for programmatic data consumption",
+    "Microsoft Fabric — unified analytics for cross-domain self-service reporting"
+  ],
+  "guardrails": [
+    {
+      "area": "Ownership",
+      "rule": "Every data product must have a named domain data owner registered in the Purview catalogue",
+      "severity": "Required"
+    },
+    {
+      "area": "Quality",
+      "rule": "All data products must define and publish data quality metrics (completeness, freshness, accuracy) in the catalogue",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "Domain storage accounts must not allow public network access — all access via private endpoints",
+      "severity": "Required"
+    },
+    {
+      "area": "Governance",
+      "rule": "Data products containing PII or Confidential data must be registered in Purview with applied sensitivity labels before consumption",
+      "severity": "Required"
+    },
+    {
+      "area": "Interoperability",
+      "rule": "Data products must expose at least one standard interface (ADLS path, Delta table, or API) for cross-domain consumption",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-DT-2026-002",
+  "composition": [
+    {
+      "patternId": "DT-001",
+      "patternName": "Data Lake Architecture",
+      "relationship": "Extends"
+    },
+    {
+      "patternId": "AP-001",
+      "patternName": "API Gateway Pattern",
+      "relationship": "Uses for data product API exposure"
+    }
+  ],
+  "lastReviewed": "2026-02-15",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-09-01",
+      "author": "Aisha Patel",
+      "summary": "Initial Data Mesh pattern based on reference architecture from Zhamak Dehghani framework",
+      "version": "0.8"
+    },
+    {
+      "date": "2026-02-15",
+      "author": "Aisha Patel",
+      "summary": "Endorsed after pilot with Supply Chain domain. Added Microsoft Fabric integration and Purview automated scanning guardrails.",
+      "version": "1.0"
+    }
+  ],
+  "strategicIntent": "Enable domain-oriented, decentralised data ownership where each business domain owns, produces, and serves its own data as a product — eliminating the central data team bottleneck and improving data quality, discoverability, and time-to-insight across McCain's global operations.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Data Architecture Review request to the Data Architecture Board with justification for central data lake pattern instead of domain-owned data products. Requires approval from Chief Data Officer and EA Lead.",
+  "interactionSteps": [
+    "Domain team registers a new data product in the Azure Purview data catalogue with ownership, schema, SLA, and quality expectations",
+    "Domain pipeline (Databricks or Synapse) transforms and writes domain data to its dedicated ADLS Gen2 storage account",
+    "Data product is published to the federated catalogue with access policies, data classification, and lineage tracked in Purview",
+    "Consumers discover data products via Purview catalogue and request access through automated access provisioning (Azure AD groups)",
+    "Consumer accesses data product via approved interface — direct ADLS read, Synapse federated query, or REST API via APIM",
+    "Purview continuously monitors data quality metrics and SLA adherence, alerting domain owners on degradation",
+    "Cross-domain data products are composed using Synapse Linked Services or Databricks Delta Sharing for governed cross-domain queries"
+  ],
+  "problemStatement": "McCain's centralised data lake creates bottlenecks where a single platform team must onboard, transform, and maintain all domain data, leading to stale pipelines, poor data quality, unclear ownership, and inability to scale with the volume of data generated across 35+ manufacturing plants and 50+ markets.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Require-Purview-Sensitivity-Label-On-Storage",
+    "ccoeRunbook": "data-mesh-domain-onboarding-runbook-v1.0",
+    "configExample": "data-mesh-domain-template-v1.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-data-mesh-domain"
+  },
+  "securityConsiderations": [
+    "Each domain storage account must have its own private endpoint and Azure AD RBAC — no shared access across domains without explicit approval",
+    "Data classification must be applied at ingestion via Purview automated scanning — Restricted and Confidential data products require additional access controls",
+    "Cross-domain data sharing must be governed by a Data Sharing Agreement registered in Purview",
+    "All data product APIs must enforce OAuth2 authentication via Azure AD — no anonymous or API-key-only access",
+    "Purview audit logs must be retained for 2 years for data governance compliance"
+  ]
+}
