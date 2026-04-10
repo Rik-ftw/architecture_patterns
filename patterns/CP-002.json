@@ -1,0 +1,121 @@
+{
+  "type": "pattern",
+  "name": "Disaster Recovery & Business Continuity",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Alex Thompson",
+  "domain": "Cloud & Platform",
+  "status": "Endorsed",
+  "version": "1.1",
+  "useCases": [
+    {
+      "use": "All Tier 1 production workloads (critical business systems with RTO < 4 hours and RPO < 1 hour)",
+      "dontUse": "Development, test, or staging environments — DR is not required for non-production workloads"
+    },
+    {
+      "use": "Data platform workloads requiring active-active or active-passive replication across Azure region pairs",
+      "dontUse": "Ephemeral compute workloads with no persistent state that can be redeployed from IaC within minutes"
+    },
+    {
+      "use": "Regulatory workloads requiring documented and tested DR procedures for audit evidence (SOX, ISO 27001)",
+      "dontUse": "Internal tools with RTO > 72 hours where backup-and-restore is a sufficient recovery strategy"
+    }
+  ],
+  "approvers": "Platform Architecture Board, CISO, James Okafor",
+  "leanixRef": "LX-6102",
+  "patternId": "CP-002",
+  "components": [
+    "Azure Site Recovery (ASR) — VM and on-premises server replication and automated failover orchestration",
+    "Azure Backup — policy-based backup for VMs, SQL databases, Blob Storage, and AKS persistent volumes",
+    "Azure Traffic Manager / Front Door — DNS-level or anycast traffic failover between primary and secondary regions",
+    "Geo-redundant storage (GRS / RA-GRS) — automatic data replication across Azure region pairs",
+    "Azure SQL Geo-Replication / Active Geo-Replication — synchronous and asynchronous database replication",
+    "Azure Cosmos DB multi-region writes — active-active global database replication",
+    "Azure Automation + Azure DevOps — DR runbook automation and IaC-based environment rebuild"
+  ],
+  "guardrails": [
+    {
+      "area": "RTO/RPO",
+      "rule": "All Tier 1 workloads must document and test RTO ≤ 4 hours and RPO ≤ 1 hour annually",
+      "severity": "Required"
+    },
+    {
+      "area": "Testing",
+      "rule": "DR failover test must be executed at least annually; results must be documented and exceptions remediated within 90 days",
+      "severity": "Required"
+    },
+    {
+      "area": "Backup",
+      "rule": "All Tier 1 data stores must have backup immutability enabled and backup compliance monitored daily",
+      "severity": "Required"
+    },
+    {
+      "area": "Region Pairing",
+      "rule": "All Azure workloads must use Microsoft-defined region pairs for geo-replication — custom region combinations are not approved",
+      "severity": "Required"
+    },
+    {
+      "area": "Documentation",
+      "rule": "All Tier 1 workloads must have a tested DR runbook registered in the CMDB and updated within 30 days of architecture changes",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-CP-2026-002",
+  "composition": [
+    {
+      "patternId": "CP-001",
+      "patternName": "Azure Landing Zone Foundation",
+      "relationship": "Deploys within"
+    },
+    {
+      "patternId": "NW-001",
+      "patternName": "Hub-Spoke Network Topology",
+      "relationship": "Network failover uses"
+    }
+  ],
+  "lastReviewed": "2026-01-25",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-06-01",
+      "author": "Alex Thompson",
+      "summary": "Initial DR/BCP pattern for Azure Tier 1 workloads",
+      "version": "1.0"
+    },
+    {
+      "date": "2026-01-25",
+      "author": "Alex Thompson",
+      "summary": "Endorsed. Added Cosmos DB multi-region writes, backup immutability guardrail, and annual DR test requirement.",
+      "version": "1.1"
+    }
+  ],
+  "strategicIntent": "Define a standardised Disaster Recovery and Business Continuity architecture for all Tier 1 and Tier 2 Azure workloads — ensuring that McCain's critical systems can recover from regional Azure outages, data corruption, or catastrophic failure within defined RTO and RPO targets, with tested and automated failover procedures.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit DR Exception Request via ServiceNow for any Tier 1 workload unable to meet RTO/RPO targets. Requires Platform Architecture Board approval, formal risk acceptance by business owner, and compensating controls documented. Maximum exception duration 6 months.",
+  "interactionSteps": [
+    "Workload team defines Tier (1/2/3) and target RTO/RPO via the DR Tier Classification template registered in the CMDB",
+    "Platform team provisions geo-redundant infrastructure in the designated Azure region pair (Canada Central ↔ Canada East for Canadian workloads)",
+    "ASR or database geo-replication continuously replicates data from primary to secondary region; replication lag monitored in Azure Monitor",
+    "Azure Backup runs policy-based backup jobs; backup compliance report generated daily and reviewed by platform team",
+    "In a DR event: Traffic Manager or Front Door DNS failover redirects traffic to secondary region within minutes",
+    "ASR orchestrates VM failover to secondary region; database failover group promotes secondary to primary automatically or on-demand",
+    "DR test executed at minimum annually: automated failover triggered in isolated test environment; RTO/RPO validated against targets",
+    "Post-failover: Azure Automation runbooks validate service health in secondary before marking failover complete"
+  ],
+  "problemStatement": "Workload teams design recovery strategies in isolation, resulting in inconsistent RTO/RPO targets, untested DR procedures, manual failover requiring specialist knowledge unavailable during an incident, and no standard for which Azure region pairs to use for replication — creating organisational risk in the event of a regional Azure outage.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Require-ASR-For-Tier1-VMs, Require-BackupImmutability, Require-GRS-For-Tier1-Storage",
+    "ccoeRunbook": "dr-bcp-operations-runbook-v1.1",
+    "configExample": "dr-tier-classification-template-v1.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-dr-baseline"
+  },
+  "securityConsiderations": [
+    "DR replica environments must inherit the same security policies, Azure Policy initiatives, and network controls as production",
+    "Backup data must be encrypted with customer-managed keys stored in Azure Key Vault; backup immutability must be enabled",
+    "DR runbook access must be gated by PIM — no standing access to DR orchestration tooling outside of declared incidents",
+    "Failover credentials and connection strings must be managed in Key Vault — not embedded in runbooks or pipelines",
+    "DR site must be treated as production security tier from day one — not as a relaxed secondary environment"
+  ]
+}
