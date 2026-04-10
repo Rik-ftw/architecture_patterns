@@ -2,11 +2,11 @@
 
 This repository is the canonical source for all approved and in-development Enterprise Architecture patterns and solution designs at McCain Foods.
 
-> **Auto-synced** from the [McCain EA Platform](https://ea-platform.replit.app) · Last updated: 06 April 2026
+> **Auto-synced** from the [McCain EA Platform](https://ea-platform.replit.app) · Last updated: 10 April 2026
 
 ## Pattern Library
 
-This repository contains **17 architecture patterns** across six domains, each with JSON metadata and 10 SVG architecture diagrams.
+This repository contains **25 architecture patterns** across six domains, each with JSON metadata and 10 SVG architecture diagrams.
 
 ### Pattern Levels
 
