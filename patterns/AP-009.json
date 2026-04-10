@@ -1,0 +1,127 @@
+{
+  "type": "pattern",
+  "name": "AI/LLM Gateway Pattern",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Priya Sharma",
+  "domain": "Application & Integration",
+  "status": "In Development",
+  "version": "0.8",
+  "useCases": [
+    {
+      "use": "Any McCain application integrating with Azure OpenAI or other LLM APIs in production",
+      "dontUse": "Developer experimentation in personal Azure OpenAI instances within approved innovation sandboxes"
+    },
+    {
+      "use": "Multi-tenant AI features where different business units share LLM infrastructure with cost allocation per team",
+      "dontUse": "Highly latency-sensitive real-time AI features where gateway hop adds unacceptable overhead — requires architecture review"
+    },
+    {
+      "use": "AI features processing Confidential or Restricted data requiring prompt-level content inspection before sending to LLM",
+      "dontUse": "Batch offline processing pipelines where synchronous gateway is not appropriate — use async queue pattern"
+    }
+  ],
+  "approvers": "Integration Architecture Board",
+  "leanixRef": "LX-5301",
+  "patternId": "AP-009",
+  "components": [
+    "Azure API Management — LLM request routing, authentication, rate-limiting, and token quota management",
+    "Azure OpenAI Service — primary LLM provider (GPT-4o, GPT-4-turbo) in Canada Central",
+    "Azure AI Content Safety — pre/post prompt content filtering for harmful content detection",
+    "Azure Monitor + Application Insights — token consumption tracking, latency monitoring, and cost attribution",
+    "Azure Key Vault — API key and endpoint management for all LLM providers",
+    "Azure Cache for Redis — semantic caching of LLM responses to reduce cost for repeated similar queries",
+    "Azure Policy — deny direct Azure OpenAI access from application subscriptions (gateway mandatory)"
+  ],
+  "guardrails": [
+    {
+      "area": "Access Control",
+      "rule": "All LLM API calls must route through the centralised AI Gateway — direct Azure OpenAI access is prohibited in production",
+      "severity": "Required"
+    },
+    {
+      "area": "Cost",
+      "rule": "Token quotas must be configured per application subscription — no unlimited token access",
+      "severity": "Required"
+    },
+    {
+      "area": "Content Safety",
+      "rule": "Prompt injection and harmful content detection must be enabled for all AI features processing external user input",
+      "severity": "Required"
+    },
+    {
+      "area": "Privacy",
+      "rule": "Prompt and completion content must not be persisted — only metadata (tokens, latency, model, application ID) may be logged",
+      "severity": "Required"
+    },
+    {
+      "area": "Resilience",
+      "rule": "Gateway must configure at least two Azure OpenAI deployments for automatic failover on throttling or service degradation",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": null,
+  "composition": [
+    {
+      "patternId": "AP-001",
+      "patternName": "API Gateway Pattern",
+      "relationship": "Extends for AI/LLM traffic"
+    },
+    {
+      "patternId": "OB-001",
+      "patternName": "Centralised Observability Platform",
+      "relationship": "Sends AI telemetry to"
+    }
+  ],
+  "lastReviewed": "2026-03-01",
+  "ccoeCertified": "No",
+  "revisionHistory": [
+    {
+      "date": "2026-01-10",
+      "author": "Priya Sharma",
+      "summary": "Initial AI/LLM Gateway pattern based on Azure API Management + Azure OpenAI integration",
+      "version": "0.5"
+    },
+    {
+      "date": "2026-03-01",
+      "author": "Priya Sharma",
+      "summary": "Added semantic caching, multi-deployment load balancing, AI Content Safety integration, and privacy guardrails",
+      "version": "0.8"
+    }
+  ],
+  "strategicIntent": "Provide a centralised, governed AI/LLM gateway that mediates all interactions between McCain applications and large language model APIs — enforcing prompt safety policies, cost controls, content filtering, and observability across all AI-powered features, while preventing direct unbounded LLM API access from application teams.",
+  "thirdPartyRisks": [
+    {
+      "risk": "Microsoft data processing terms apply to all prompts — data handling must be reviewed for Confidential data",
+      "vendor": "Azure OpenAI Service",
+      "mitigation": "Use Azure OpenAI PTU (Provisioned Throughput Units) with data handling agreement; do not send Restricted data to LLMs"
+    }
+  ],
+  "exceptionProcess": "Submit AI Architecture Exception via ServiceNow with justification for direct LLM API access. Requires Integration Architecture Board and Chief Data & AI Officer approval. Maximum exception duration 30 days during approved PoC phase.",
+  "interactionSteps": [
+    "Application team registers their AI use case in the APIM AI product catalogue with approved token budget, model, and content policy",
+    "Application authenticates to the AI Gateway (APIM) using its Managed Identity — no direct Azure OpenAI API keys in application code",
+    "APIM validates authentication, enforces per-subscription token quota, and checks if a semantically equivalent response is cached in Redis",
+    "If cache miss: APIM forwards request to Azure AI Content Safety for prompt inspection — harmful or policy-violating prompts are blocked",
+    "Clean prompts are routed to Azure OpenAI Service (or fallback provider) with load balancing across deployments",
+    "LLM response passes through AI Content Safety post-filtering before returning to the application",
+    "APIM logs token consumption, latency, model, and cost attribution to Application Insights for chargeback reporting",
+    "If primary Azure OpenAI deployment is throttled, APIM automatically retries against secondary deployment or alternative model"
+  ],
+  "problemStatement": "Without a central AI gateway, application teams integrate directly with LLM APIs (Azure OpenAI, OpenAI, Anthropic) independently — resulting in uncontrolled API cost, no prompt injection protection, inconsistent content filtering, inability to switch providers, and no visibility into AI usage patterns across the organisation.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Deny-DirectOpenAI-Access, Require-AIGateway-For-LLM",
+    "ccoeRunbook": "ai-llm-gateway-operations-runbook-v0.8",
+    "configExample": "apim-llm-gateway-config-v0.8.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-ai-gateway"
+  },
+  "securityConsiderations": [
+    "No application may call Azure OpenAI APIs directly — all requests must route through the AI Gateway; enforced by Azure Policy and VNet isolation",
+    "Prompts and completions must not be logged in plain text in Application Insights — log metadata only (tokens, latency, model) to prevent PII leakage",
+    "Azure OpenAI deployments must be in a dedicated subscription with private endpoints — not in workload subscriptions",
+    "Prompt injection detection must be enabled via Azure AI Content Safety for all production AI features processing user input",
+    "Monthly AI cost attribution reports must be reviewed by the CCoE and shared with business unit owners for budget accountability"
+  ]
+}
