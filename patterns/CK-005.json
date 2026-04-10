@@ -1,0 +1,127 @@
+{
+  "type": "pattern",
+  "name": "Container Security Pattern",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Sarah Chen",
+  "domain": "Security & Controls",
+  "status": "Endorsed",
+  "version": "1.2",
+  "useCases": [
+    {
+      "use": "All production containerised workloads deployed on Azure Kubernetes Service (AKS) or Azure Container Apps",
+      "dontUse": "Development-only Docker Compose environments on developer laptops with no access to production data or networks"
+    },
+    {
+      "use": "CI/CD pipelines building and deploying container images to McCain's container registries",
+      "dontUse": "VM-based workloads that do not use container orchestration"
+    },
+    {
+      "use": "Any AKS cluster running workloads that process Confidential or Restricted data",
+      "dontUse": "Temporary batch processing containers with no network exposure and ephemeral data only — if exemption approved"
+    }
+  ],
+  "approvers": "CCoE Security Board, Platform Engineering Lead",
+  "leanixRef": "LX-7005",
+  "patternId": "CK-005",
+  "components": [
+    "Azure Container Registry (ACR) — private container registry with geo-replication and quarantine policy",
+    "Microsoft Defender for Containers — runtime threat detection, vulnerability assessment, and Kubernetes security posture",
+    "Azure Policy (OPA Gatekeeper) — admission control policies (no root containers, no privileged pods, required labels)",
+    "Azure Kubernetes Service (AKS) — managed Kubernetes with RBAC, Azure AD integration, and private cluster mode",
+    "Trivy / Microsoft Defender vulnerability scanning — image scanning in CI pipeline and registry",
+    "Azure Monitor for Containers — pod-level resource monitoring, log collection, and alerting",
+    "Azure Key Vault CSI Driver — secrets injection into pods without environment variable exposure",
+    "Falco (runtime) — kernel-level anomaly detection for container runtime threats"
+  ],
+  "guardrails": [
+    {
+      "area": "Image Security",
+      "rule": "All container images must pass vulnerability scan with zero Critical CVEs before deployment to production",
+      "severity": "Required"
+    },
+    {
+      "area": "Runtime",
+      "rule": "Containers must not run as root and must have read-only root filesystem where application supports it",
+      "severity": "Required"
+    },
+    {
+      "area": "Secrets",
+      "rule": "Secrets must not be stored in container images or environment variables — Key Vault CSI Driver required",
+      "severity": "Required"
+    },
+    {
+      "area": "Registry",
+      "rule": "All production images must be pulled exclusively from McCain's Azure Container Registry — no external registries",
+      "severity": "Required"
+    },
+    {
+      "area": "Monitoring",
+      "rule": "Defender for Containers must be enabled on all production AKS clusters",
+      "severity": "Required"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-CK-2026-005",
+  "composition": [
+    {
+      "patternId": "SEC-IAM-001",
+      "patternName": "Identity & Privileged Access Management",
+      "relationship": "Uses for AKS workload identity"
+    },
+    {
+      "patternId": "CP-001",
+      "patternName": "Azure Landing Zone Foundation",
+      "relationship": "Deploys within"
+    }
+  ],
+  "lastReviewed": "2026-02-01",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-05-20",
+      "author": "Sarah Chen",
+      "summary": "Initial container security pattern for AKS workloads",
+      "version": "1.0"
+    },
+    {
+      "date": "2025-09-10",
+      "author": "Sarah Chen",
+      "summary": "Added Key Vault CSI Driver mandate, Falco runtime detection, and image signing with Notation",
+      "version": "1.1"
+    },
+    {
+      "date": "2026-02-01",
+      "author": "Sarah Chen",
+      "summary": "Endorsed. Added OPA Gatekeeper admission policy library and Defender for Containers integration.",
+      "version": "1.2"
+    }
+  ],
+  "strategicIntent": "Establish a secure container supply chain and runtime security posture for all containerised workloads running on Azure Kubernetes Service — from image build through registry scanning, admission control, and runtime threat detection — ensuring containers are treated as untrusted code requiring continuous verification.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Container Security Exception via ServiceNow. Root container exceptions require CISO approval and compensating controls (enhanced Falco rules, network policy isolation, 24hr review cycle). Maximum exception duration 90 days.",
+  "interactionSteps": [
+    "Developer builds container image — CI pipeline runs Trivy vulnerability scan; build fails on Critical or High CVEs without approved exception",
+    "Image pushed to Azure Container Registry with quarantine policy — Defender for Containers rescans the image in registry before promoting to production repository",
+    "Deployment manifest submitted to AKS — Azure Policy / OPA Gatekeeper admission controller validates: no root user, no privileged containers, required labels present, image from approved ACR only",
+    "Pod starts — Key Vault CSI Driver mounts secrets as files (no env vars); containers run as non-root with read-only filesystem where possible",
+    "Defender for Containers monitors runtime behaviour — anomalous syscalls, privilege escalation attempts, or unexpected network connections trigger Sentinel alerts",
+    "Falco rules detect known attack patterns (shell spawned in container, sensitive file access, crypto mining signatures) and emit events to Sentinel",
+    "Azure Monitor collects pod logs and metrics; alerts on resource exhaustion, crash loops, and OOM events via action group"
+  ],
+  "problemStatement": "Container images introduce a novel software supply chain attack surface: vulnerable base images, embedded secrets, missing CVE patches, and unrestricted container privileges can all be exploited at runtime. Without a standardised container security pattern, teams ship unscanned images with excessive privileges and no runtime threat detection.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Deny-Privileged-Containers, Require-NonRoot-Containers, Deny-External-Registry-Images",
+    "ccoeRunbook": "container-security-operations-runbook-v1.2",
+    "configExample": "aks-security-baseline-v1.2.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-aks-security"
+  },
+  "securityConsiderations": [
+    "All container images must originate from approved base images on the McCain approved image list — no public Docker Hub pulls in production",
+    "Containers must not run as root (UID 0) in production — runAsNonRoot must be enforced via OPA Gatekeeper policy",
+    "No secrets may be injected via environment variables — all secrets must use Key Vault CSI Driver or Managed Identity",
+    "AKS clusters must operate in private cluster mode — no public API server endpoint in production",
+    "Container image signatures must be verified at admission using Notation and Azure Key Vault-backed signing keys"
+  ]
+}
