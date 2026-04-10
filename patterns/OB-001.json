@@ -1,0 +1,121 @@
+{
+  "type": "pattern",
+  "name": "Centralised Observability Platform",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Alex Thompson",
+  "domain": "Observability & Operations",
+  "status": "Endorsed",
+  "version": "1.1",
+  "useCases": [
+    {
+      "use": "All production Azure workloads requiring monitoring, alerting, and incident detection",
+      "dontUse": "Development and sandbox environments where local logging is sufficient — use the shared non-production workspace instead"
+    },
+    {
+      "use": "Cross-service distributed tracing for microservices architectures running on AKS or Azure Functions",
+      "dontUse": "Simple single-service applications where built-in Azure portal metrics are sufficient"
+    },
+    {
+      "use": "SOC 2 and ISO 27001 compliance evidence generation requiring centralised log retention and audit trail",
+      "dontUse": "Isolated PoC or innovation projects with no compliance requirements"
+    }
+  ],
+  "approvers": "Platform Architecture Board, James Okafor",
+  "leanixRef": "LX-8001",
+  "patternId": "OB-001",
+  "components": [
+    "Azure Log Analytics Workspace (centralised) — single hub workspace for all workload log aggregation",
+    "Application Insights (workspace-based) — distributed tracing, dependency tracking, and availability tests per workload",
+    "Azure Monitor — metric collection, alert rules, and action groups for all Azure resources",
+    "Azure Monitor Workbooks — shared operational dashboards for SLA reporting and capacity planning",
+    "Microsoft Sentinel — SIEM for security signal correlation, threat detection, and compliance reporting",
+    "Azure Monitor Private Link Scope (AMPLS) — private network ingestion for all log sources",
+    "Grafana (Azure Managed) — engineering-facing dashboards with Prometheus and Log Analytics data sources",
+    "Azure Data Explorer — long-term analytics over historical log data (>90 days hot retention)"
+  ],
+  "guardrails": [
+    {
+      "area": "Ingestion",
+      "rule": "All production Azure resources must send diagnostic logs to the centralised Log Analytics Workspace — no isolated workload workspaces",
+      "severity": "Required"
+    },
+    {
+      "area": "Retention",
+      "rule": "Hot retention minimum 90 days; security and compliance logs minimum 2 years; financial audit logs 7 years",
+      "severity": "Required"
+    },
+    {
+      "area": "Alerting",
+      "rule": "All Tier 1 workloads must have P1/P2 alert rules configured with PagerDuty action group",
+      "severity": "Required"
+    },
+    {
+      "area": "Privacy",
+      "rule": "Logs containing PII must be redacted at ingestion via Log Analytics transformation rules before storage",
+      "severity": "Required"
+    },
+    {
+      "area": "Cost",
+      "rule": "Log Analytics daily ingestion cap must be set per workload; budget alerts at 80% of cap must be configured",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-OB-2026-001",
+  "composition": [
+    {
+      "patternId": "CP-001",
+      "patternName": "Azure Landing Zone Foundation",
+      "relationship": "Platform telemetry feeds"
+    },
+    {
+      "patternId": "NW-002",
+      "patternName": "Private Connectivity Pattern",
+      "relationship": "Uses AMPLS for private log ingestion"
+    }
+  ],
+  "lastReviewed": "2026-02-20",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-08-01",
+      "author": "Alex Thompson",
+      "summary": "Initial centralised observability pattern with Log Analytics and Application Insights",
+      "version": "1.0"
+    },
+    {
+      "date": "2026-02-20",
+      "author": "Alex Thompson",
+      "summary": "Endorsed. Added Azure Managed Grafana, Azure Data Explorer archival, AMPLS private ingestion, and PII transformation guardrail.",
+      "version": "1.1"
+    }
+  ],
+  "strategicIntent": "Establish a unified, centralised observability platform across all McCain Azure workloads — aggregating logs, metrics, traces, and security signals into a single pane of glass — enabling rapid incident detection, root cause analysis, and SLA reporting without requiring per-team observability infrastructure.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Observability Exception via ServiceNow for workloads requiring isolated Log Analytics workspace. Must include justification (data residency, compliance isolation, or cost isolation requirement), approval from Platform Architecture Board, and quarterly review to assess readiness to consolidate.",
+  "interactionSteps": [
+    "All Azure resources send diagnostic logs and metrics to the centralised Log Analytics Workspace via diagnostic settings — enforced by Azure Policy",
+    "Application teams instrument workloads with Application Insights SDK (workspace-based, linked to central workspace) for distributed traces and custom telemetry",
+    "Azure Monitor collects platform metrics at 1-minute granularity; alert rules trigger action groups (PagerDuty for P1/P2, email for P3/P4)",
+    "Security signals (Azure AD, Defender, network flow logs) route to Microsoft Sentinel via data connectors for SIEM correlation",
+    "Workload teams access their telemetry via Azure Monitor Workbooks and Grafana dashboards — scoped to their workload's resource group",
+    "Log Analytics hot retention (90 days) rolls to Azure Data Explorer for 2-year warm analytics and 7-year cold archive to ADLS",
+    "Monthly SLA reports generated via Azure Monitor Workbooks and distributed to workload owners and CCoE"
+  ],
+  "problemStatement": "Without a centralised observability platform, each application team builds isolated monitoring stacks, creating alert fatigue from uncoordinated notifications, inability to perform cross-service root cause analysis, inconsistent SLA reporting, and significant cost duplication from redundant Log Analytics workspaces and Application Insights instances.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Require-DiagnosticSettings-LogAnalytics, Require-AppInsights-WorkspaceBased",
+    "ccoeRunbook": "observability-platform-operations-runbook-v1.1",
+    "configExample": "log-analytics-diagnostic-settings-v1.1.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-observability-baseline"
+  },
+  "securityConsiderations": [
+    "Log Analytics Workspace must be accessed via Azure Monitor Private Link Scope (AMPLS) — no public internet log ingestion in production",
+    "Workload teams must have RBAC-scoped access to their own log data only — no cross-workload log access without explicit approval",
+    "Logs containing PII must be transformed at ingestion using Log Analytics transformation rules to redact sensitive fields",
+    "Sentinel workspace must be in the centralised security subscription — not the individual workload subscription",
+    "Log retention and purge operations must be audit-logged and require CCoE approval for purges outside retention policy"
+  ]
+}
