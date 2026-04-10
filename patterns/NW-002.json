@@ -1,0 +1,120 @@
+{
+  "type": "pattern",
+  "name": "Private Connectivity Pattern",
+  "tier": "Layer 2 — Logical",
+  "level": "Logical",
+  "owner": "Joe Bloggs",
+  "domain": "Network & Connectivity",
+  "status": "Endorsed",
+  "version": "1.0",
+  "useCases": [
+    {
+      "use": "All production Azure PaaS service access from Azure workloads and on-premises systems (Key Vault, Storage, SQL, Event Hubs, Cosmos DB, etc.)",
+      "dontUse": "Public-facing APIs and web endpoints designed for external consumer or partner access — use Azure Front Door + API Management instead"
+    },
+    {
+      "use": "On-premises to Azure connectivity for Confidential or Restricted data — ExpressRoute mandatory",
+      "dontUse": "Development sandbox environments with public test data only — VPN gateway is acceptable"
+    },
+    {
+      "use": "Third-party SaaS integrations that support Azure Private Link (e.g., Snowflake, Databricks, Confluent Cloud)",
+      "dontUse": "Public SaaS services without Private Link support where VNet injection or private connectivity is not available"
+    }
+  ],
+  "approvers": "Network Architecture Board, James Okafor",
+  "leanixRef": "LX-5520",
+  "patternId": "NW-002",
+  "components": [
+    "Azure Private Endpoints — NIC-level private IP for PaaS services within the spoke VNet",
+    "Azure Private DNS Zones — private DNS resolution for Private Endpoint FQDNs (privatelink.* zones)",
+    "Azure Private Link Service — expose custom services privately to other VNets or tenants",
+    "Azure ExpressRoute — dedicated private circuit from McCain data centres and manufacturing sites to Azure",
+    "Azure VPN Gateway — site-to-site VPN for lower-tier connectivity (Tier 2/3 sites without ExpressRoute)",
+    "Azure Firewall Premium — FQDN-based allow-list for any required public internet egress from Azure workloads",
+    "Azure Policy — deny public endpoint creation, enforce Private Endpoint for required PaaS services"
+  ],
+  "guardrails": [
+    {
+      "area": "Network",
+      "rule": "All production PaaS services (Storage, SQL, Key Vault, Event Hubs, Cosmos DB, etc.) must have public network access disabled and Private Endpoint enabled",
+      "severity": "Required"
+    },
+    {
+      "area": "DNS",
+      "rule": "Private DNS Zones for all privatelink.* namespaces must be centrally managed in the hub subscription",
+      "severity": "Required"
+    },
+    {
+      "area": "On-Premises",
+      "rule": "On-premises connectivity to Azure for Confidential or Restricted data must use ExpressRoute — not public internet VPN",
+      "severity": "Required"
+    },
+    {
+      "area": "Policy",
+      "rule": "Azure Policy must deny creation of public endpoints on PaaS services in production subscriptions",
+      "severity": "Required"
+    },
+    {
+      "area": "Egress",
+      "rule": "All internet egress from Azure workloads must be routed through centralised Azure Firewall with FQDN allow-list",
+      "severity": "Recommended"
+    }
+  ],
+  "azureDesign": null,
+  "ccoeCertRef": "CCOE-NW-2026-002",
+  "composition": [
+    {
+      "patternId": "NW-001",
+      "patternName": "Hub-Spoke Network Topology",
+      "relationship": "Deploys within"
+    },
+    {
+      "patternId": "SC-001",
+      "patternName": "Zero Trust Network Access",
+      "relationship": "Enforces network layer of"
+    }
+  ],
+  "lastReviewed": "2026-02-10",
+  "ccoeCertified": "Yes",
+  "revisionHistory": [
+    {
+      "date": "2025-07-15",
+      "author": "Joe Bloggs",
+      "summary": "Initial Private Connectivity pattern for Azure PaaS services",
+      "version": "0.9"
+    },
+    {
+      "date": "2026-02-10",
+      "author": "Joe Bloggs",
+      "summary": "Endorsed. Added Azure Private DNS Resolver integration, cross-tenant PL guardrail, and ExpressRoute BGP authentication requirement.",
+      "version": "1.0"
+    }
+  ],
+  "strategicIntent": "Eliminate public internet exposure for all data-plane communications between Azure services, on-premises systems, and platform services — using Azure Private Endpoints, Private Link, and ExpressRoute to ensure all traffic remains on the Microsoft backbone or McCain's private network, never traversing the public internet.",
+  "thirdPartyRisks": [],
+  "exceptionProcess": "Submit Network Exception via ServiceNow for any PaaS service requiring temporary public access. Must include business justification, compensating controls (IP whitelisting, enhanced logging), and automatic expiry date (maximum 30 days). Requires CCoE Network team and CISO approval.",
+  "interactionSteps": [
+    "Platform team provisions Private Endpoint for each PaaS service in the appropriate spoke VNet subnet (snet-privateendpoints-*)",
+    "Private DNS Zone for the service (e.g., privatelink.blob.core.windows.net) is linked to the hub VNet and all spoke VNets",
+    "Public network access is disabled on the PaaS service after Private Endpoint is confirmed healthy",
+    "On-premises systems resolve PaaS service FQDNs via on-premises DNS forwarders that forward privatelink.* zones to Azure Private DNS Resolver",
+    "Azure Policy enforces Deny-Public-Network-Access on all new PaaS service deployments in production subscriptions",
+    "Any required internet egress from Azure workloads routes through Azure Firewall; FQDN allow-list reviewed quarterly",
+    "ExpressRoute connectivity health monitored via Azure Monitor; failover to VPN Gateway tested annually"
+  ],
+  "problemStatement": "Azure PaaS services (Storage, SQL, Key Vault, Event Hubs, etc.) have public endpoints enabled by default. Without private connectivity controls, sensitive data traverses the public internet when accessed from Azure workloads or on-premises, creating data exfiltration risk and violating McCain's Zero Trust network requirements.",
+  "submissionSource": null,
+  "implementationAssets": {
+    "azurePolicy": "Deny-Public-Network-Access-PaaS, Require-PrivateEndpoint-KeyVault, Require-PrivateEndpoint-Storage",
+    "ccoeRunbook": "private-connectivity-operations-runbook-v1.0",
+    "configExample": "private-endpoint-baseline-v1.0.yaml",
+    "terraformModule": "github.com/mccain/terraform-azure-private-endpoints"
+  },
+  "securityConsiderations": [
+    "Public network access must be explicitly disabled on all production PaaS services after Private Endpoint creation — not just restricted",
+    "Private Endpoint NIC must be deployed in a dedicated subnet (snet-privateendpoints) separate from workload subnets",
+    "Private DNS Zones must be centrally managed in the hub subscription — no spoke-level DNS zones for privatelink zones",
+    "Cross-tenant Private Link connections must be approved by the CCoE network team — no auto-approval for cross-tenant PLs",
+    "ExpressRoute circuits must be configured with BGP authentication and route filters to prevent route leakage"
+  ]
+}
