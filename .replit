@@ -1,0 +1,18 @@
+run = "cd mcp-server && npm install && npm start"
+entrypoint = "mcp-server/src/server.js"
+
+[env]
+PORT = "3000"
+
+[nix]
+channel = "stable-24_05"
+
+[nix.packages]
+nodejs = "nodejs_20"
+
+[deployment]
+run = ["sh", "-c", "cd mcp-server && npm start"]
+
+[[ports]]
+localPort = 3000
+externalPort = 80

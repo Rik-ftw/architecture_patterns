@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "workflow-state.schema.json",
+  "title": "Intake Workflow State",
+  "description": "Tracks the lifecycle state of an intake request as it moves through triage, review, and approval.",
+  "type": "object",
+  "required": ["requestId", "currentState", "stateHistory"],
+  "properties": {
+    "requestId": {
+      "type": "string",
+      "pattern": "^INT-[0-9]{6}$"
+    },
+    "currentState": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "submitted",
+        "ai_triage",
+        "pending_triage",
+        "needs_info",
+        "in_assessment",
+        "architecture_review",
+        "security_review",
+        "vendor_review",
+        "arb_review",
+        "ccoe_review",
+        "pending_approval",
+        "approved",
+        "approved_with_conditions",
+        "rejected",
+        "deferred",
+        "in_implementation",
+        "post_implementation_review",
+        "closed",
+        "cancelled"
+      ]
+    },
+    "currentAssignee": {
+      "type": "object",
+      "properties": {
+        "type": { "type": "string", "enum": ["individual", "team", "ai_agent", "review_board"] },
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" }
+      }
+    },
+    "aiTriageResult": {
+      "type": "object",
+      "description": "Output from the AI triage engine",
+      "properties": {
+        "triageTimestamp": { "type": "string", "format": "date-time" },
+        "confidenceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+        "riskScore": {
+          "type": "object",
+          "properties": {
+            "overall": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+            "security": { "type": "number", "minimum": 0, "maximum": 10 },
+            "compliance": { "type": "number", "minimum": 0, "maximum": 10 },
+            "architectural": { "type": "number", "minimum": 0, "maximum": 10 },
+            "operational": { "type": "number", "minimum": 0, "maximum": 10 },
+            "vendor": { "type": "number", "minimum": 0, "maximum": 10 }
+          }
+        },
+        "suggestedCategory": { "type": "string" },
+        "matchedPatterns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "patternId": { "type": "string" },
+              "patternName": { "type": "string" },
+              "relevanceScore": { "type": "number", "minimum": 0, "maximum": 1 },
+              "recommendation": { "type": "string", "enum": ["adopt", "review", "exception_needed", "not_applicable"] }
+            }
+          },
+          "description": "Patterns from the library that match this request"
+        },
+        "matchedVendors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "vendorId": { "type": "integer" },
+              "vendorName": { "type": "string" },
+              "product": { "type": "string" },
+              "status": { "type": "string", "enum": ["approved", "under_review", "not_in_registry", "deprecated"] }
+            }
+          }
+        },
+        "suggestedRoute": {
+          "type": "object",
+          "properties": {
+            "lane": { "type": "string", "enum": ["fast_track", "standard", "complex", "exception"] },
+            "reviewsRequired": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["architecture", "security", "vendor", "arb", "ccoe", "data_privacy", "compliance"] }
+            },
+            "estimatedDaysToDecision": { "type": "integer" }
+          }
+        },
+        "aiSummary": { "type": "string", "description": "AI-generated executive summary of the request" },
+        "aiRecommendations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": { "type": "string", "enum": ["action", "warning", "suggestion", "blocker"] },
+              "message": { "type": "string" },
+              "relatedPatternId": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "missingInformation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": { "type": "string" },
+              "reason": { "type": "string" },
+              "severity": { "type": "string", "enum": ["required", "recommended"] }
+            }
+          }
+        }
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reviewType": { "type": "string" },
+          "reviewer": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "in_progress", "approved", "rejected", "deferred", "conditional"] },
+          "decision": { "type": ["string", "null"] },
+          "conditions": { "type": "array", "items": { "type": "string" } },
+          "comments": { "type": "string" },
+          "reviewedAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      }
+    },
+    "stateHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["fromState", "toState", "timestamp", "actor"],
+        "properties": {
+          "fromState": { "type": "string" },
+          "toState": { "type": "string" },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "actor": { "type": "string", "description": "Person, team, or 'ai_engine' that triggered the transition" },
+          "reason": { "type": "string" },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "slaTracking": {
+      "type": "object",
+      "properties": {
+        "targetResponseDate": { "type": "string", "format": "date-time" },
+        "targetDecisionDate": { "type": "string", "format": "date-time" },
+        "slaBreached": { "type": "boolean", "default": false },
+        "escalationLevel": { "type": "integer", "default": 0 }
+      }
+    }
+  }
+}

@@ -1,0 +1,494 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Intake Workflow State Machine",
+  "description": "Defines all valid states, transitions, guards, and actions for the intake workflow engine. Compatible with XState v5 / any finite state machine runtime.",
+  "version": "1.0.0",
+  "id": "intakeWorkflow",
+  "initial": "draft",
+  "context": {
+    "requestId": null,
+    "requestType": null,
+    "priority": null,
+    "riskScore": null,
+    "routingLane": null,
+    "assignee": null,
+    "reviewsCompleted": [],
+    "reviewsRequired": [],
+    "retryCount": 0
+  },
+  "states": {
+    "draft": {
+      "description": "Requestor is preparing the intake form. AI copilot assists with field completion.",
+      "on": {
+        "SUBMIT": {
+          "target": "submitted",
+          "guard": "isFormValid",
+          "actions": ["recordSubmission", "assignIntakeId", "notifyRequestor"]
+        },
+        "SAVE_DRAFT": {
+          "target": "draft",
+          "actions": ["persistDraft"]
+        }
+      },
+      "meta": {
+        "uiComponent": "IntakeForm",
+        "aiFeatures": ["field_autocomplete", "smart_suggestions", "pattern_recommendation"],
+        "slaHours": null
+      }
+    },
+    "submitted": {
+      "description": "Request submitted. Automatically enters AI triage pipeline.",
+      "entry": ["startSlaClock", "logSubmission"],
+      "always": {
+        "target": "ai_triage",
+        "actions": ["triggerAiTriage"]
+      },
+      "meta": {
+        "uiComponent": "SubmissionConfirmation",
+        "slaHours": 1
+      }
+    },
+    "ai_triage": {
+      "description": "AI engine analyzes the request: risk scoring, pattern matching, vendor lookup, routing recommendation.",
+      "entry": ["invokeAiTriageEngine"],
+      "on": {
+        "TRIAGE_COMPLETE": {
+          "target": "pending_triage",
+          "actions": ["storeTriageResult", "calculateRoute", "assignToTriageTeam"]
+        },
+        "TRIAGE_FAILED": {
+          "target": "pending_triage",
+          "actions": ["logTriageFailure", "assignToTriageTeam", "flagManualTriage"]
+        }
+      },
+      "meta": {
+        "uiComponent": "AiProcessingIndicator",
+        "aiFeatures": ["risk_scoring", "pattern_matching", "vendor_lookup", "route_recommendation", "gap_analysis"],
+        "slaHours": 0.5,
+        "automated": true
+      }
+    },
+    "pending_triage": {
+      "description": "Human triage analyst reviews AI recommendations and confirms or overrides routing.",
+      "on": {
+        "APPROVE_TRIAGE": {
+          "target": "in_assessment",
+          "guard": "isRouteConfirmed",
+          "actions": ["confirmRoute", "assignToLead", "notifyStakeholders"]
+        },
+        "OVERRIDE_ROUTE": {
+          "target": "in_assessment",
+          "actions": ["overrideRoute", "logOverrideReason", "assignToLead"]
+        },
+        "REQUEST_INFO": {
+          "target": "needs_info",
+          "actions": ["sendInfoRequest", "notifyRequestor", "pauseSlaClock"]
+        },
+        "REJECT": {
+          "target": "rejected",
+          "guard": "hasRejectionReason",
+          "actions": ["recordRejection", "notifyRequestor"]
+        },
+        "DEFER": {
+          "target": "deferred",
+          "actions": ["recordDeferral", "scheduleDeferralReview"]
+        }
+      },
+      "meta": {
+        "uiComponent": "TriageDashboard",
+        "aiFeatures": ["recommendation_display", "confidence_indicators", "similar_request_lookup"],
+        "slaHours": 24,
+        "role": "triage_analyst"
+      }
+    },
+    "needs_info": {
+      "description": "Waiting on the requestor to provide additional information.",
+      "on": {
+        "INFO_PROVIDED": {
+          "target": "ai_triage",
+          "actions": ["updateRequest", "resumeSlaClock", "reRunAiTriage"]
+        },
+        "CANCEL": {
+          "target": "cancelled",
+          "actions": ["recordCancellation", "notifyStakeholders"]
+        }
+      },
+      "after": {
+        "NEEDS_INFO_TIMEOUT_7D": {
+          "target": "cancelled",
+          "actions": ["autoCancel", "notifyRequestorTimeout"]
+        }
+      },
+      "meta": {
+        "uiComponent": "InfoRequestForm",
+        "slaHours": 168,
+        "role": "requestor"
+      }
+    },
+    "in_assessment": {
+      "description": "Domain lead assesses the request and determines which reviews are required based on routing lane.",
+      "entry": ["determineReviewGates"],
+      "on": {
+        "ROUTE_FAST_TRACK": {
+          "target": "pending_approval",
+          "guard": "isFastTrackEligible",
+          "actions": ["bypassDetailedReview", "prepareApprovalPackage"]
+        },
+        "ROUTE_TO_ARCHITECTURE": {
+          "target": "architecture_review",
+          "actions": ["assignArchitectureReviewer"]
+        },
+        "ROUTE_TO_SECURITY": {
+          "target": "security_review",
+          "actions": ["assignSecurityReviewer"]
+        },
+        "ROUTE_TO_VENDOR": {
+          "target": "vendor_review",
+          "actions": ["assignVendorReviewer"]
+        },
+        "ROUTE_TO_ARB": {
+          "target": "arb_review",
+          "actions": ["scheduleArbSlot", "prepareArbPackage"]
+        },
+        "REQUEST_INFO": {
+          "target": "needs_info",
+          "actions": ["sendInfoRequest", "notifyRequestor"]
+        }
+      },
+      "meta": {
+        "uiComponent": "AssessmentWorkbench",
+        "aiFeatures": ["pattern_gap_analysis", "vendor_risk_summary", "compliance_checklist_gen"],
+        "slaHours": 48,
+        "role": "domain_lead"
+      }
+    },
+    "architecture_review": {
+      "description": "Architecture team reviews the proposed solution against endorsed patterns and guardrails.",
+      "on": {
+        "REVIEW_APPROVED": [
+          {
+            "target": "security_review",
+            "guard": "needsSecurityReview",
+            "actions": ["recordReview", "assignSecurityReviewer"]
+          },
+          {
+            "target": "vendor_review",
+            "guard": "needsVendorReview",
+            "actions": ["recordReview", "assignVendorReviewer"]
+          },
+          {
+            "target": "pending_approval",
+            "guard": "allReviewsComplete",
+            "actions": ["recordReview", "prepareApprovalPackage"]
+          }
+        ],
+        "REVIEW_CONDITIONAL": {
+          "target": "architecture_review",
+          "actions": ["recordConditions", "notifyRequestor"]
+        },
+        "REVIEW_REJECTED": {
+          "target": "rejected",
+          "actions": ["recordReview", "notifyRequestor"]
+        },
+        "ESCALATE_TO_ARB": {
+          "target": "arb_review",
+          "actions": ["recordEscalation", "scheduleArbSlot"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ReviewWorkbench",
+        "aiFeatures": ["pattern_compliance_check", "guardrail_validation", "architecture_diagram_gen"],
+        "slaHours": 72,
+        "role": "architecture_reviewer"
+      }
+    },
+    "security_review": {
+      "description": "Security team assesses risk, data classification, compliance, and Zero Trust alignment.",
+      "on": {
+        "REVIEW_APPROVED": [
+          {
+            "target": "vendor_review",
+            "guard": "needsVendorReview",
+            "actions": ["recordReview", "assignVendorReviewer"]
+          },
+          {
+            "target": "pending_approval",
+            "guard": "allReviewsComplete",
+            "actions": ["recordReview", "prepareApprovalPackage"]
+          }
+        ],
+        "REVIEW_CONDITIONAL": {
+          "target": "security_review",
+          "actions": ["recordConditions", "notifyRequestor"]
+        },
+        "REVIEW_REJECTED": {
+          "target": "rejected",
+          "actions": ["recordReview", "notifyRequestor"]
+        }
+      },
+      "meta": {
+        "uiComponent": "SecurityReviewPanel",
+        "aiFeatures": ["threat_model_gen", "data_flow_analysis", "compliance_mapping", "zero_trust_alignment"],
+        "slaHours": 72,
+        "role": "security_reviewer"
+      }
+    },
+    "vendor_review": {
+      "description": "Vendor/procurement team reviews against the vendor registry, licensing, and third-party risk.",
+      "on": {
+        "REVIEW_APPROVED": [
+          {
+            "target": "pending_approval",
+            "guard": "allReviewsComplete",
+            "actions": ["recordReview", "prepareApprovalPackage"]
+          }
+        ],
+        "REVIEW_CONDITIONAL": {
+          "target": "vendor_review",
+          "actions": ["recordConditions", "notifyRequestor"]
+        },
+        "NEW_VENDOR_REQUIRED": {
+          "target": "vendor_review",
+          "actions": ["triggerVendorOnboarding", "notifyProcurement"]
+        },
+        "REVIEW_REJECTED": {
+          "target": "rejected",
+          "actions": ["recordReview", "notifyRequestor"]
+        }
+      },
+      "meta": {
+        "uiComponent": "VendorReviewPanel",
+        "aiFeatures": ["vendor_registry_lookup", "license_analysis", "third_party_risk_scoring"],
+        "slaHours": 96,
+        "role": "vendor_analyst"
+      }
+    },
+    "arb_review": {
+      "description": "Architecture Review Board convenes for complex or exception requests.",
+      "on": {
+        "ARB_APPROVED": {
+          "target": "approved",
+          "actions": ["recordArbDecision", "notifyAllParties"]
+        },
+        "ARB_CONDITIONAL": {
+          "target": "approved_with_conditions",
+          "actions": ["recordArbDecision", "recordConditions", "notifyAllParties"]
+        },
+        "ARB_REJECTED": {
+          "target": "rejected",
+          "actions": ["recordArbDecision", "notifyAllParties"]
+        },
+        "ARB_DEFERRED": {
+          "target": "deferred",
+          "actions": ["recordArbDecision", "scheduleDeferralReview"]
+        },
+        "ROUTE_TO_CCOE": {
+          "target": "ccoe_review",
+          "actions": ["assignCcoeReviewer"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ArbMeetingView",
+        "aiFeatures": ["decision_pack_gen", "impact_analysis", "precedent_lookup"],
+        "slaHours": 168,
+        "role": "arb_board"
+      }
+    },
+    "ccoe_review": {
+      "description": "Cloud Center of Excellence reviews for platform alignment and certification.",
+      "on": {
+        "CCOE_CERTIFIED": {
+          "target": "approved",
+          "actions": ["recordCcoeCertification", "updatePatternLibrary", "notifyAllParties"]
+        },
+        "CCOE_CONDITIONAL": {
+          "target": "approved_with_conditions",
+          "actions": ["recordConditions", "notifyAllParties"]
+        },
+        "CCOE_REJECTED": {
+          "target": "rejected",
+          "actions": ["recordReview", "notifyAllParties"]
+        }
+      },
+      "meta": {
+        "uiComponent": "CcoeReviewPanel",
+        "aiFeatures": ["platform_alignment_check", "pattern_certification_prep"],
+        "slaHours": 120,
+        "role": "ccoe_reviewer"
+      }
+    },
+    "pending_approval": {
+      "description": "All reviews complete. Final approval gate before implementation.",
+      "on": {
+        "APPROVE": {
+          "target": "approved",
+          "actions": ["recordApproval", "notifyAllParties", "createImplementationTicket"]
+        },
+        "APPROVE_WITH_CONDITIONS": {
+          "target": "approved_with_conditions",
+          "actions": ["recordConditions", "notifyAllParties", "createImplementationTicket"]
+        },
+        "REJECT": {
+          "target": "rejected",
+          "guard": "hasRejectionReason",
+          "actions": ["recordRejection", "notifyAllParties"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ApprovalSummary",
+        "aiFeatures": ["decision_summary_gen", "risk_summary"],
+        "slaHours": 48,
+        "role": "approver"
+      }
+    },
+    "approved": {
+      "description": "Request approved. Ready for implementation handoff.",
+      "on": {
+        "START_IMPLEMENTATION": {
+          "target": "in_implementation",
+          "actions": ["createImplementationPlan", "assignImplementationTeam"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ApprovalConfirmation",
+        "slaHours": null
+      }
+    },
+    "approved_with_conditions": {
+      "description": "Approved with conditions that must be met during or after implementation.",
+      "on": {
+        "START_IMPLEMENTATION": {
+          "target": "in_implementation",
+          "actions": ["createImplementationPlan", "trackConditions"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ConditionalApprovalView",
+        "slaHours": null
+      }
+    },
+    "in_implementation": {
+      "description": "Solution is being implemented. Tracked for post-implementation review.",
+      "on": {
+        "IMPLEMENTATION_COMPLETE": {
+          "target": "post_implementation_review",
+          "actions": ["triggerPostImplReview", "notifyReviewers"]
+        },
+        "IMPLEMENTATION_BLOCKED": {
+          "target": "in_assessment",
+          "actions": ["logBlocker", "reassess"]
+        }
+      },
+      "meta": {
+        "uiComponent": "ImplementationTracker",
+        "aiFeatures": ["progress_monitoring", "drift_detection"],
+        "slaHours": null
+      }
+    },
+    "post_implementation_review": {
+      "description": "Post-implementation review to verify compliance and update the pattern library.",
+      "on": {
+        "REVIEW_PASSED": {
+          "target": "closed",
+          "actions": ["recordCompletion", "updatePatternLibrary", "feedbackToAiModel"]
+        },
+        "REVIEW_FAILED": {
+          "target": "in_implementation",
+          "actions": ["logRemediationRequired", "notifyImplementationTeam"]
+        }
+      },
+      "meta": {
+        "uiComponent": "PostImplReviewPanel",
+        "aiFeatures": ["compliance_verification", "pattern_library_update_suggestion"],
+        "slaHours": 240,
+        "role": "architecture_reviewer"
+      }
+    },
+    "rejected": {
+      "type": "final",
+      "description": "Request was rejected. Requestor may resubmit a new request.",
+      "entry": ["stopSlaClock", "archiveRequest"],
+      "meta": {
+        "uiComponent": "RejectionSummary"
+      }
+    },
+    "deferred": {
+      "description": "Request deferred for future consideration.",
+      "on": {
+        "REACTIVATE": {
+          "target": "ai_triage",
+          "actions": ["reactivateRequest", "reRunAiTriage"]
+        },
+        "CANCEL": {
+          "target": "cancelled",
+          "actions": ["recordCancellation"]
+        }
+      },
+      "after": {
+        "DEFERRAL_REVIEW_30D": {
+          "target": "deferred",
+          "actions": ["sendDeferralReminder"]
+        }
+      },
+      "meta": {
+        "uiComponent": "DeferralView",
+        "slaHours": null
+      }
+    },
+    "cancelled": {
+      "type": "final",
+      "description": "Request cancelled by requestor or system timeout.",
+      "entry": ["stopSlaClock", "archiveRequest"],
+      "meta": {
+        "uiComponent": "CancellationSummary"
+      }
+    },
+    "closed": {
+      "type": "final",
+      "description": "Request completed end-to-end. Feeds back into AI model for continuous improvement.",
+      "entry": ["stopSlaClock", "archiveRequest", "updateMetrics"],
+      "meta": {
+        "uiComponent": "CompletionSummary"
+      }
+    }
+  },
+  "routingLanes": {
+    "fast_track": {
+      "description": "Low-risk requests that align with endorsed patterns and approved vendors. Minimal review required.",
+      "criteria": {
+        "riskScoreMax": 3,
+        "patternsAligned": true,
+        "vendorApproved": true,
+        "noExceptionRequired": true,
+        "dataClassificationMax": "internal"
+      },
+      "reviewsRequired": [],
+      "targetSlaHours": 48
+    },
+    "standard": {
+      "description": "Moderate-risk requests that need architecture and possibly security review.",
+      "criteria": {
+        "riskScoreMax": 6,
+        "noExceptionRequired": true
+      },
+      "reviewsRequired": ["architecture"],
+      "targetSlaHours": 168
+    },
+    "complex": {
+      "description": "High-risk or multi-domain requests requiring full review cycle.",
+      "criteria": {
+        "riskScoreMin": 6
+      },
+      "reviewsRequired": ["architecture", "security", "vendor"],
+      "targetSlaHours": 336
+    },
+    "exception": {
+      "description": "Requests that deviate from endorsed patterns or require ARB/CCoE approval.",
+      "criteria": {
+        "patternException": true
+      },
+      "reviewsRequired": ["architecture", "security", "arb"],
+      "targetSlaHours": 504
+    }
+  }
+}

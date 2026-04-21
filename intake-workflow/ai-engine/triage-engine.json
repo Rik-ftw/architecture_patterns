@@ -1,0 +1,268 @@
+{
+  "title": "AI Triage & Routing Engine",
+  "version": "1.0.0",
+  "description": "Configuration for the AI-powered triage engine that analyzes intake requests, scores risk, matches patterns/vendors, and recommends routing.",
+
+  "pipeline": {
+    "description": "Ordered processing stages. Each stage enriches the request context before routing decision.",
+    "stages": [
+      {
+        "id": "completeness_check",
+        "name": "Completeness & Quality Check",
+        "description": "Validates that all required fields are present and assesses the quality/clarity of the submission.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request"],
+        "outputs": ["completeness_score", "missing_fields", "clarity_score"],
+        "prompt_template": "completeness_check.prompt",
+        "actions": {
+          "score_below_threshold": {
+            "threshold": 0.6,
+            "action": "flag_needs_info",
+            "generate": "missing_information_list"
+          }
+        }
+      },
+      {
+        "id": "classification",
+        "name": "Request Classification & Categorization",
+        "description": "Classifies the request into domain, complexity tier, and request archetype.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "completeness_result"],
+        "outputs": ["domain_classification", "complexity_tier", "request_archetype"],
+        "prompt_template": "classification.prompt",
+        "context_sources": ["patterns/*.json", "vendors/registry.json"]
+      },
+      {
+        "id": "pattern_matching",
+        "name": "Architecture Pattern Matching",
+        "description": "Matches the request against the endorsed pattern library using semantic similarity and rule-based matching.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "classification_result"],
+        "outputs": ["matched_patterns", "pattern_gaps", "exception_flags"],
+        "prompt_template": "pattern_matching.prompt",
+        "context_sources": ["patterns/*.json"],
+        "matching_strategy": {
+          "semantic_similarity": {
+            "enabled": true,
+            "threshold": 0.7,
+            "embedding_model": "text-embedding-3-large",
+            "fields_to_embed": ["description", "proposedTechnologies", "integrationPoints"]
+          },
+          "rule_based": {
+            "enabled": true,
+            "rules": [
+              {
+                "if": "technicalContext.hostingPreference == 'azure_cloud' && targetDomain == 'containers_kubernetes'",
+                "then_match": ["CK-001", "CK-004"]
+              },
+              {
+                "if": "targetDomain == 'application_integration' && technicalContext.integrationPoints.length > 2",
+                "then_match": ["AP-001", "AP-004", "IN-001"]
+              },
+              {
+                "if": "targetDomain == 'network_connectivity'",
+                "then_match": ["NW-001", "SC-001"]
+              },
+              {
+                "if": "requestType == 'vendor_onboarding'",
+                "then_match": [],
+                "then_route": "vendor_review"
+              },
+              {
+                "if": "requestType == 'pattern_exception'",
+                "then_route": "exception_lane"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "vendor_analysis",
+        "name": "Vendor & Technology Analysis",
+        "description": "Cross-references proposed technologies against the approved vendor registry and flags new/unapproved vendors.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "classification_result"],
+        "outputs": ["vendor_matches", "unapproved_vendors", "vendor_risk_flags"],
+        "prompt_template": "vendor_analysis.prompt",
+        "context_sources": ["vendors/registry.json"],
+        "vendor_matching": {
+          "fuzzy_match_threshold": 0.8,
+          "check_fields": ["proposedTechnologies", "description"],
+          "flag_conditions": [
+            "vendor_not_in_registry",
+            "vendor_criticality_mismatch",
+            "vendor_review_overdue",
+            "data_sharing_with_unapproved"
+          ]
+        }
+      },
+      {
+        "id": "risk_scoring",
+        "name": "Multi-Dimensional Risk Scoring",
+        "description": "Calculates risk scores across security, compliance, architectural, operational, and vendor dimensions.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "classification_result", "pattern_matching_result", "vendor_analysis_result"],
+        "outputs": ["risk_scores", "risk_narrative"],
+        "prompt_template": "risk_scoring.prompt",
+        "scoring_model": {
+          "dimensions": {
+            "security": {
+              "weight": 0.25,
+              "factors": [
+                { "name": "data_classification", "weight": 0.3, "scoring": { "public": 1, "internal": 3, "confidential": 7, "restricted": 10 } },
+                { "name": "pii_involved", "weight": 0.25, "scoring": { "false": 0, "true": 8 } },
+                { "name": "external_integrations", "weight": 0.2, "scoring": "count_based_0_10" },
+                { "name": "zero_trust_alignment", "weight": 0.15, "scoring": "ai_assessed" },
+                { "name": "authentication_model", "weight": 0.1, "scoring": "ai_assessed" }
+              ]
+            },
+            "compliance": {
+              "weight": 0.2,
+              "factors": [
+                { "name": "regulatory_scope", "weight": 0.4, "scoring": "count_and_severity" },
+                { "name": "data_residency_requirements", "weight": 0.3, "scoring": "ai_assessed" },
+                { "name": "audit_requirements", "weight": 0.3, "scoring": "ai_assessed" }
+              ]
+            },
+            "architectural": {
+              "weight": 0.25,
+              "factors": [
+                { "name": "pattern_alignment", "weight": 0.3, "scoring": "inverse_gap_count" },
+                { "name": "integration_complexity", "weight": 0.25, "scoring": "count_based_0_10" },
+                { "name": "scalability_requirements", "weight": 0.2, "scoring": "ai_assessed" },
+                { "name": "technology_maturity", "weight": 0.15, "scoring": "ai_assessed" },
+                { "name": "dependency_chain", "weight": 0.1, "scoring": "count_based_0_10" }
+              ]
+            },
+            "operational": {
+              "weight": 0.15,
+              "factors": [
+                { "name": "availability_sla", "weight": 0.3, "scoring": { "99": 2, "99.9": 5, "99.95": 7, "99.99": 10 } },
+                { "name": "team_capability", "weight": 0.3, "scoring": "ai_assessed" },
+                { "name": "operational_overhead", "weight": 0.2, "scoring": "ai_assessed" },
+                { "name": "monitoring_complexity", "weight": 0.2, "scoring": "ai_assessed" }
+              ]
+            },
+            "vendor": {
+              "weight": 0.15,
+              "factors": [
+                { "name": "vendor_approved", "weight": 0.3, "scoring": { "approved": 0, "under_review": 5, "not_in_registry": 9 } },
+                { "name": "vendor_criticality", "weight": 0.25, "scoring": { "Medium": 3, "High": 6, "Critical": 9 } },
+                { "name": "vendor_lock_in_risk", "weight": 0.25, "scoring": "ai_assessed" },
+                { "name": "data_shared_externally", "weight": 0.2, "scoring": { "false": 0, "true": 7 } }
+              ]
+            }
+          },
+          "overall_score_calculation": "weighted_average",
+          "risk_thresholds": {
+            "low": { "min": 0, "max": 3 },
+            "medium": { "min": 3, "max": 6 },
+            "high": { "min": 6, "max": 8 },
+            "critical": { "min": 8, "max": 10 }
+          }
+        }
+      },
+      {
+        "id": "routing_decision",
+        "name": "Routing & Lane Assignment",
+        "description": "Determines the appropriate routing lane and required reviews based on risk profile and request type.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "risk_scores", "pattern_matching_result", "vendor_analysis_result"],
+        "outputs": ["routing_lane", "required_reviews", "estimated_sla", "routing_rationale"],
+        "prompt_template": "routing_decision.prompt",
+        "routing_rules": [
+          {
+            "name": "Fast Track",
+            "lane": "fast_track",
+            "conditions": {
+              "all": [
+                "risk_scores.overall == 'low'",
+                "pattern_matching_result.exception_flags.length == 0",
+                "vendor_analysis_result.unapproved_vendors.length == 0",
+                "intake_request.complianceContext.securityTier != 'critical'",
+                "intake_request.requestType not in ['pattern_exception', 'decommission']"
+              ]
+            },
+            "reviews": [],
+            "sla_hours": 48
+          },
+          {
+            "name": "Standard",
+            "lane": "standard",
+            "conditions": {
+              "all": [
+                "risk_scores.overall in ['low', 'medium']",
+                "pattern_matching_result.exception_flags.length == 0"
+              ]
+            },
+            "reviews": ["architecture"],
+            "sla_hours": 168
+          },
+          {
+            "name": "Complex",
+            "lane": "complex",
+            "conditions": {
+              "any": [
+                "risk_scores.overall == 'high'",
+                "risk_scores.security >= 7",
+                "intake_request.technicalContext.integrationPoints.length > 5",
+                "intake_request.requestType == 'decommission'"
+              ]
+            },
+            "reviews": ["architecture", "security", "vendor"],
+            "sla_hours": 336
+          },
+          {
+            "name": "Exception",
+            "lane": "exception",
+            "conditions": {
+              "any": [
+                "risk_scores.overall == 'critical'",
+                "pattern_matching_result.exception_flags.length > 0",
+                "intake_request.requestType == 'pattern_exception'",
+                "vendor_analysis_result.unapproved_vendors.length > 0 && vendor_criticality == 'Critical'"
+              ]
+            },
+            "reviews": ["architecture", "security", "arb"],
+            "sla_hours": 504
+          }
+        ]
+      },
+      {
+        "id": "summary_generation",
+        "name": "Executive Summary & Recommendations",
+        "description": "Generates a human-readable executive summary, actionable recommendations, and decision package.",
+        "model": "claude-sonnet-4-6",
+        "inputs": ["intake_request", "all_stage_results"],
+        "outputs": ["executive_summary", "recommendations", "decision_package"],
+        "prompt_template": "summary_generation.prompt"
+      }
+    ]
+  },
+
+  "feedback_loop": {
+    "description": "Continuous improvement mechanism. Human triage overrides and final outcomes feed back into the AI models.",
+    "signals": [
+      {
+        "event": "triage_override",
+        "description": "When a human analyst overrides the AI routing recommendation",
+        "captures": ["original_route", "override_route", "override_reason"],
+        "action": "store_for_retraining"
+      },
+      {
+        "event": "review_outcome_mismatch",
+        "description": "When the review outcome differs from AI prediction",
+        "captures": ["predicted_outcome", "actual_outcome", "review_comments"],
+        "action": "store_for_retraining"
+      },
+      {
+        "event": "post_implementation_feedback",
+        "description": "Post-implementation review results fed back to improve future predictions",
+        "captures": ["original_risk_scores", "actual_issues_encountered", "pattern_adherence"],
+        "action": "store_for_retraining"
+      }
+    ],
+    "retraining_schedule": "monthly",
+    "minimum_samples_for_retrain": 50
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "@mccain/architecture-governance-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for AI-enabled architecture pattern governance, vendor registry, and intake workflow",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "architecture-mcp": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "mcp": "node src/index.js",
+    "triage": "node src/pipeline/run-triage.js"
+  },
+  "dependencies": {
+    "@langchain/anthropic": "^1.3.26",
+    "@langchain/core": "^1.1.38",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "langchain": "^1.2.39"
+  },
+  "keywords": [
+    "mcp",
+    "architecture",
+    "governance",
+    "patterns"
+  ],
+  "license": "ISC"
+}
