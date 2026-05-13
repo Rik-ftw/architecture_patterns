@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Architecture Pattern Library</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg1:#ffffff;--bg2:#f8fafc;--bg3:#f1f5f9;
+  --tx1:#0f172a;--tx2:#64748b;
+  --bd1:rgba(15,23,42,0.12);--bd2:rgba(15,23,42,0.25);
+  --accent:#185FA5;--r-md:8px;--r-lg:12px;
+  --font:system-ui,-apple-system,sans-serif;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg1:#1e293b;--bg2:#0f172a;--bg3:#020617;
+    --tx1:#f1f5f9;--tx2:#94a3b8;
+    --bd1:rgba(241,245,249,0.12);--bd2:rgba(241,245,249,0.25);
+  }
+}
+body{font-family:var(--font);background:var(--bg3);color:var(--tx1);height:100vh;overflow:hidden}
+.shell{display:flex;height:100vh}
+
+.sidebar{width:240px;min-width:240px;border-right:0.5px solid var(--bd1);background:var(--bg2);display:flex;flex-direction:column}
+.logo{padding:16px 14px;border-bottom:0.5px solid var(--bd1);display:flex;align-items:center;gap:8px}
+.logo i{font-size:20px;color:var(--accent)}
+.logo span{font-size:14px;font-weight:500}
+.nav-label{padding:12px 14px 6px;font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
+.domain-list{flex:1;overflow-y:auto;padding:4px 0}
+.domain-item{display:flex;align-items:center;gap:8px;padding:7px 14px;font-size:13px;cursor:pointer;color:var(--tx2);border-left:2px solid transparent;transition:all .15s;user-select:none}
+.domain-item:hover{background:var(--bg1);color:var(--tx1)}
+.domain-item.active{color:var(--tx1);font-weight:500;border-left-color:var(--accent);background:var(--bg1)}
+.domain-item .cnt{margin-left:auto;font-size:11px;background:var(--bg3);border:0.5px solid var(--bd1);border-radius:99px;padding:1px 7px;color:var(--tx2)}
+
+.config{padding:12px 14px;border-top:0.5px solid var(--bd1)}
+.config label{font-size:11px;color:var(--tx2);display:block;margin-bottom:3px;margin-top:8px}
+.config label:first-child{margin-top:0}
+.config input{width:100%;font-size:12px;padding:6px 8px;border:0.5px solid var(--bd1);border-radius:var(--r-md);background:var(--bg1);color:var(--tx1);outline:none}
+.config input:focus{border-color:var(--accent)}
+.load-btn{width:100%;margin-top:10px;font-size:12px;padding:8px;border:0.5px solid var(--bd2);border-radius:var(--r-md);background:var(--bg1);color:var(--tx1);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.load-btn:hover{background:var(--bg2)}
+.sbar{padding:6px 14px;font-size:11px;color:var(--tx2);border-top:0.5px solid var(--bd1);display:flex;align-items:center;gap:5px}
+
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{padding:12px 16px;border-bottom:0.5px solid var(--bd1);background:var(--bg1);display:flex;align-items:center;gap:10px}
+.sw{position:relative;flex:1}
+.sw i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--tx2);pointer-events:none}
+.sw input{width:100%;padding:8px 10px 8px 34px;font-size:13px;border:0.5px solid var(--bd1);border-radius:var(--r-md);background:var(--bg2);color:var(--tx1);outline:none}
+.sw input:focus{border-color:var(--accent)}
+select{font-size:13px;padding:8px 10px;border:0.5px solid var(--bd1);border-radius:var(--r-md);background:var(--bg2);color:var(--tx1);outline:none;cursor:pointer}
+.content{flex:1;overflow:hidden;display:flex}
+
+.list-pane{width:300px;min-width:300px;border-right:0.5px solid var(--bd1);overflow-y:auto;padding:10px;background:var(--bg2)}
+.pc{padding:12px;border:0.5px solid var(--bd1);border-radius:var(--r-lg);background:var(--bg1);margin-bottom:8px;cursor:pointer;transition:border-color .15s}
+.pc:hover{border-color:var(--bd2)}
+.pc.active{border-color:var(--accent);border-width:1.5px}
+.pc-id{font-size:11px;color:var(--accent);font-weight:500;margin-bottom:3px}
+.pc-name{font-size:14px;font-weight:500;margin-bottom:6px}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;margin-right:4px}
+.p-Draft{background:#FAEEDA;color:#854F0B}
+.p-Active{background:#EAF3DE;color:#3B6D11}
+.p-Deprecated{background:#FCEBEB;color:#A32D2D}
+.p-Pending{background:#E6F1FB;color:#185FA5}
+.p-n{background:var(--bg2);color:var(--tx2);border:0.5px solid var(--bd1)}
+.msg{padding:24px;text-align:center;font-size:13px;color:var(--tx2);line-height:1.6}
+
+.dp{flex:1;overflow-y:auto;padding:24px;background:var(--bg1)}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--tx2);gap:10px}
+.empty i{font-size:40px;opacity:.2}
+.sec{margin-bottom:24px}
+.st{font-size:11px;font-weight:500;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;padding-bottom:6px;border-bottom:0.5px solid var(--bd1)}
+.h1{font-size:22px;font-weight:500;line-height:1.3;margin-bottom:8px}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px}
+.mi{background:var(--bg2);border-radius:var(--r-md);padding:8px 12px}
+.mi label{font-size:11px;color:var(--tx2);display:block;margin-bottom:2px}
+.mi span{font-size:13px;font-weight:500}
+.dw{border:0.5px solid var(--bd1);border-radius:var(--r-lg);overflow:hidden;background:var(--bg2)}
+.dw svg{width:100%;height:auto;display:block}
+.bt{font-size:13px;line-height:1.6}
+.sl{list-style:none;display:flex;flex-direction:column;gap:6px}
+.si{display:flex;align-items:flex-start;gap:10px;font-size:13px;padding:9px 12px;background:var(--bg2);border-radius:var(--r-md);line-height:1.5}
+.sn{background:var(--accent);color:#fff;border-radius:50%;width:22px;height:22px;min-width:22px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+.ci{font-size:13px;padding:8px 12px;background:var(--bg2);border-radius:var(--r-md);display:flex;align-items:center;gap:8px;margin-bottom:5px;line-height:1.4}
+.ci i{color:var(--accent);font-size:15px;flex-shrink:0}
+.gi{padding:10px 14px;border-radius:var(--r-md);border-left:3px solid;margin-bottom:6px}
+.g-Required{border-left-color:#A32D2D;background:#FCEBEB}
+.g-Recommended{border-left-color:#854F0B;background:#FAEEDA}
+.ga{font-size:11px;font-weight:500;margin-bottom:3px}
+.g-Required .ga{color:#A32D2D}
+.g-Recommended .ga{color:#854F0B}
+.gr{font-size:13px;line-height:1.5}
+.ucg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.uc-do{background:#EAF3DE;border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:#27500A;line-height:1.5}
+.uc-dont{background:#FCEBEB;border-radius:var(--r-md);padding:10px 12px;font-size:13px;color:#791F1F;line-height:1.5}
+.ul{font-size:11px;font-weight:500;margin-bottom:4px;opacity:.7}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tb{padding:12px 14px;border-radius:var(--r-md);font-size:13px;line-height:1.5}
+.tb-b{background:#EAF3DE;color:#27500A}
+.tb-r{background:#FCEBEB;color:#791F1F}
+.tl{font-size:11px;font-weight:500;margin-bottom:6px}
+.ti-item{margin-bottom:5px}
+.cri{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg2);border-radius:var(--r-md);margin-bottom:5px;font-size:13px}
+.rb{font-size:11px;padding:2px 7px;border-radius:99px;background:var(--bg1);border:0.5px solid var(--bd1);color:var(--tx2);margin-left:auto}
+.rh-item{font-size:13px;padding:8px 12px;background:var(--bg2);border-radius:var(--r-md);margin-bottom:5px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="logo">
+      <i class="ti ti-book-2"></i>
+      <span>Pattern Library</span>
+    </div>
+    <div class="nav-label">Domains</div>
+    <div class="domain-list" id="domainList">
+      <div class="domain-item active" data-domain="all" onclick="selectDomain('all')">
+        <i class="ti ti-layout-grid"></i> All patterns<span class="cnt">0</span>
+      </div>
+    </div>
+    <div class="config">
+      <label>GitHub owner/repo</label>
+      <input id="cfgRepo" placeholder="org/repo-name"/>
+      <label>Personal Access Token</label>
+      <input id="cfgPat" type="password" placeholder="ghp_xxxx"/>
+      <label>Patterns folder path</label>
+      <input id="cfgPath" value="patterns"/>
+      <button class="load-btn" onclick="loadFromGitHub()">
+        <i class="ti ti-refresh"></i> Load from GitHub
+      </button>
+    </div>
+    <div class="sbar" id="sbar"><i class="ti ti-info-circle"></i> Enter repo details above</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="sw">
+        <i class="ti ti-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by name, ID or domain…" oninput="filterPatterns()"/>
+      </div>
+      <select id="statusFilter" onchange="filterPatterns()">
+        <option value="">All statuses</option>
+        <option>Draft</option><option>Active</option><option>Deprecated</option>
+      </select>
+      <select id="maturityFilter" onchange="filterPatterns()">
+        <option value="">All maturity</option>
+        <option>1-Initial</option><option>2-Developing</option><option>3-Defined</option>
+        <option>4-Managed</option><option>5-Optimizing</option>
+      </select>
+    </div>
+    <div class="content">
+      <div class="list-pane" id="listPane">
+        <div class="msg">Configure GitHub settings and click Load.</div>
+      </div>
+      <div class="dp" id="detailPane">
+        <div class="empty">
+          <i class="ti ti-book-2"></i>
+          <span>Select a pattern to view details</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let all=[],filtered=[],selDomain='all',selId=null;
+
+function dIcon(d){
+  const m={Identity:'ti-shield-lock',Cloud:'ti-cloud',Observ:'ti-activity',Network:'ti-network',Data:'ti-database',Security:'ti-lock',Compute:'ti-server'};
+  for(const k in m) if(d&&d.includes(k)) return m[k];
+  return 'ti-puzzle';
+}
+function setSbar(msg,icon='ti-info-circle'){
+  document.getElementById('sbar').innerHTML=`<i class="ti ${icon}"></i> ${msg}`;
+}
+function renderDomains(){
+  const domains=[...new Set(all.map(p=>p.domain))].sort();
+  let html=`<div class="domain-item ${selDomain==='all'?'active':''}" data-domain="all" onclick="selectDomain('all')"><i class="ti ti-layout-grid"></i> All patterns<span class="cnt">${all.length}</span></div>`;
+  domains.forEach(d=>{
+    const c=all.filter(p=>p.domain===d).length;
+    const e=encodeURIComponent(d);
+    html+=`<div class="domain-item ${selDomain===d?'active':''}" data-domain="${e}" onclick="selectDomain('${e}')"><i class="ti ${dIcon(d)}"></i> ${d}<span class="cnt">${c}</span></div>`;
+  });
+  document.getElementById('domainList').innerHTML=html;
+}
+function selectDomain(e){
+  selDomain=decodeURIComponent(e);
+  document.querySelectorAll('.domain-item').forEach(el=>el.classList.toggle('active',decodeURIComponent(el.dataset.domain)===selDomain));
+  filterPatterns();
+}
+function filterPatterns(){
+  const q=document.getElementById('searchInput').value.toLowerCase();
+  const st=document.getElementById('statusFilter').value;
+  const mt=document.getElementById('maturityFilter').value;
+  filtered=all.filter(p=>{
+    if(selDomain!=='all'&&p.domain!==selDomain) return false;
+    if(st&&p.status!==st) return false;
+    if(mt&&p.maturityLevel!==mt) return false;
+    if(q&&!((p.name||'').toLowerCase().includes(q)||(p.patternId||'').toLowerCase().includes(q)||(p.domain||'').toLowerCase().includes(q))) return false;
+    return true;
+  });
+  renderList();
+}
+function renderList(){
+  const pane=document.getElementById('listPane');
+  if(!filtered.length){pane.innerHTML='<div class="msg">No patterns match your filters.</div>';return;}
+  pane.innerHTML=filtered.map(p=>`
+    <div class="pc ${p.patternId===selId?'active':''}" onclick="selectPattern('${p.patternId}')">
+      <div class="pc-id">${p.patternId} &middot; v${p.version||'1.0'}</div>
+      <div class="pc-name">${p.name}</div>
+      <span class="pill p-${p.status}">${p.status}</span>
+      <span class="pill p-n">${(p.tier||'').replace('Layer ','L')}</span>
+    </div>`).join('');
+}
+function selectPattern(id){
+  selId=id; renderList();
+  const p=all.find(x=>x.patternId===id); if(!p) return;
+
+  const compliance=(p.complianceMapping||[]).map(c=>`<span class="pill p-n">${c.framework} ${c.control}</span>`).join('');
+  const components=(p.components||[]).map(c=>`<div class="ci"><i class="ti ti-puzzle"></i>${c}</div>`).join('');
+  const steps=(p.interactionSteps||[]).map((s,i)=>`<li class="si"><span class="sn">${i+1}</span>${s.replace(/^\d+\.\s*/,'')}</li>`).join('');
+  const guardrails=(p.guardrails||[]).map(g=>`<div class="gi g-${g.severity}"><div class="ga">${g.area} · ${g.severity}</div><div class="gr">${g.rule}</div></div>`).join('');
+  const usecases=(p.useCases||[]).map(u=>`<div class="ucg"><div class="uc-do"><div class="ul">✓ Use</div>${u.use}</div><div class="uc-dont"><div class="ul">✕ Don't use</div>${u.dontUse}</div></div>`).join('');
+  const benefits=((p.tradeoffs||{}).benefits||[]).map(b=>`<div class="ti-item">· ${b}</div>`).join('');
+  const risks=((p.tradeoffs||{}).risks||[]).map(r=>`<div class="ti-item">· ${r}</div>`).join('');
+  const composition=(p.composition||[]).map(c=>`<div class="cri"><i class="ti ti-arrow-right" style="color:var(--accent)"></i><strong>${c.patternId}</strong> ${c.patternName}<span class="rb">${c.relationship}</span></div>`).join('');
+  const revHistory=(p.revisionHistory||[]).map(r=>`<div class="rh-item"><span style="color:var(--tx2)">${r.date} · v${r.version} · ${r.author}</span><br/>${r.summary}</div>`).join('');
+
+  document.getElementById('detailPane').innerHTML=`
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:13px;color:var(--accent);font-weight:500">${p.patternId}</span>
+        <span class="pill p-${p.status}">${p.status}</span>
+        <span class="pill p-n">${p.maturityLevel||''}</span>
+        ${p.ccoeCertified==='Pending'?'<span class="pill p-Pending">CCoE Pending</span>':''}
+      </div>
+      <div class="h1">${p.name}</div>
+      ${compliance?`<div class="tag-row">${compliance}</div>`:''}
+    </div>
+    <div class="mg">
+      <div class="mi"><label>Domain</label><span>${p.domain||'—'}</span></div>
+      <div class="mi"><label>Tier</label><span>${p.tier||'—'}</span></div>
+      <div class="mi"><label>Version</label><span>${p.version||'—'}</span></div>
+      <div class="mi"><label>Owner</label><span>${p.owner||'—'}</span></div>
+      <div class="mi"><label>Last reviewed</label><span>${p.lastReviewed||'—'}</span></div>
+      <div class="mi"><label>Review cycle</label><span>${p.reviewCycle||'—'}</span></div>
+    </div>
+    ${p.diagramSvg?`<div class="sec"><div class="st">Architecture diagram</div><div class="dw">${p.diagramSvg}</div></div>`:''}
+    <div class="sec"><div class="st">Strategic intent</div><p class="bt">${p.strategicIntent||'—'}</p></div>
+    <div class="sec"><div class="st">Problem statement</div><p class="bt">${p.problemStatement||'—'}</p></div>
+    ${usecases?`<div class="sec"><div class="st">Use cases</div>${usecases}</div>`:''}
+    ${components?`<div class="sec"><div class="st">Components</div>${components}</div>`:''}
+    ${steps?`<div class="sec"><div class="st">Interaction steps</div><ul class="sl">${steps}</ul></div>`:''}
+    ${guardrails?`<div class="sec"><div class="st">Guardrails</div>${guardrails}</div>`:''}
+    ${(benefits||risks)?`<div class="sec"><div class="st">Tradeoffs</div><div class="tg">
+      ${benefits?`<div class="tb tb-b"><div class="tl">Benefits</div>${benefits}</div>`:''}
+      ${risks?`<div class="tb tb-r"><div class="tl">Risks</div>${risks}</div>`:''}
+    </div></div>`:''}
+    ${composition?`<div class="sec"><div class="st">Pattern composition</div>${composition}</div>`:''}
+    ${p.exceptionProcess?`<div class="sec"><div class="st">Exception process</div><p class="bt">${p.exceptionProcess}</p></div>`:''}
+    ${revHistory?`<div class="sec"><div class="st">Revision history</div>${revHistory}</div>`:''}
+  `;
+}
+
+async function loadFromGitHub(){
+  const repo=document.getElementById('cfgRepo').value.trim();
+  const pat=document.getElementById('cfgPat').value.trim();
+  const base=document.getElementById('cfgPath').value.trim()||'patterns';
+  if(!repo){alert('Please enter owner/repo');return;}
+  document.getElementById('listPane').innerHTML='<div class="msg">Loading from GitHub…</div>';
+  setSbar('Fetching patterns…','ti-loader');
+  const headers={'Accept':'application/vnd.github+json'};
+  if(pat) headers['Authorization']=`Bearer ${pat}`;
+  try{
+    const collected=[];
+    await walk(repo,base,headers,collected);
+    if(!collected.length){
+      document.getElementById('listPane').innerHTML='<div class="msg">No JSON pattern files found in that path.</div>';
+      setSbar('No patterns found','ti-alert-circle');
+      return;
+    }
+    all=collected.sort((a,b)=>(a.patternId||'').localeCompare(b.patternId||''));
+    filtered=[...all];
+    renderDomains(); renderList();
+    setSbar(`${all.length} patterns loaded`,'ti-check');
+  }catch(e){
+    document.getElementById('listPane').innerHTML=`<div class="msg" style="color:#A32D2D">Error: ${e.message}</div>`;
+    setSbar('Load failed','ti-alert-circle');
+  }
+}
+
+async function walk(repo,path,headers,out){
+  const r=await fetch(`https://api.github.com/repos/${repo}/contents/${path}`,{headers});
+  if(!r.ok) throw new Error(`GitHub API ${r.status} on /${path}`);
+  const items=await r.json();
+  for(const item of items){
+    if(item.type==='dir') await walk(repo,item.path,headers,out);
+    else if(item.type==='file'&&item.name.endsWith('.json')){
+      try{
+        const fr=await fetch(item.download_url,{headers});
+        const json=await fr.json();
+        if(json.patternId) out.push(json);
+      }catch(_){}
+    }
+  }
+}
+</script>
+</body>
+</html>
