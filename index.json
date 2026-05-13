@@ -1,0 +1,402 @@
+[
+  {
+    "patternId": "AI-001",
+    "name": "AI Model Gateway Control",
+    "domain": "AI & Analytics",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "AI-002",
+    "name": "Prompt Redaction and Content Safety",
+    "domain": "AI & Analytics",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "AI-003",
+    "name": "AI Landing Zone Governance",
+    "domain": "AI & Analytics",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "AP-001",
+    "name": "API Gateway Mediation",
+    "domain": "Application & Integration",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "AP-002",
+    "name": "Service-to-Service Contract Governance",
+    "domain": "Application & Integration",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "AP-004",
+    "name": "Event-Driven Integration",
+    "domain": "Application & Integration",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CL-001",
+    "name": "Subscription Baseline Guardrails",
+    "domain": "Cloud & Platform",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CL-002",
+    "name": "Management Group Governance Hierarchy",
+    "domain": "Cloud & Platform",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CL-003",
+    "name": "Platform Landing Zone Shared Services",
+    "domain": "Cloud & Platform",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CT-001",
+    "name": "Pod Security Baseline",
+    "domain": "Containers & Kubernetes",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CT-002",
+    "name": "Private Container Registry Governance",
+    "domain": "Containers & Kubernetes",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "CT-003",
+    "name": "Cluster Ingress and Egress Control",
+    "domain": "Containers & Kubernetes",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DT-001",
+    "name": "Data Lake Zone Segmentation",
+    "domain": "Data & Storage",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DT-002",
+    "name": "Storage Encryption and Key Control",
+    "domain": "Data & Storage",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DT-003",
+    "name": "Data Sovereignty Control Plane",
+    "domain": "Data & Storage",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DV-001",
+    "name": "Secure Pipeline Release Gates",
+    "domain": "DevOps & CI/CD",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DV-002",
+    "name": "Policy-as-Code Deployment Control",
+    "domain": "DevOps & CI/CD",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "DV-003",
+    "name": "Artifact Provenance and Signing",
+    "domain": "DevOps & CI/CD",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "ID-001",
+    "name": "Conditional Access Baseline",
+    "domain": "Identity & Access",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "ID-002",
+    "name": "Privileged Identity Tiering",
+    "domain": "Identity & Access",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "ID-003",
+    "name": "Workload Managed Identity",
+    "domain": "Identity & Access",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "IN-001",
+    "name": "Connector Isolation Boundary",
+    "domain": "Integration Connectors",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "IN-002",
+    "name": "Connector Throttling and Backoff",
+    "domain": "Integration Connectors",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "IN-003",
+    "name": "Managed File Transfer Ingestion",
+    "domain": "Integration Connectors",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "NW-001",
+    "name": "Hub-Spoke Network Landing Zone",
+    "domain": "Network & Connectivity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "NW-002",
+    "name": "Private Endpoint Access Path",
+    "domain": "Network & Connectivity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "NW-003",
+    "name": "Secure Site-to-Cloud VPN Conduit",
+    "domain": "Network & Connectivity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "NW-004",
+    "name": "CCTV IP Video Surveillance Network",
+    "domain": "Network & Connectivity",
+    "status": "Review",
+    "version": "1.0",
+    "owner": "Jay Tofflemire",
+    "maturityLevel": "3-Defined",
+    "lastReviewed": "2023-05-31"
+  },
+  {
+    "patternId": "OB-001",
+    "name": "Central Log Collection and Retention",
+    "domain": "Observability & SOC",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "OB-002",
+    "name": "Digital Forensics Evidence Preservation",
+    "domain": "Observability & SOC",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "OB-003",
+    "name": "SOC Collector Placement",
+    "domain": "Observability & SOC",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "OT-001",
+    "name": "Industrial DMZ Zone Conduit",
+    "domain": "OT & Industrial",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "OT-002",
+    "name": "OT Remote Access Broker",
+    "domain": "OT & Industrial",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "OT-003",
+    "name": "Plant Edge Compute Gateway",
+    "domain": "OT & Industrial",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "RS-001",
+    "name": "Disaster Recovery as Code",
+    "domain": "Resilience & Continuity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "RS-002",
+    "name": "Active-Active Cloud Resilience",
+    "domain": "Resilience & Continuity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "RS-003",
+    "name": "Backup Immutability and Restore Validation",
+    "domain": "Resilience & Continuity",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "SC-001",
+    "name": "Zero Trust Access Control",
+    "domain": "Security & Controls",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "SC-002",
+    "name": "Data Loss Prevention Boundary",
+    "domain": "Security & Controls",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  },
+  {
+    "patternId": "SC-003",
+    "name": "Secrets Management and Rotation",
+    "domain": "Security & Controls",
+    "status": "Draft",
+    "version": "1.0",
+    "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+    "maturityLevel": "2-Developing",
+    "lastReviewed": "2026-05-12"
+  }
+]

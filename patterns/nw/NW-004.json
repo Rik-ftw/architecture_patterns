@@ -1,0 +1,221 @@
+{
+  "id": 40,
+  "patternId": "NW-004",
+  "name": "CCTV IP Video Surveillance Network",
+  "domain": "Network & Connectivity",
+  "tier": "Layer 2 \u2014 Logical",
+  "status": "Review",
+  "version": "1.0",
+  "owner": "Jay Tofflemire",
+  "approvers": "GTS SOE Approval, Mark Kirby and Quintin Grant",
+  "lastReviewed": "2023-05-31",
+  "reviewCycle": "Annual",
+  "ccoeCertified": "Pending",
+  "ccoeCertRef": null,
+  "leanixRef": null,
+  "strategicIntent": "Provide McCain sites with a standard network architecture pattern for closed-circuit and IP video surveillance that preserves local control of footage while allowing only explicitly approved corporate access paths. The pattern translates the GTS CCTV SOE deployment models into reusable design guardrails for site assessments, VLAN segmentation, firewall control, wired camera connectivity, local storage, vendor support, and legal/privacy review.",
+  "problemStatement": "McCain sites deploy CCTV to support physical security and operations, but unmanaged camera networks can create privacy, bandwidth, remote-access, and corporate-network exposure risks. The CCTV SOE states that McCain supports three deployment models, prefers standalone deployments with no external access, requires local footage storage, requires an on-site assessment, and requires dedicated VLAN plus firewall protection when corporate or VPN access is needed.",
+  "useCases": [
+    {
+      "use": "Model 1 \u2014 implement a standalone CCTV environment with no external access where on-site viewing and local retention satisfy the site requirement; this is the preferred and lowest-risk approach in the SOE.",
+      "dontUse": "Do not use Model 1 when corporate network users, VPN users, or centralized security operations require access to the VMS or live/recorded video."
+    },
+    {
+      "use": "Model 2 \u2014 implement a standalone CCTV environment that uses the corporate network only as a backbone transport within a dedicated CCTV VLAN with no active IP gateway and no access outside that VLAN.",
+      "dontUse": "Do not use Model 2 if the VMS or cameras need routed access to corporate systems, remote VPN access, internet access, or cloud video services."
+    },
+    {
+      "use": "Model 3A \u2014 provide corporate or VPN access through a firewall while keeping IP video transmission on a standalone camera network and exposing only approved VMS access paths.",
+      "dontUse": "Do not use Model 3A when camera-to-VMS transport must traverse the corporate backbone; use Model 3B and complete uplink bandwidth sizing instead."
+    },
+    {
+      "use": "Model 3B \u2014 provide corporate or VPN access through a firewall while using the corporate network as the backbone for IP video transmission to the VMS, after bandwidth and firewall sizing are validated.",
+      "dontUse": "Do not use Model 3B where uplinks cannot sustain video traffic or where local law, privacy review, or the McCain CCTV Surveillance Policy prohibits the proposed access model."
+    }
+  ],
+  "components": [
+    "Axis IP Cameras \u2014 preferred supported camera hardware where feasible under the McCain CCTV SOE.",
+    "Wired Ethernet Camera Access Network \u2014 recommended camera connectivity approach; wireless CCTV is not the standard option.",
+    "Dedicated CCTV VLAN \u2014 isolates cameras and VMS from general corporate client/server traffic and is mandatory when using the corporate backbone or corporate access models.",
+    "Video Management System (VMS) \u2014 on-site platform for camera management, viewing, recording, and local footage retention; footage must not be stored in cloud systems.",
+    "Local Video Storage \u2014 site-local retention for CCTV recordings in alignment with the SOE requirement that all footage is stored local.",
+    "Corporate Network Backbone \u2014 optional transport layer for Model 2 or Model 3B only after uplink bandwidth assessment confirms the network can support video traffic.",
+    "Firewall Between Corporate Network/VPN and CCTV VLAN \u2014 mandatory control point for Model 3 access into and out of the dedicated video surveillance VLAN.",
+    "Local CCTV Vendor with Maintenance Agreement \u2014 installs and supports the complete solution, including regular firmware/security updates, patching, break/fix, and replacement.",
+    "McCain CCTV Surveillance Policy and Local Legal Review \u2014 required governance inputs before implementation to validate acceptable use, signage, retention, access, and jurisdiction-specific privacy obligations."
+  ],
+  "interactionSteps": [
+    "1. Complete site assessment, CCTV policy review, local legal/regulatory review, and select Model 1, Model 2, Model 3A, or Model 3B.",
+    "2. Deploy preferred Axis wired IP cameras and connect them to the dedicated CCTV camera access network or VLAN.",
+    "3. Record and manage video on the on-site VMS with local footage storage; do not use cloud recording or cloud VMS storage.",
+    "4. For Model 1, keep the CCTV environment standalone with no external access path.",
+    "5. For Model 2, use the corporate network only as a backbone for the dedicated CCTV VLAN with no active IP gateway outside the VLAN.",
+    "6. For Model 3A, keep IP video transmission on a standalone camera network and permit corporate or VPN VMS access only through the firewall.",
+    "7. For Model 3B, carry IP video traffic across the corporate backbone only after uplink bandwidth is sized and firewall placement is approved.",
+    "8. Operate the solution under a local vendor maintenance agreement covering firmware/security patching, break/fix, replacement, and periodic access review."
+  ],
+  "diagramSvg": "<svg width=\"1100\" height=\"640\" viewBox=\"0 0 1100 640\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"system-ui, -apple-system, sans-serif\"><defs><marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" fill=\"#1B3A6B\"/></marker><marker id=\"warn\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" fill=\"#BA7517\"/></marker></defs><rect width=\"1100\" height=\"640\" fill=\"#f8fafc\"/><text x=\"550\" y=\"34\" text-anchor=\"middle\" fill=\"#1B3A6B\" font-size=\"20\" font-weight=\"700\">McCain APL NW-004 \u2014 CCTV IP Video Surveillance Network</text><rect x=\"40\" y=\"70\" width=\"250\" height=\"90\" rx=\"10\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"65\" cy=\"96\" r=\"14\" fill=\"#1B3A6B\"/><text x=\"65\" y=\"101\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">1</text><text x=\"165\" y=\"95\" text-anchor=\"middle\" fill=\"#1e293b\" font-size=\"13\" font-weight=\"700\">Assessment + Model Selection</text><text x=\"165\" y=\"118\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Policy, legal, local regulations</text><text x=\"165\" y=\"136\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Model 1 / 2 / 3A / 3B</text><rect x=\"390\" y=\"70\" width=\"210\" height=\"90\" rx=\"10\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/><circle cx=\"415\" cy=\"96\" r=\"14\" fill=\"#0F6E56\"/><text x=\"415\" y=\"101\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">2</text><text x=\"495\" y=\"98\" text-anchor=\"middle\" fill=\"#1e293b\" font-size=\"13\" font-weight=\"700\">Axis Wired Cameras</text><text x=\"495\" y=\"123\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Dedicated CCTV network/VLAN</text><rect x=\"760\" y=\"70\" width=\"250\" height=\"90\" rx=\"10\" fill=\"white\" stroke=\"#0F6E56\" stroke-width=\"2\"/><circle cx=\"785\" cy=\"96\" r=\"14\" fill=\"#0F6E56\"/><text x=\"785\" y=\"101\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">3</text><text x=\"885\" y=\"98\" text-anchor=\"middle\" fill=\"#1e293b\" font-size=\"13\" font-weight=\"700\">On-site VMS + Storage</text><text x=\"885\" y=\"123\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Local footage only; no cloud</text><line x1=\"290\" y1=\"115\" x2=\"388\" y2=\"115\" stroke=\"#1B3A6B\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><line x1=\"600\" y1=\"115\" x2=\"758\" y2=\"115\" stroke=\"#1B3A6B\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><rect x=\"50\" y=\"240\" width=\"220\" height=\"105\" rx=\"10\" fill=\"#ecfeff\" stroke=\"#0891b2\" stroke-width=\"2\"/><circle cx=\"75\" cy=\"267\" r=\"14\" fill=\"#0891b2\"/><text x=\"75\" y=\"272\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">4</text><text x=\"160\" y=\"268\" text-anchor=\"middle\" fill=\"#164e63\" font-size=\"13\" font-weight=\"700\">Model 1 Standalone</text><text x=\"160\" y=\"294\" text-anchor=\"middle\" fill=\"#164e63\" font-size=\"11\">No external access</text><text x=\"160\" y=\"312\" text-anchor=\"middle\" fill=\"#164e63\" font-size=\"11\">Preferred lowest-risk model</text><rect x=\"310\" y=\"240\" width=\"230\" height=\"105\" rx=\"10\" fill=\"#f0fdf4\" stroke=\"#16a34a\" stroke-width=\"2\"/><circle cx=\"335\" cy=\"267\" r=\"14\" fill=\"#16a34a\"/><text x=\"335\" y=\"272\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">5</text><text x=\"425\" y=\"268\" text-anchor=\"middle\" fill=\"#14532d\" font-size=\"13\" font-weight=\"700\">Model 2 Backbone Only</text><text x=\"425\" y=\"294\" text-anchor=\"middle\" fill=\"#14532d\" font-size=\"11\">Dedicated VLAN, no active gateway</text><text x=\"425\" y=\"312\" text-anchor=\"middle\" fill=\"#14532d\" font-size=\"11\">Validate uplink bandwidth</text><rect x=\"580\" y=\"240\" width=\"220\" height=\"105\" rx=\"10\" fill=\"#fff7ed\" stroke=\"#BA7517\" stroke-width=\"2\"/><circle cx=\"605\" cy=\"267\" r=\"14\" fill=\"#BA7517\"/><text x=\"605\" y=\"272\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">6</text><text x=\"690\" y=\"268\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"13\" font-weight=\"700\">Model 3A Firewall Access</text><text x=\"690\" y=\"294\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"11\">Standalone video transport</text><text x=\"690\" y=\"312\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"11\">Corporate/VPN to VMS via firewall</text><rect x=\"840\" y=\"240\" width=\"220\" height=\"105\" rx=\"10\" fill=\"#fff7ed\" stroke=\"#BA7517\" stroke-width=\"2\"/><circle cx=\"865\" cy=\"267\" r=\"14\" fill=\"#BA7517\"/><text x=\"865\" y=\"272\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">7</text><text x=\"950\" y=\"268\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"13\" font-weight=\"700\">Model 3B Backbone + FW</text><text x=\"950\" y=\"294\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"11\">Corporate backbone carries video</text><text x=\"950\" y=\"312\" text-anchor=\"middle\" fill=\"#7c2d12\" font-size=\"11\">Firewall + bandwidth approval</text><line x1=\"885\" y1=\"160\" x2=\"160\" y2=\"238\" stroke=\"#0891b2\" stroke-width=\"1.8\" marker-end=\"url(#arr)\"/><line x1=\"885\" y1=\"160\" x2=\"425\" y2=\"238\" stroke=\"#16a34a\" stroke-width=\"1.8\" marker-end=\"url(#arr)\"/><line x1=\"885\" y1=\"160\" x2=\"690\" y2=\"238\" stroke=\"#BA7517\" stroke-width=\"1.8\" marker-end=\"url(#warn)\"/><line x1=\"885\" y1=\"160\" x2=\"950\" y2=\"238\" stroke=\"#BA7517\" stroke-width=\"1.8\" marker-end=\"url(#warn)\"/><rect x=\"355\" y=\"430\" width=\"390\" height=\"110\" rx=\"10\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"385\" cy=\"463\" r=\"14\" fill=\"#1B3A6B\"/><text x=\"385\" y=\"468\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">8</text><text x=\"550\" y=\"462\" text-anchor=\"middle\" fill=\"#1e293b\" font-size=\"14\" font-weight=\"700\">Vendor Maintenance + Operations</text><text x=\"550\" y=\"488\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Firmware/security patching, break/fix, replacement</text><text x=\"550\" y=\"506\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Periodic access and firewall rule review</text><line x1=\"160\" y1=\"345\" x2=\"470\" y2=\"428\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/><line x1=\"425\" y1=\"345\" x2=\"520\" y2=\"428\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/><line x1=\"690\" y1=\"345\" x2=\"600\" y2=\"428\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/><line x1=\"950\" y1=\"345\" x2=\"630\" y2=\"428\" stroke=\"#1B3A6B\" stroke-width=\"1.5\" marker-end=\"url(#arr)\"/><text x=\"550\" y=\"600\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Source: McCain GTS CCTV Closed Circuit and IP Video Surveillance Solutions SOE v1.1</text></svg>",
+  "securityConsiderations": [
+    "CCTV footage must be stored locally on site; cloud VMS, cloud recording, or cloud footage retention is not permitted by the source SOE.",
+    "Corporate or VPN access to the VMS is permitted only under Model 3 and must traverse a firewall controlling access into and out of the dedicated video surveillance VLAN.",
+    "Model 2 must not have an active IP gateway or any routed access outside the dedicated CCTV VLAN.",
+    "The design must adhere to the McCain CCTV Surveillance Policy and must be reviewed against local regulations/laws before installation.",
+    "Camera and VMS administrative access must be limited to approved support identities and vendor accounts with auditable activity; default vendor credentials are not permitted.",
+    "The local vendor maintenance agreement must include regular firmware and security patching of all CCTV components, break/fix support, and replacement obligations.",
+    "Network uplinks used for Model 2 or Model 3B must be sized for expected video bitrate, retention/replay traffic, and peak viewing load to avoid degrading corporate network services."
+  ],
+  "guardrails": [
+    {
+      "area": "Governance",
+      "rule": "An on-site assessment, McCain CCTV Surveillance Policy review, and local legal/regulatory review must be completed before selecting a deployment model.",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "CCTV footage must be stored locally; cloud-hosted VMS or cloud video storage is not permitted without an approved exception to the CCTV SOE.",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "If corporate network or VPN access is required, the VMS and CCTV systems must be placed in a dedicated video surveillance VLAN protected by a firewall controlling ingress and egress.",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "Model 1 must remain standalone with no external access; if external access is required, use Model 3 rather than adding ad hoc access to Model 1.",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "Model 2 must use the corporate network only as a backbone and must not have an active IP gateway or access outside the dedicated CCTV VLAN.",
+      "severity": "Required"
+    },
+    {
+      "area": "Performance",
+      "rule": "For Model 2 and Model 3B, network uplinks must be assessed and sized for camera count, resolution, frame rate, codec, viewing concurrency, and VMS recording traffic before implementation.",
+      "severity": "Required"
+    },
+    {
+      "area": "Reliability",
+      "rule": "A local vendor maintenance agreement must cover installation, regular firmware/security updating and patching, break/fix, and component replacement.",
+      "severity": "Required"
+    },
+    {
+      "area": "Security",
+      "rule": "Axis IP cameras and wired camera connectivity should be selected where feasible, consistent with the source SOE recommendations.",
+      "severity": "Recommended"
+    },
+    {
+      "area": "Cost",
+      "rule": "Sites should validate local storage sizing and retention requirements before procurement to avoid under-sized VMS/storage platforms.",
+      "severity": "Recommended"
+    }
+  ],
+  "complianceMapping": [
+    {
+      "framework": "NIST CSF",
+      "control": "PR.AC-5"
+    },
+    {
+      "framework": "NIST CSF",
+      "control": "PR.DS-1"
+    },
+    {
+      "framework": "NIST CSF",
+      "control": "PR.MA-1"
+    },
+    {
+      "framework": "CIS Controls",
+      "control": "12.2"
+    }
+  ],
+  "tradeoffs": {
+    "benefits": [
+      "Reduces risk by making standalone CCTV with no external access the preferred deployment model where business requirements allow.",
+      "Provides a clear upgrade path from standalone CCTV to controlled corporate/VPN access without bypassing VLAN and firewall controls.",
+      "Protects corporate network performance by requiring uplink bandwidth assessment before using the corporate backbone for video traffic.",
+      "Improves supportability by requiring a local vendor maintenance agreement that includes firmware/security patching, break/fix, and replacement."
+    ],
+    "risks": [
+      "Model 3 access can expose CCTV systems and sensitive footage to corporate or VPN users if firewall rules, account controls, or vendor access are over-permissive.",
+      "Model 2 and Model 3B can degrade corporate network performance if camera bitrate, resolution, retention, or viewing concurrency assumptions are wrong.",
+      "Local-only footage storage reduces cloud exposure but can create site-level resilience and evidence-retention risk if local VMS/storage is not protected and monitored.",
+      "CCTV has privacy and labour-relations implications; implementation without local law and McCain CCTV Surveillance Policy review can create legal or employee-trust risk."
+    ],
+    "constraints": [
+      "The source SOE does not define detailed operational configuration standards, camera hardening baselines, retention durations, or VMS product selection beyond the Axis camera recommendation.",
+      "Cisco Video Surveillance Operations Manager is identified in the source SOE as July 2023 end-of-life, so new designs must not assume expansion of that platform without separate lifecycle approval.",
+      "No CCoE certification reference or LeanIX application registration was provided with the source standard."
+    ]
+  },
+  "maturityLevel": "3-Defined",
+  "composition": [
+    {
+      "patternId": "NW-001",
+      "patternName": "Hub-Spoke Network Landing Zone",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "NW-003",
+      "patternName": "Secure Site-to-Cloud VPN Conduit",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "SC-001",
+      "patternName": "Zero Trust Access Control",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "OB-001",
+      "patternName": "Central Log Collection and Retention",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "OT-002",
+      "patternName": "OT Remote Access Broker",
+      "relationship": "Conflicts"
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": null,
+    "ccoeRunbook": "SOE - CCTV Closed Circuit and IP Video Surveillance Solutions v1.1",
+    "configExample": "nw-004-cctv-model-selection.example.json",
+    "terraformModule": null
+  },
+  "exceptionProcess": "The source SOE states no exceptions to the CCTV standard. Any exception request must be raised to the SOE Owner Jay Tofflemire and circulated through the SOE standards approval process with the appropriate IS staff, SME, Information Architecture, support team, and designated approvers. The request must include the selected model, reason the standard model cannot be used, site assessment, local legal/regulatory analysis, McCain CCTV Surveillance Policy impact, network bandwidth assessment, firewall rule design where applicable, data/footage retention impact, and vendor maintenance plan.",
+  "revisionHistory": [
+    {
+      "date": "2021-01-25",
+      "author": "Jay Tofflemire",
+      "version": "1.0",
+      "summary": "Source SOE initial draft for CCTV Closed Circuit and IP Video Surveillance Solutions."
+    },
+    {
+      "date": "2021-02-16",
+      "author": "Jay Tofflemire",
+      "version": "1.1",
+      "summary": "Source SOE minor revision added breakdown of Model 3 into Model 3A and Model 3B."
+    },
+    {
+      "date": "2023-05-31",
+      "author": "Jay Tofflemire",
+      "version": "1.1",
+      "summary": "Source SOE reviewed with no changes required."
+    },
+    {
+      "date": "2026-05-13",
+      "author": "OpenAI Codex",
+      "version": "1.0",
+      "summary": "Created APL network architecture pattern from the supplied McCain CCTV SOE text and aligned it to the pattern schema."
+    }
+  ],
+  "thirdPartyRisks": [
+    "Local CCTV vendor dependency for installation, maintenance, firmware/security patching, break/fix, and replacement.",
+    "Axis camera supply, lifecycle, and firmware support should be validated during procurement.",
+    "Cisco Video Surveillance Operations Manager is identified by the source SOE as July 2023 end-of-life and should be treated as lifecycle risk for existing deployments."
+  ],
+  "submissionSource": "Supplied text: McCain Foods Limited Global Technology Services Standard Operating Environment & Roadmap \u2014 CCTV Closed Circuit and IP Video Surveillance Solutions, document version 1.1, last reviewed 2023-05-31.",
+  "azureDesign": null,
+  "createdAt": "2026-05-13T00:00:00Z",
+  "updatedAt": "2026-05-13T00:00:00Z"
+}

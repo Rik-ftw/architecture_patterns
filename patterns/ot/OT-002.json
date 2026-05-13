@@ -1,0 +1,127 @@
+{
+  "id": 29,
+  "patternId": "OT-002",
+  "name": "OT Remote Access Broker",
+  "domain": "OT & Industrial",
+  "tier": "Layer 3 \u2014 Physical",
+  "status": "Draft",
+  "version": "1.0",
+  "owner": "TBD \u2014 accountable McCain architect not provided in attached context",
+  "approvers": "TBD \u2014 governing board and named approver not provided in attached context",
+  "lastReviewed": "2026-05-12",
+  "reviewCycle": "Annual",
+  "ccoeCertified": "Pending",
+  "ccoeCertRef": null,
+  "leanixRef": null,
+  "strategicIntent": "This Draft pattern establishes McCain guardrails for ot remote access broker across ot & industrial so teams can reuse a vetted design reference early in solution shaping. Missing items before endorsement: named McCain owner/approver, approved CCoE certification reference, LeanIX registration, and validated implementation asset links from the enterprise repository.",
+  "problemStatement": "McCain plant-floor technology needs IEC 62443-aligned zones and conduits so remote support, telemetry, and edge compute do not expose control systems to enterprise or internet risk. This pattern solves the specific design decision for ot remote access broker.",
+  "useCases": [
+    {
+      "use": "Apply OT Remote Access Broker when a McCain project needs a reusable, governed approach in the OT domain for production or pre-production workloads.",
+      "dontUse": "Do not use where a temporary proof of concept has no enterprise data, no plant connectivity, and no path to production without later architecture review."
+    },
+    {
+      "use": "Use during vendor solution assessment to compare proposed architecture against McCain guardrails and exception requirements.",
+      "dontUse": "Do not use to justify bypassing domain-specific risk assessment, data classification, or OT safety review where those reviews are required."
+    }
+  ],
+  "components": [
+    "Industrial DMZ \u2014 IEC 62443 zone separating enterprise IT from plant floor OT",
+    "OT Firewall \u2014 conduit enforcement between zones with default-deny policy",
+    "Remote Access Broker \u2014 approved, monitored, time-bound vendor and support access",
+    "Edge Gateway \u2014 local protocol translation and buffering for plant telemetry",
+    "Historian or MES Interface \u2014 controlled source for production and quality events"
+  ],
+  "interactionSteps": [
+    "1. Identify iec 62443 zone and conduit for ot remote access broker.",
+    "2. Approve controlled conduit path for ot remote access broker.",
+    "3. Broker data or remote session through idmz for ot remote access broker.",
+    "4. Monitor ot and enterprise telemetry for ot remote access broker.",
+    "5. Review safety, vendor, and exception evidence for ot remote access broker."
+  ],
+  "diagramSvg": "<svg width=\"900\" height=\"320\" viewBox=\"0 0 900 320\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"system-ui, -apple-system, sans-serif\"><defs><marker id=\"arr\" markerWidth=\"8\" markerHeight=\"8\" refX=\"7\" refY=\"3\" orient=\"auto\"><path d=\"M0,0 L0,6 L8,3 z\" fill=\"#0F6E56\"/></marker></defs><rect width=\"900\" height=\"320\" fill=\"#f8fafc\"/><text x=\"450\" y=\"38\" text-anchor=\"middle\" fill=\"#1B3A6B\" font-size=\"18\" font-weight=\"700\">McCain APL OT-002 \u2014 OT Remote Access Broker</text><rect x=\"70\" y=\"120\" width=\"120\" height=\"70\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"88\" cy=\"138\" r=\"12\" fill=\"#1B3A6B\"/><text x=\"88\" y=\"142\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">1</text><text x=\"130\" y=\"160\" fill=\"#1e293b\" font-size=\"11\" text-anchor=\"middle\">Request</text><rect x=\"230\" y=\"120\" width=\"120\" height=\"70\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"248\" cy=\"138\" r=\"12\" fill=\"#1B3A6B\"/><text x=\"248\" y=\"142\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">2</text><text x=\"290\" y=\"160\" fill=\"#1e293b\" font-size=\"11\" text-anchor=\"middle\">Control</text><rect x=\"390\" y=\"120\" width=\"120\" height=\"70\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"408\" cy=\"138\" r=\"12\" fill=\"#1B3A6B\"/><text x=\"408\" y=\"142\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">3</text><text x=\"450\" y=\"160\" fill=\"#1e293b\" font-size=\"11\" text-anchor=\"middle\">Process</text><rect x=\"550\" y=\"120\" width=\"120\" height=\"70\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"568\" cy=\"138\" r=\"12\" fill=\"#1B3A6B\"/><text x=\"568\" y=\"142\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">4</text><text x=\"610\" y=\"160\" fill=\"#1e293b\" font-size=\"11\" text-anchor=\"middle\">Monitor</text><rect x=\"710\" y=\"120\" width=\"120\" height=\"70\" rx=\"8\" fill=\"white\" stroke=\"#1B3A6B\" stroke-width=\"2\"/><circle cx=\"728\" cy=\"138\" r=\"12\" fill=\"#1B3A6B\"/><text x=\"728\" y=\"142\" fill=\"white\" font-size=\"12\" text-anchor=\"middle\">5</text><text x=\"770\" y=\"160\" fill=\"#1e293b\" font-size=\"11\" text-anchor=\"middle\">Operate</text><line x1=\"190\" y1=\"155\" x2=\"230\" y2=\"155\" stroke=\"#0F6E56\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><line x1=\"350\" y1=\"155\" x2=\"390\" y2=\"155\" stroke=\"#0F6E56\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><line x1=\"510\" y1=\"155\" x2=\"550\" y2=\"155\" stroke=\"#0F6E56\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><line x1=\"670\" y1=\"155\" x2=\"710\" y2=\"155\" stroke=\"#0F6E56\" stroke-width=\"2\" marker-end=\"url(#arr)\"/><text x=\"450\" y=\"260\" text-anchor=\"middle\" fill=\"#64748b\" font-size=\"11\">Numbered markers 1-5 correspond exactly to interactionSteps 1-5.</text></svg>",
+  "securityConsiderations": [
+    "Access must use least privilege and be traceable to an approved McCain identity, workload identity, or support process.",
+    "Any PII, employee, supplier, customer, quality, or production-sensitive data must be classified before the pattern is implemented.",
+    "Administrative actions must be logged to the central observability/SOC platform with retention aligned to the applicable data class.",
+    "Design must identify IEC 62443 zones and conduits and must not permit direct internet-to-control-system connectivity."
+  ],
+  "guardrails": [
+    {
+      "area": "Security",
+      "rule": "IEC 62443 zone/conduit boundaries must be documented; direct enterprise-to-control-zone access is prohibited without approved exception.",
+      "severity": "Required"
+    },
+    {
+      "area": "Governance",
+      "rule": "The workload must have owner, cost centre, data classification, environment, and criticality metadata before production approval.",
+      "severity": "Required"
+    },
+    {
+      "area": "Reliability",
+      "rule": "Monitoring, alert routing, and operational runbook ownership must be defined before go-live.",
+      "severity": "Required"
+    },
+    {
+      "area": "Cost",
+      "rule": "Teams should define expected capacity, retention, and consumption limits during design review.",
+      "severity": "Recommended"
+    }
+  ],
+  "complianceMapping": [
+    {
+      "framework": "IEC 62443",
+      "control": "SR 5.1"
+    }
+  ],
+  "tradeoffs": {
+    "benefits": [
+      "Gives McCain teams a common review reference for ot remote access broker instead of re-solving the design per project.",
+      "Improves audit readiness by documenting required controls, evidence, and exception paths early."
+    ],
+    "risks": [
+      "If ot remote access broker is applied without data classification, criticality assessment, or domain review, teams may create false assurance and miss local plant or regulatory constraints."
+    ],
+    "constraints": [
+      "Specific McCain tool URLs, CCoE-certified modules, named owners, and LeanIX references are TBD because they were not provided in the attached context."
+    ]
+  },
+  "maturityLevel": "2-Developing",
+  "composition": [
+    {
+      "patternId": "CL-001",
+      "patternName": "Subscription Baseline Guardrails",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "OB-001",
+      "patternName": "Central Log Collection and Retention",
+      "relationship": "Uses"
+    },
+    {
+      "patternId": "NW-003",
+      "patternName": "Secure Site-to-Cloud VPN Conduit",
+      "relationship": "Uses"
+    }
+  ],
+  "implementationAssets": {
+    "azurePolicy": "TBD \u2014 approved Azure Policy for OT-002 not provided in attached context",
+    "ccoeRunbook": "TBD \u2014 approved CCoE runbook for OT-002 not provided in attached context",
+    "configExample": "ot-002-config.example.json",
+    "terraformModule": null
+  },
+  "exceptionProcess": "Contact the McCain Enterprise Architecture Review Board and the relevant domain architect. Submit an Architecture Decision Record, data classification, threat model, operational impact assessment, compliance impact mapping, and compensating controls through the architecture governance intake; approval is required before implementation.",
+  "revisionHistory": [
+    {
+      "date": "2026-05-12",
+      "author": "TBD \u2014 accountable McCain architect not provided in attached context",
+      "version": "1.0",
+      "summary": "Initial Draft pattern generated from McCain APL taxonomy and supplied AP-004 quality bar; owner, CCoE certification, LeanIX registration, and approved implementation assets remain TBD pending governance review."
+    }
+  ],
+  "thirdPartyRisks": [],
+  "submissionSource": null,
+  "azureDesign": null,
+  "createdAt": "2026-05-12T00:00:00Z",
+  "updatedAt": "2026-05-12T00:00:00Z"
+}
